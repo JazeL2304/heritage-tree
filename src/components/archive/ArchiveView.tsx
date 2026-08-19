@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { loadArchives, saveArchive, deleteArchive } from '@/lib/archive-service';
 
 export interface ArchivalItem {
   id: string;
@@ -12,51 +13,13 @@ export interface ArchivalItem {
   taggedMembers: string[];
 }
 
-const INITIAL_ARCHIVE_ITEMS: ArchivalItem[] = [
-  {
-    id: 'arch_1',
-    title: 'Foto Keluarga Besar Ming Dynasty Branch (1985)',
-    category: 'photos',
-    date: '1985-06-12',
-    description: 'Foto potret hitam putih keluarga besar saat acara kumpul trah Li di halaman rumah utama.',
-    imageUrl: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600&auto=format&fit=crop&q=80',
-    taggedMembers: ['Li Jianhua', 'Wang Xiu Ying'],
-  },
-  {
-    id: 'arch_2',
-    title: 'Sertifikat Salinan Zupu Volume IV (1960)',
-    category: 'documents',
-    date: '1960-03-15',
-    description: 'Naskah tua catatan silsilah keturunan Li bermaterai segel stempel kekaisaran.',
-    imageUrl: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80',
-    taggedMembers: ['Li Jianhua'],
-  },
-  {
-    id: 'arch_3',
-    title: 'Pernikahan Li Wei & Chen Ting (2018)',
-    category: 'photos',
-    date: '2018-09-20',
-    description: 'Dokumentasi resepsi adat pernikahan generasi ke-2 di balai agung.',
-    imageUrl: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=600&auto=format&fit=crop&q=80',
-    taggedMembers: ['Li Wei', 'Chen Ting'],
-  },
-  {
-    id: 'arch_4',
-    title: 'Akta Kelahiran Li An (2020)',
-    category: 'records',
-    date: '2020-09-05',
-    description: 'Catatan sipil resmi pencatatan penerus generasi ke-3.',
-    imageUrl: 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?w=600&auto=format&fit=crop&q=80',
-    taggedMembers: ['Li An', 'Li Wei'],
-  },
-];
-
 export const ArchiveView: React.FC = () => {
-  const [items, setItems] = useState<ArchivalItem[]>(INITIAL_ARCHIVE_ITEMS);
+  const [items, setItems] = useState<ArchivalItem[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedItem, setSelectedItem] = useState<ArchivalItem | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // New archive item form state
   const [newTitle, setNewTitle] = useState('');
@@ -64,6 +27,16 @@ export const ArchiveView: React.FC = () => {
   const [newDate, setNewDate] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newImageUrl, setNewImageUrl] = useState('');
+
+  useEffect(() => {
+    async function initArchives() {
+      setIsLoading(true);
+      const data = await loadArchives();
+      setItems(data);
+      setIsLoading(false);
+    }
+    initArchives();
+  }, []);
 
   const filteredItems = items.filter((item) => {
     const matchesCategory = activeCategory === 'all' || item.category === activeCategory;
@@ -73,7 +46,7 @@ export const ArchiveView: React.FC = () => {
     return matchesCategory && matchesSearch;
   });
 
-  const handleAddItem = (e: React.FormEvent) => {
+  const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
 
@@ -84,14 +57,25 @@ export const ArchiveView: React.FC = () => {
       date: newDate || new Date().toISOString().split('T')[0],
       description: newDescription,
       imageUrl: newImageUrl || 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&auto=format&fit=crop&q=80',
-      taggedMembers: ['Keluarga Li'],
+      taggedMembers: ['Keluarga'],
     };
 
-    setItems([newItem, ...items]);
+    const updated = [newItem, ...items];
+    setItems(updated);
     setIsAddModalOpen(false);
     setNewTitle('');
     setNewDescription('');
     setNewImageUrl('');
+    setNewDate('');
+
+    await saveArchive(newItem);
+  };
+
+  const handleDeleteItem = async (id: string) => {
+    const updated = items.filter((i) => i.id !== id);
+    setItems(updated);
+    setSelectedItem(null);
+    await deleteArchive(id);
   };
 
   return (
@@ -252,12 +236,23 @@ export const ArchiveView: React.FC = () => {
 
             <div className="flex justify-between items-center border-t border-[#e8dfd5] pt-3 text-xs text-[#59413e]">
               <span>Terkait Anggota: <strong>{selectedItem.taggedMembers.join(', ')}</strong></span>
-              <button
-                onClick={() => setSelectedItem(null)}
-                className="px-4 py-1.5 bg-[#8e1616] text-white font-bold rounded text-xs uppercase"
-              >
-                Tutup Viewer
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteItem(selectedItem.id)}
+                  className="px-3 py-1.5 bg-[#ba1a1a] text-white font-bold rounded text-xs uppercase flex items-center gap-1 hover:bg-[#93000a] transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[15px]">delete</span>
+                  <span>Hapus</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedItem(null)}
+                  className="px-4 py-1.5 bg-[#8e1616] text-white font-bold rounded text-xs uppercase cursor-pointer"
+                >
+                  Tutup Viewer
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { loadEvents, saveEvent, deleteEvent } from '@/lib/event-service';
 
 export interface FamilyEvent {
   id: string;
@@ -13,61 +14,19 @@ export interface FamilyEvent {
   organizer: string;
 }
 
-const INITIAL_EVENTS: FamilyEvent[] = [
-  {
-    id: 'evt_1',
-    title: 'Ulang Tahun Li Wei (32 Tahun)',
-    type: 'birthday',
-    date: '2026-04-07',
-    time: '19:00 WIB',
-    location: 'Kediaman Utama Li Wei, Jakarta',
-    description: 'Syukuran ulang tahun Li Wei bersama keluarga besar generasi ke-2.',
-    organizer: 'Chen Ting',
-  },
-  {
-    id: 'evt_2',
-    title: 'Reuni Akbar & Arisan Trah Li 2026',
-    type: 'reunion',
-    date: '2026-05-15',
-    time: '10:00 WIB',
-    location: 'Pendopo Sanggar Heritage, Bandung',
-    description: 'Kumpul tahunan silaturahmi antar generasi 1, 2, dan 3. Pembacaan Zupu dan makan bersama.',
-    organizer: 'Li Jianhua',
-  },
-  {
-    id: 'evt_3',
-    title: 'Ziarah & Haul Peringatan Leluhur',
-    type: 'commemoration',
-    date: '2026-08-22',
-    time: '08:00 WIB',
-    location: 'Kawasan Makam Keluarga Trah Li',
-    description: 'Doa bersama dan ziarah kubur mengenang jasa para pendahulu silsilah.',
-    organizer: 'Wang Xiu Ying',
-  },
-  {
-    id: 'evt_4',
-    title: 'Syukuran Kelahiran Keturunan Gen-3',
-    type: 'meeting',
-    date: '2026-08-10',
-    time: '11:00 WIB',
-    location: 'Rumah Besar Trah Li',
-    description: 'Kumpul keluarga menyambut anggota keluarga baru keturunan generasi 3.',
-    organizer: 'Wang Xiu Ying',
-  },
-  {
-    id: 'evt_5',
-    title: 'Rapat Persiapan Haul Akbar',
-    type: 'meeting',
-    date: '2026-08-18',
-    time: '19:30 WIB',
-    location: 'Pendopo Utama',
-    description: 'Rapat koordinasi seksi konsumsi dan dokumentasi ziarah.',
-    organizer: 'Li Jianhua',
-  },
-];
-
 export const EventsView: React.FC = () => {
-  const [events, setEvents] = useState<FamilyEvent[]>(INITIAL_EVENTS);
+  const [events, setEvents] = useState<FamilyEvent[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function initEvents() {
+      setIsLoading(true);
+      const data = await loadEvents();
+      setEvents(data);
+      setIsLoading(false);
+    }
+    initEvents();
+  }, []);
   const [viewMode, setViewMode] = useState<'grid' | 'default' | 'heatmap'>('grid');
 
   // Active Month & Year (Default to August 2026)
@@ -165,7 +124,7 @@ export const EventsView: React.FC = () => {
     return matchesType;
   });
 
-  const handleAddEvent = (e: React.FormEvent) => {
+  const handleAddEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
 
@@ -182,11 +141,20 @@ export const EventsView: React.FC = () => {
       organizer: newOrganizer,
     };
 
-    setEvents([...events, newEvt]);
+    setEvents([newEvt, ...events]);
     setIsAddModalOpen(false);
     setNewTitle('');
     setNewDescription('');
     setNewLocation('');
+    setNewDate('');
+
+    await saveEvent(newEvt);
+  };
+
+  const handleDeleteEvent = async (id: string) => {
+    setEvents(events.filter((e) => e.id !== id));
+    setSelectedEventDetail(null);
+    await deleteEvent(id);
   };
 
   const getEventBadge = (type: FamilyEvent['type']) => {
@@ -657,11 +625,19 @@ export const EventsView: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end pt-3 border-t border-[#e8dfd5]">
+              <div className="flex justify-between items-center pt-3 border-t border-[#e8dfd5]">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteEvent(selectedEventDetail.id)}
+                  className="px-3 py-1.5 bg-[#ba1a1a] text-white font-bold text-xs uppercase rounded flex items-center gap-1 hover:bg-[#93000a] transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[15px]">delete</span>
+                  <span>Hapus Agenda</span>
+                </button>
                 <button
                   type="button"
                   onClick={() => setSelectedEventDetail(null)}
-                  className="px-4 py-2 bg-[#8e1616] text-white font-bold text-xs uppercase rounded cursor-pointer"
+                  className="px-4 py-1.5 bg-[#8e1616] text-white font-bold text-xs uppercase rounded cursor-pointer"
                 >
                   Tutup
                 </button>

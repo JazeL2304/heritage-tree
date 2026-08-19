@@ -23,34 +23,53 @@ CREATE TABLE IF NOT EXISTS public.family_members (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- Enable Row Level Security (RLS)
 ALTER TABLE public.family_members ENABLE ROW LEVEL SECURITY;
 
--- 2. Create public access policies for family members
 DROP POLICY IF EXISTS "Allow public read access to family_members" ON public.family_members;
 DROP POLICY IF EXISTS "Allow public insert/update/delete to family_members" ON public.family_members;
 DROP POLICY IF EXISTS "Allow public all access to family_members" ON public.family_members;
 
-CREATE POLICY "Allow public read access to family_members" 
-ON public.family_members FOR SELECT 
-USING (true);
-
-CREATE POLICY "Allow public insert/update/delete to family_members" 
+CREATE POLICY "Allow public all access to family_members" 
 ON public.family_members FOR ALL 
-USING (true)
-WITH CHECK (true);
+USING (true) WITH CHECK (true);
 
--- 3. Insert Initial Seed Data (Optional sample family tree)
-INSERT INTO public.family_members (id, surname, given_name, gender, birth_date, is_deceased, generation, is_verified, photo_url, notes)
-VALUES
-  ('m_patriarch', 'Li', 'Jianhua', 'male', '1960-03-15', FALSE, 1, TRUE, 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', 'Senior Scholar of the Imperial Lineage'),
-  ('m_matriarch', 'Wang', 'Xiu Ying', 'female', '1962-08-22', FALSE, 1, TRUE, 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150', 'Archival Custodian'),
-  ('m_subject', 'Li', 'Wei', 'male', '1994-04-07', FALSE, 2, TRUE, 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', 'Head of Branch (Gen 2)'),
-  ('m_spouse', 'Chen', 'Ting', 'female', '1995-02-18', FALSE, 2, TRUE, 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150', 'Partner in Lineage Record')
-ON CONFLICT (id) DO NOTHING;
 
--- Link relationships for initial seed data
-UPDATE public.family_members SET spouse_id = 'm_matriarch' WHERE id = 'm_patriarch';
-UPDATE public.family_members SET spouse_id = 'm_patriarch' WHERE id = 'm_matriarch';
-UPDATE public.family_members SET father_id = 'm_patriarch', mother_id = 'm_matriarch', spouse_id = 'm_spouse' WHERE id = 'm_subject';
-UPDATE public.family_members SET spouse_id = 'm_subject' WHERE id = 'm_spouse';
+-- 2. Create family_archives table
+CREATE TABLE IF NOT EXISTS public.family_archives (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    category TEXT NOT NULL DEFAULT 'photos',
+    date DATE,
+    description TEXT,
+    image_url TEXT,
+    tagged_members TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+ALTER TABLE public.family_archives ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public all access to family_archives" ON public.family_archives;
+CREATE POLICY "Allow public all access to family_archives" 
+ON public.family_archives FOR ALL 
+USING (true) WITH CHECK (true);
+
+
+-- 3. Create family_events table
+CREATE TABLE IF NOT EXISTS public.family_events (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    type TEXT NOT NULL DEFAULT 'meeting',
+    date DATE,
+    time TEXT,
+    location TEXT,
+    description TEXT,
+    organizer TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+ALTER TABLE public.family_events ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public all access to family_events" ON public.family_events;
+CREATE POLICY "Allow public all access to family_events" 
+ON public.family_events FOR ALL 
+USING (true) WITH CHECK (true);
