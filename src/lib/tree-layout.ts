@@ -76,25 +76,37 @@ export function calculateTreePositions(members: FamilyMember[]): {
   });
 
   // 1. Compute Spouse Marriage Connections (Horizontal line between couples)
+  const spousePairsProcessed = new Set<string>();
+
+  const addSpouseConnection = (m1: FamilyMember, m2: FamilyMember) => {
+    const pairKey = [m1.id, m2.id].sort().join('_');
+    if (spousePairsProcessed.has(pairKey)) return;
+    spousePairsProcessed.add(pairKey);
+
+    if (m1.x !== undefined && m1.y !== undefined && m2.x !== undefined && m2.y !== undefined) {
+      const leftMember = m1.x < m2.x ? m1 : m2;
+      const rightMember = m1.x < m2.x ? m2 : m1;
+
+      const startX = (leftMember.x || 0) + NODE_WIDTH;
+      const endX = rightMember.x || 0;
+      const lineY = (leftMember.y || 0) + 60; // Middle height of member card
+
+      const path = `M ${startX} ${lineY} L ${endX} ${lineY}`;
+      connections.push({
+        id: `spouse_${pairKey}`,
+        fromId: m1.id,
+        toId: m2.id,
+        type: 'spouse',
+        path,
+      });
+    }
+  };
+
   positionedMembers.forEach((m) => {
     if (m.spouseId) {
       const spouse = positionedMembers.find((s) => s.id === m.spouseId);
-      if (spouse && m.id < spouse.id && m.x !== undefined && m.y !== undefined && spouse.x !== undefined && spouse.y !== undefined) {
-        const leftMember = m.x < spouse.x ? m : spouse;
-        const rightMember = m.x < spouse.x ? spouse : m;
-
-        const startX = (leftMember.x || 0) + NODE_WIDTH;
-        const endX = rightMember.x || 0;
-        const lineY = (leftMember.y || 0) + 60; // Middle height of member card
-
-        const path = `M ${startX} ${lineY} L ${endX} ${lineY}`;
-        connections.push({
-          id: `spouse_${m.id}_${spouse.id}`,
-          fromId: m.id,
-          toId: spouse.id,
-          type: 'spouse',
-          path,
-        });
+      if (spouse) {
+        addSpouseConnection(m, spouse);
       }
     }
   });
@@ -118,6 +130,11 @@ export function calculateTreePositions(members: FamilyMember[]): {
     const parents = positionedMembers.filter((p) => parentIds.includes(p.id));
 
     if (parents.length === 0) return;
+
+    // If there are 2 parents (father + mother), ensure a spouse line connects them!
+    if (parents.length === 2) {
+      addSpouseConnection(parents[0], parents[1]);
+    }
 
     let stemX = 0;
     let stemY = 0;

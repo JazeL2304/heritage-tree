@@ -10,71 +10,67 @@ interface TreeConnectorProps {
 export const TreeConnector: React.FC<TreeConnectorProps> = ({ connections }) => {
   return (
     <svg
-      viewBox="-2000 -2000 6000 6000"
       style={{
         position: 'absolute',
-        top: -2000,
-        left: -2000,
-        width: 6000,
-        height: 6000,
+        top: -3000,
+        left: -3000,
+        width: 8000,
+        height: 8000,
         pointerEvents: 'none',
         overflow: 'visible',
         zIndex: 5,
       }}
+      viewBox="-3000 -3000 8000 8000"
     >
       <defs>
-        {/* Drop Shadow for high contrast pop over grid background */}
-        <filter id="connector-shadow" x="-10%" y="-10%" width="120%" height="120%">
-          <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#1f1d1d" floodOpacity="0.25" />
-        </filter>
-
-        {/* Marriage Ring / Joint Circle Marker */}
+        {/* Marriage Joint Ring Marker */}
         <marker
           id="joint-ring"
-          viewBox="0 0 10 10"
-          refX="5"
-          refY="5"
-          markerWidth="8"
-          markerHeight="8"
+          viewBox="0 0 12 12"
+          refX="6"
+          refY="6"
+          markerWidth="10"
+          markerHeight="10"
         >
-          <circle cx="5" cy="5" r="4" fill="#fed65b" stroke="#8e1616" strokeWidth="2" />
+          <circle cx="6" cy="6" r="5" fill="#d4af37" stroke="#1f1d1d" strokeWidth="2" />
         </marker>
 
         {/* Downward Child Arrow Marker */}
         <marker
           id="child-arrow"
-          viewBox="0 0 10 10"
-          refX="5"
-          refY="5"
-          markerWidth="7"
-          markerHeight="7"
+          viewBox="0 0 12 12"
+          refX="6"
+          refY="6"
+          markerWidth="10"
+          markerHeight="10"
           orient="auto-start-reverse"
         >
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="#8e1616" stroke="#fed65b" strokeWidth="1" />
+          <path d="M 0 1 L 12 6 L 0 11 z" fill="#8e1616" stroke="#d4af37" strokeWidth="1.5" />
         </marker>
       </defs>
 
       {connections.map((conn) => {
         const isSpouse = conn.type === 'spouse';
         return (
-          <g key={conn.id} filter="url(#connector-shadow)">
-            {/* White/Parchment thick background stroke for maximum line contrast */}
+          <g key={conn.id}>
+            {/* Outer Contrast Outline (Dark Gold/Brown Glow) */}
             <path
               d={conn.path}
               fill="none"
-              stroke="#fbf9f5"
-              strokeWidth={isSpouse ? '5' : '6'}
+              stroke="#fed65b"
+              strokeWidth={isSpouse ? '7' : '7'}
               strokeLinecap="round"
               strokeLinejoin="round"
+              opacity="0.9"
             />
 
-            {/* Main Primary Connector Path Line */}
+            {/* Core Primary Line (Thick Cinnabar Red / Dark Charcoal) */}
             <path
               d={conn.path}
               fill="none"
-              stroke={isSpouse ? '#735c00' : '#8e1616'}
-              strokeWidth={isSpouse ? '3' : '3.5'}
-              strokeDasharray={isSpouse ? '5,5' : 'none'}
+              stroke={isSpouse ? '#8e1616' : '#8e1616'}
+              strokeWidth={isSpouse ? '4' : '4'}
+              strokeDasharray={isSpouse ? '6,4' : 'none'}
               strokeLinecap="round"
               strokeLinejoin="round"
               markerEnd={isSpouse ? 'url(#joint-ring)' : 'url(#child-arrow)'}
