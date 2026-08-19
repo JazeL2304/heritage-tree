@@ -28,6 +28,17 @@ export const TreeNodeCard: React.FC<TreeNodeCardProps> = ({
     }
   }, [member.id]);
 
+  // GSAP Interactive Selection Pop-Up Animation
+  useEffect(() => {
+    if (isActive && cardRef.current) {
+      gsap.fromTo(
+        cardRef.current,
+        { scale: 0.92 },
+        { scale: 1.08, duration: 0.45, ease: 'back.out(2.4)' }
+      );
+    }
+  }, [isActive]);
+
   const getYearsText = () => {
     const birthYear = member.birthDate ? new Date(member.birthDate).getFullYear() : '????';
     if (member.isDeceased) {
