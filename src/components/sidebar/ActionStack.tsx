@@ -21,7 +21,7 @@ export const ActionStack: React.FC<ActionStackProps> = ({
       {/* Standalone Add Member Button */}
       <button
         onClick={onAddStandalone}
-        className="w-full py-1.5 bg-[#2E5E3B] text-white font-bold text-[11px] uppercase tracking-wider rounded shadow-sm hover:opacity-90 transition-all duration-200 flex justify-center items-center gap-1.5 cursor-pointer"
+        className="w-full py-1.5 bg-[#6B0F0F] text-white font-bold text-[11px] uppercase tracking-wider rounded shadow-sm hover:opacity-90 transition-all duration-200 flex justify-center items-center gap-1.5 cursor-pointer"
       >
         <span className="material-symbols-outlined text-[16px]">person_add</span>
         <span>+ ANGGOTA BARU (TANPA RELASI)</span>
