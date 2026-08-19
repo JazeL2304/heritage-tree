@@ -90,7 +90,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
         </div>
         <div>
           <h2 className="font-bold text-xs text-[#8e1616] leading-tight font-['Poppins']">
-            Silsilah Trah Keluarga
+            Silsilah Potu Family
           </h2>
           <p className="text-[10px] text-[#59413e]">
             {allMembers.length} Anggota Terdaftar
@@ -109,11 +109,10 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            className={`py-1 text-[10px] font-bold rounded flex flex-col items-center justify-center transition-all cursor-pointer ${
-              activeTab === tab.id
+            className={`py-1 text-[10px] font-bold rounded flex flex-col items-center justify-center transition-all cursor-pointer ${activeTab === tab.id
                 ? 'bg-[#8e1616] text-white shadow-sm'
                 : 'text-[#59413e] hover:bg-[#efeeea]'
-            }`}
+              }`}
           >
             <span className="material-symbols-outlined text-[15px]">{tab.icon}</span>
             <span>{tab.label}</span>
@@ -218,11 +217,10 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                         <div
                           key={m.id}
                           onClick={() => onSelectMember(m)}
-                          className={`p-1.5 rounded flex items-center justify-between cursor-pointer text-[11px] transition-colors ${
-                            isSelected
+                          className={`p-1.5 rounded flex items-center justify-between cursor-pointer text-[11px] transition-colors ${isSelected
                               ? 'bg-[#8e1616] text-white font-bold'
                               : 'bg-white text-[#1f1d1d] hover:bg-[#eae8e4] border border-[#e8dfd5]'
-                          }`}
+                            }`}
                         >
                           <span className="truncate">{m.givenName} {m.surname}</span>
                           <span className="text-[9px] uppercase opacity-80 px-1 bg-black/10 rounded">
@@ -248,11 +246,10 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                         <div
                           key={m.id}
                           onClick={() => onSelectMember(m)}
-                          className={`p-1.5 rounded flex items-center justify-between cursor-pointer text-[11px] transition-colors ${
-                            isSelected
+                          className={`p-1.5 rounded flex items-center justify-between cursor-pointer text-[11px] transition-colors ${isSelected
                               ? 'bg-[#8e1616] text-white font-bold'
                               : 'bg-white text-[#1f1d1d] hover:bg-[#eae8e4] border border-[#e8dfd5]'
-                          }`}
+                            }`}
                         >
                           <span className="truncate">{m.givenName} {m.surname}</span>
                           <span className="text-[9px] uppercase opacity-80 px-1 bg-black/10 rounded">
@@ -278,11 +275,10 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                         <div
                           key={m.id}
                           onClick={() => onSelectMember(m)}
-                          className={`p-1.5 rounded flex items-center justify-between cursor-pointer text-[11px] transition-colors ${
-                            isSelected
+                          className={`p-1.5 rounded flex items-center justify-between cursor-pointer text-[11px] transition-colors ${isSelected
                               ? 'bg-[#8e1616] text-white font-bold'
                               : 'bg-white text-[#1f1d1d] hover:bg-[#eae8e4] border border-[#e8dfd5]'
-                          }`}
+                            }`}
                         >
                           <span className="truncate">{m.givenName} {m.surname}</span>
                           <span className="text-[9px] uppercase opacity-80 px-1 bg-black/10 rounded">
