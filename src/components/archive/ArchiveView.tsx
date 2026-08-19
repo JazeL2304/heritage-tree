@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { loadArchives, saveArchive, deleteArchive } from '@/lib/archive-service';
+import { Archive3DCarousel } from './Archive3DCarousel';
 
 export interface ArchivalItem {
   id: string;
@@ -20,6 +21,7 @@ export const ArchiveView: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<ArchivalItem | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [displayMode, setDisplayMode] = useState<'grid' | '3d'>('3d');
 
   // New archive item form state
   const [newTitle, setNewTitle] = useState('');
@@ -109,13 +111,36 @@ export const ArchiveView: React.FC = () => {
             </p>
           </div>
 
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="px-4 py-2.5 bg-[#8e1616] text-white font-bold text-xs uppercase tracking-wider rounded hover:bg-[#731010] transition-colors shadow flex items-center gap-2 cursor-pointer shrink-0"
-          >
-            <span className="material-symbols-outlined text-[18px]">add_photo_alternate</span>
-            Tambah Arsip Baru
-          </button>
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+            <div className="flex bg-[#eae8e4] p-1 rounded-lg border border-[#e8dfd5] text-xs font-semibold">
+              <button
+                onClick={() => setDisplayMode('3d')}
+                className={`px-3 py-1.5 rounded transition-colors cursor-pointer flex items-center gap-1.5 ${
+                  displayMode === '3d' ? 'bg-[#8e1616] text-[#fed65b] shadow-sm font-bold' : 'text-[#59413e] hover:text-[#8e1616]'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[16px]">3d_rotation</span>
+                3D Carousel GSAP
+              </button>
+              <button
+                onClick={() => setDisplayMode('grid')}
+                className={`px-3 py-1.5 rounded transition-colors cursor-pointer flex items-center gap-1.5 ${
+                  displayMode === 'grid' ? 'bg-[#8e1616] text-white shadow-sm font-bold' : 'text-[#59413e] hover:text-[#8e1616]'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[16px]">grid_view</span>
+                Grid Galeri
+              </button>
+            </div>
+
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="px-4 py-2.5 bg-[#8e1616] text-white font-bold text-xs uppercase tracking-wider rounded hover:bg-[#731010] transition-colors shadow flex items-center gap-2 cursor-pointer shrink-0"
+            >
+              <span className="material-symbols-outlined text-[18px]">add_photo_alternate</span>
+              Tambah Arsip Baru
+            </button>
+          </div>
         </div>
 
         {/* Filter & Search Toolbar */}
@@ -159,52 +184,70 @@ export const ArchiveView: React.FC = () => {
           </div>
         </div>
 
+        {/* 3D GSAP Showcase Carousel */}
+        {displayMode === '3d' && (
+          <div className="mb-6">
+            <Archive3DCarousel
+              items={filteredItems}
+              onSelectItem={(item) => setSelectedItem(item)}
+            />
+          </div>
+        )}
+
         {/* Archival Items Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredItems.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => setSelectedItem(item)}
-              className="bg-[#fbf9f5] border border-[#e8dfd5] rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer flex flex-col border-t-4 border-t-[#8e1616]"
-            >
-              {/* Image Thumbnail */}
-              <div className="relative h-48 bg-[#eae8e4] overflow-hidden group">
-                <img
-                  src={item.imageUrl}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute top-3 left-3 bg-[#8e1616] text-[#fed65b] text-[10px] uppercase font-bold px-2 py-0.5 rounded shadow">
-                  {item.category}
-                </div>
-              </div>
-
-              {/* Card Body */}
-              <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
-                <div>
-                  <h3 className="font-bold text-sm text-[#8e1616] font-['Poppins'] line-clamp-1">
-                    {item.title}
-                  </h3>
-                  <div className="text-[11px] text-[#735c00] font-semibold mt-0.5 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">calendar_today</span>
-                    {item.date}
+        {displayMode === 'grid' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredItems.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => setSelectedItem(item)}
+                className="bg-[#fbf9f5] border border-[#e8dfd5] rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer flex flex-col border-t-4 border-t-[#8e1616]"
+              >
+                {/* Image Thumbnail */}
+                <div className="relative h-48 bg-[#eae8e4] overflow-hidden group">
+                  <img
+                    src={item.imageUrl}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute top-3 left-3 bg-[#8e1616] text-[#fed65b] text-[10px] uppercase font-bold px-2 py-0.5 rounded shadow">
+                    {item.category === 'events'
+                      ? 'Pertemuan'
+                      : item.category === 'childhood'
+                      ? 'Masa Kecil'
+                      : item.category === 'photos'
+                      ? 'Foto Jadul'
+                      : 'Lainnya'}
                   </div>
-                  <p className="text-xs text-[#59413e] mt-2 line-clamp-2 leading-relaxed">
-                    {item.description}
-                  </p>
                 </div>
 
-                <div className="pt-2 border-t border-[#e8dfd5] flex items-center justify-between text-[11px] text-[#59413e]">
-                  <span className="flex items-center gap-1 text-[#8e1616] font-semibold">
-                    <span className="material-symbols-outlined text-[14px]">sell</span>
-                    {item.taggedMembers.join(', ')}
-                  </span>
-                  <span className="text-[#8e1616] underline font-bold">Lihat Detail →</span>
+                {/* Card Body */}
+                <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
+                  <div>
+                    <h3 className="font-bold text-sm text-[#8e1616] font-['Poppins'] line-clamp-1">
+                      {item.title}
+                    </h3>
+                    <div className="text-[11px] text-[#735c00] font-semibold mt-0.5 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">calendar_today</span>
+                      {item.date}
+                    </div>
+                    <p className="text-xs text-[#59413e] mt-2 line-clamp-2 leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t border-[#e8dfd5] flex items-center justify-between text-[11px] text-[#59413e]">
+                    <span className="flex items-center gap-1 text-[#8e1616] font-semibold">
+                      <span className="material-symbols-outlined text-[14px]">sell</span>
+                      {item.taggedMembers.join(', ')}
+                    </span>
+                    <span className="text-[#8e1616] underline font-bold">Lihat Detail →</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {filteredItems.length === 0 && (
           <div className="bg-[#fbf9f5] border border-[#e8dfd5] rounded-lg p-12 text-center text-[#59413e]">
