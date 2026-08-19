@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import gsap from 'gsap';
 import { FamilyMember, TreeConnection, CanvasTransform } from '@/types/family';
 import { TreeNodeCard } from './TreeNodeCard';
 import { TreeConnector } from './TreeConnector';
@@ -59,27 +60,37 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
     });
   };
 
-  // Toolbar actions
+  // GSAP Animated Toolbar actions
+  const animateTransform = (targetX: number, targetY: number, targetZoom: number) => {
+    const obj = { ...transform };
+    gsap.to(obj, {
+      x: targetX,
+      y: targetY,
+      zoom: targetZoom,
+      duration: 0.6,
+      ease: 'power3.out',
+      onUpdate: () => {
+        setTransform({ x: obj.x, y: obj.y, zoom: obj.zoom });
+      },
+    });
+  };
+
   const handleZoomIn = () => {
-    setTransform((prev) => ({
-      ...prev,
-      zoom: Math.min(prev.zoom * 1.15, 2.2),
-    }));
+    const newZoom = Math.min(transform.zoom * 1.2, 2.2);
+    animateTransform(transform.x, transform.y, newZoom);
   };
 
   const handleZoomOut = () => {
-    setTransform((prev) => ({
-      ...prev,
-      zoom: Math.max(prev.zoom * 0.85, 0.4),
-    }));
+    const newZoom = Math.max(transform.zoom * 0.8, 0.4);
+    animateTransform(transform.x, transform.y, newZoom);
   };
 
   const handleFitScreen = () => {
-    setTransform({ x: 400, y: 150, zoom: 1 });
+    animateTransform(400, 150, 1);
   };
 
   const handleReset = () => {
-    setTransform({ x: 400, y: 150, zoom: 1 });
+    animateTransform(400, 150, 1);
   };
 
   return (

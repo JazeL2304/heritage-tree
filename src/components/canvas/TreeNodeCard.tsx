@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import gsap from 'gsap';
 import { FamilyMember } from '@/types/family';
 
 interface TreeNodeCardProps {
@@ -14,6 +15,19 @@ export const TreeNodeCard: React.FC<TreeNodeCardProps> = ({
   isActive,
   onSelect,
 }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // GSAP Smooth Entrance Animation
+  useEffect(() => {
+    if (cardRef.current) {
+      gsap.fromTo(
+        cardRef.current,
+        { scale: 0.85, autoAlpha: 0, y: (member.y || 0) + 20 },
+        { scale: 1, autoAlpha: 1, y: member.y || 0, duration: 0.5, ease: 'back.out(1.4)' }
+      );
+    }
+  }, [member.id]);
+
   const getYearsText = () => {
     const birthYear = member.birthDate ? new Date(member.birthDate).getFullYear() : '????';
     if (member.isDeceased) {
@@ -25,6 +39,7 @@ export const TreeNodeCard: React.FC<TreeNodeCardProps> = ({
 
   return (
     <div
+      ref={cardRef}
       onClick={(e) => {
         e.stopPropagation();
         onSelect(member);
@@ -32,7 +47,7 @@ export const TreeNodeCard: React.FC<TreeNodeCardProps> = ({
       style={{
         transform: `translate(${member.x || 0}px, ${member.y || 0}px)`,
       }}
-      className={`absolute w-[160px] bg-[#8e1616] rounded border shadow-sm flex flex-col items-center p-3 z-10 transition-all duration-200 cursor-pointer hover:shadow-md ${
+      className={`tree-node-card absolute w-[160px] bg-[#8e1616] rounded border shadow-sm flex flex-col items-center p-3 z-10 transition-all duration-200 cursor-pointer hover:shadow-md ${
         isActive
           ? 'border-2 border-[#fed65b] shadow-[0_4px_20px_rgba(254,214,91,0.35)] scale-105 z-20'
           : 'border-[#e8dfd5] hover:border-[#fed65b]'

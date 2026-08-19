@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { AncestralCrestCanvas } from '../3d/AncestralCrestCanvas';
 
 interface PasscodeModalProps {
   isOpen: boolean;
@@ -41,7 +42,7 @@ export const PasscodeModal: React.FC<PasscodeModalProps> = ({
       {/* Main Modal Card with Stitch Double Border */}
       <div
         role="dialog"
-        className="relative z-10 w-[90%] max-w-[460px] bg-[#FDFBF7] rounded-[12px] border-2 border-[#8e1616] shadow-[0_20px_40px_rgba(70,10,10,0.25)] p-8 flex flex-col items-center animate-in fade-in zoom-in duration-200"
+        className="relative z-10 w-[90%] max-w-[480px] bg-[#FDFBF7] rounded-[16px] border-2 border-[#8e1616] shadow-[0_20px_40px_rgba(70,10,10,0.25)] p-6 md:p-8 flex flex-col items-center animate-in fade-in zoom-in duration-200"
       >
         {/* Optional Close Button if not full standalone landing gate */}
         {!isStandaloneGate && onClose && (
@@ -54,20 +55,16 @@ export const PasscodeModal: React.FC<PasscodeModalProps> = ({
           </button>
         )}
 
-        {/* Header Section */}
-        <div className="flex flex-col items-center text-center mb-6 w-full">
-          {/* Emblem Seal */}
-          <div className="w-12 h-12 rounded-full bg-[#8e1616] border border-[#D4AF37] flex items-center justify-center mb-4 shadow-sm">
-            <span className="material-symbols-outlined text-[#D4AF37] text-[26px]">
-              history_edu
-            </span>
-          </div>
+        {/* 3D Three.js Interactive Ancestral Crest Ring */}
+        <AncestralCrestCanvas />
 
+        {/* Header Section */}
+        <div className="flex flex-col items-center text-center mb-6 w-full -mt-6">
           {/* Title & Subtitle Badge */}
           <h1 className="font-bold text-xl text-[#8e1616] uppercase tracking-[0.08em] mb-1 font-['Plus_Jakarta_Sans']">
             HERITAGESCROLL
           </h1>
-          <div className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-wider mb-4 border-b border-[#D4AF37]/30 pb-1 px-4 inline-block">
+          <div className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-wider mb-2 border-b border-[#D4AF37]/30 pb-1 px-4 inline-block">
             FAMILY LEDGER ACCESS
           </div>
 
@@ -78,7 +75,7 @@ export const PasscodeModal: React.FC<PasscodeModalProps> = ({
         </div>
 
         {/* Passcode Form */}
-        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
           <div className="flex flex-col gap-2 w-full">
             <label className="text-[11px] font-bold text-[#8e1616] tracking-wide text-center uppercase">
               KODE AKSES KELUARGA / FAMILY PASSCODE
@@ -118,9 +115,9 @@ export const PasscodeModal: React.FC<PasscodeModalProps> = ({
         </form>
 
         {/* Card Footer Info */}
-        <div className="mt-6 text-[11px] text-[#5C5249] text-center flex items-center justify-center gap-1.5 opacity-80 pt-4 border-t border-[#e8dfd5] w-full">
+        <div className="mt-5 text-[11px] text-[#5C5249] text-center flex items-center justify-center gap-1.5 opacity-80 pt-3 border-t border-[#e8dfd5] w-full">
           <span className="material-symbols-outlined text-[14px] text-[#D4AF37]">lock</span>
-          <span>Tersimpan aman di cloud pribadi keluarga. Perubahan akan disinkronkan otomatis.</span>
+          <span>Tersimpan aman di cloud pribadi keluarga.</span>
         </div>
       </div>
     </div>
