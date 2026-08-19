@@ -95,8 +95,8 @@ export const ArchiveView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 min-h-[calc(100vh-4rem)] bg-[#fbf9f5] parchment-grid p-6 md:p-8 overflow-y-auto">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="w-full h-[calc(100vh-4rem)] bg-[#fbf9f5] parchment-grid p-6 md:p-8 overflow-y-auto">
+      <div className="max-w-6xl mx-auto space-y-6 pb-12">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#efeeea] border border-[#e8dfd5] p-5 rounded-lg shadow-sm">
           <div>

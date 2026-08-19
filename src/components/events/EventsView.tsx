@@ -194,17 +194,17 @@ export const EventsView: React.FC = () => {
       case 'birthday':
         return { label: 'Ulang Tahun', bg: 'bg-[#fed65b] text-[#745c00]', border: 'border-[#fed65b]', icon: 'cake' };
       case 'reunion':
-        return { label: 'Reuni / Arisan', bg: 'bg-[#8e1616] text-white', border: 'border-[#8e1616]', icon: 'groups' };
+        return { label: 'Reuni & Arisan', bg: 'bg-[#8e1616] text-white', border: 'border-[#8e1616]', icon: 'groups' };
       case 'commemoration':
-        return { label: 'Haul / Ziarah', bg: 'bg-[#003921] text-white', border: 'border-[#003921]', icon: 'diversity_1' };
+        return { label: 'Haul & Ziarah', bg: 'bg-[#003921] text-white', border: 'border-[#003921]', icon: 'diversity_1' };
       default:
         return { label: 'Pertemuan', bg: 'bg-[#eae8e4] text-[#1f1d1d]', border: 'border-[#e8dfd5]', icon: 'event' };
     }
   };
 
   return (
-    <div className="flex-1 min-h-[calc(100vh-4rem)] bg-[#fbf9f5] parchment-grid p-4 md:p-6 overflow-y-auto">
-      <div className="max-w-7xl mx-auto space-y-5">
+    <div className="w-full h-[calc(100vh-4rem)] bg-[#fbf9f5] parchment-grid p-4 md:p-6 overflow-y-auto">
+      <div className="max-w-7xl mx-auto space-y-5 pb-12">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#efeeea] border border-[#e8dfd5] p-4 rounded-lg shadow-sm">
           <div>
@@ -225,7 +225,7 @@ export const EventsView: React.FC = () => {
             <div className="flex bg-[#eae8e4] p-1 rounded-lg border border-[#e8dfd5] text-xs font-semibold">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`px-3 py-1.5 rounded transition-colors cursor-pointer flex items-center gap-1 ${
+                className={`px-3 py-1.5 rounded transition-colors cursor-pointer flex items-center gap-1.5 ${
                   viewMode === 'grid' ? 'bg-[#8e1616] text-white shadow-sm' : 'text-[#59413e] hover:text-[#8e1616]'
                 }`}
               >
@@ -234,7 +234,7 @@ export const EventsView: React.FC = () => {
               </button>
               <button
                 onClick={() => setViewMode('default')}
-                className={`px-3 py-1.5 rounded transition-colors cursor-pointer flex items-center gap-1 ${
+                className={`px-3 py-1.5 rounded transition-colors cursor-pointer flex items-center gap-1.5 ${
                   viewMode === 'default' ? 'bg-[#8e1616] text-white shadow-sm' : 'text-[#59413e] hover:text-[#8e1616]'
                 }`}
               >
@@ -243,7 +243,7 @@ export const EventsView: React.FC = () => {
               </button>
               <button
                 onClick={() => setViewMode('heatmap')}
-                className={`px-3 py-1.5 rounded transition-colors cursor-pointer flex items-center gap-1 ${
+                className={`px-3 py-1.5 rounded transition-colors cursor-pointer flex items-center gap-1.5 ${
                   viewMode === 'heatmap' ? 'bg-[#8e1616] text-white shadow-sm' : 'text-[#59413e] hover:text-[#8e1616]'
                 }`}
               >
@@ -321,18 +321,19 @@ export const EventsView: React.FC = () => {
                 </div>
               </div>
 
-              {/* Status Filter Checklist Panel */}
+              {/* Status Filter Checklist Panel (Icons instead of emojis) */}
               <div className="bg-[#fbf9f5] border border-[#e8dfd5] rounded-xl p-4 shadow-sm space-y-3">
-                <h3 className="font-bold text-xs text-[#8e1616] uppercase tracking-wider font-['Plus_Jakarta_Sans'] border-b border-[#e8dfd5] pb-2">
-                  Kategori Agenda
+                <h3 className="font-bold text-xs text-[#8e1616] uppercase tracking-wider font-['Plus_Jakarta_Sans'] border-b border-[#e8dfd5] pb-2 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[16px]">filter_list</span>
+                  <span>Kategori Agenda</span>
                 </h3>
 
                 <div className="space-y-2 text-xs">
                   {[
-                    { id: 'birthday', label: '🎂 Ulang Tahun', count: events.filter(e => e.type === 'birthday').length },
-                    { id: 'reunion', label: '👨‍👩‍👧‍👦 Reuni & Arisan', count: events.filter(e => e.type === 'reunion').length },
-                    { id: 'commemoration', label: '🕯️ Haul & Ziarah', count: events.filter(e => e.type === 'commemoration').length },
-                    { id: 'meeting', label: '📅 Pertemuan Rutin', count: events.filter(e => e.type === 'meeting').length },
+                    { id: 'birthday', label: 'Ulang Tahun', icon: 'cake', iconColor: 'text-[#d4af37]', count: events.filter(e => e.type === 'birthday').length },
+                    { id: 'reunion', label: 'Reuni & Arisan', icon: 'groups', iconColor: 'text-[#8e1616]', count: events.filter(e => e.type === 'reunion').length },
+                    { id: 'commemoration', label: 'Haul & Ziarah', icon: 'diversity_1', iconColor: 'text-[#003921]', count: events.filter(e => e.type === 'commemoration').length },
+                    { id: 'meeting', label: 'Pertemuan Rutin', icon: 'event', iconColor: 'text-[#59413e]', count: events.filter(e => e.type === 'meeting').length },
                   ].map((item) => (
                     <label
                       key={item.id}
@@ -345,6 +346,7 @@ export const EventsView: React.FC = () => {
                           onChange={() => toggleTypeFilter(item.id)}
                           className="accent-[#8e1616]"
                         />
+                        <span className={`material-symbols-outlined text-[16px] ${item.iconColor}`}>{item.icon}</span>
                         <span className="font-semibold text-[#1f1d1d]">{item.label}</span>
                       </span>
                       <span className="text-[10px] font-bold bg-[#8e1616] text-white px-1.5 py-0.5 rounded-full">
@@ -504,12 +506,13 @@ export const EventsView: React.FC = () => {
           </div>
         )}
 
-        {/* DEFAULT VIEW MODE: CLEAN TIMELINE CARDS LIST (The original list option) */}
+        {/* DEFAULT VIEW MODE: CLEAN TIMELINE CARDS LIST */}
         {viewMode === 'default' && (
           <div className="space-y-4">
             <div className="bg-[#fbf9f5] border border-[#e8dfd5] p-3 rounded-lg flex justify-between items-center text-xs">
-              <span className="font-bold text-[#8e1616] uppercase tracking-wider font-['Plus_Jakarta_Sans']">
-                📋 Daftar List Agenda Timeline
+              <span className="font-bold text-[#8e1616] uppercase tracking-wider font-['Plus_Jakarta_Sans'] flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[18px]">format_list_bulleted</span>
+                <span>Daftar List Agenda Timeline</span>
               </span>
               <span className="text-[#59413e]">Menampilkan {filteredEvents.length} Acara</span>
             </div>
@@ -573,8 +576,9 @@ export const EventsView: React.FC = () => {
         {/* HEATMAP VIEW MODE: DENSITY GRID */}
         {viewMode === 'heatmap' && (
           <div className="bg-[#fbf9f5] border-2 border-[#8e1616] rounded-xl p-6 shadow-lg space-y-4 text-center">
-            <h3 className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans'] uppercase tracking-wider">
-              🔥 Heatmap Kepadatan Agenda Keluarga {currentYear}
+            <h3 className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans'] uppercase tracking-wider flex items-center justify-center gap-2">
+              <span className="material-symbols-outlined text-[#8e1616]">local_fire_department</span>
+              <span>Heatmap Kepadatan Agenda Keluarga {currentYear}</span>
             </h3>
             <p className="text-xs text-[#59413e]">Visualisasi intensitas kegiatan dan pertemuan keluarga sepanjang tahun.</p>
 
@@ -639,9 +643,18 @@ export const EventsView: React.FC = () => {
               </p>
 
               <div className="space-y-1.5 text-[#59413e] pt-1 font-semibold">
-                <div>🕒 Waktu: <strong>{selectedEventDetail.time}</strong></div>
-                <div>📍 Lokasi: <strong>{selectedEventDetail.location}</strong></div>
-                <div>👤 Penyelenggara: <strong>{selectedEventDetail.organizer}</strong></div>
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[16px] text-[#8e1616]">schedule</span>
+                  <span>Waktu: <strong>{selectedEventDetail.time}</strong></span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[16px] text-[#8e1616]">location_on</span>
+                  <span>Lokasi: <strong>{selectedEventDetail.location}</strong></span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[16px] text-[#8e1616]">person</span>
+                  <span>Penyelenggara: <strong>{selectedEventDetail.organizer}</strong></span>
+                </div>
               </div>
 
               <div className="flex justify-end pt-3 border-t border-[#e8dfd5]">

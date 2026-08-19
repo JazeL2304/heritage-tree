@@ -118,8 +118,9 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
           <div className="p-3 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#59413e] space-y-2">
             <h4 className="font-bold text-[#8e1616]">Archival Ledger Records</h4>
             <p>Historical genealogical archives of the Li family line (Zupu Volume IV).</p>
-            <div className="p-2 bg-[#eae8e4] rounded text-[11px]">
-              📜 Document Ref #M-1994-07
+            <div className="p-2 bg-[#eae8e4] rounded text-[11px] flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[16px] text-[#8e1616]">description</span>
+              <span>Document Ref #M-1994-07</span>
             </div>
           </div>
         )}

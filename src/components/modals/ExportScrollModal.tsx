@@ -98,8 +98,9 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
 
         {/* Scroll Preview Box */}
         <div className="bg-[#F8F4EE] border border-[#e8dfd5] rounded p-4 mb-4 relative overflow-hidden text-center shadow-inner">
-          <div className="text-[11px] uppercase tracking-widest text-[#8e1616] font-bold mb-1">
-            📜 Scroll Preview
+          <div className="text-[11px] uppercase tracking-widest text-[#8e1616] font-bold mb-1 flex items-center justify-center gap-1">
+            <span className="material-symbols-outlined text-[16px]">description</span>
+            <span>Scroll Preview</span>
           </div>
           <div className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
             {scrollTitle || 'Family Lineage Scroll'}
