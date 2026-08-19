@@ -92,23 +92,22 @@ export const INITIAL_MEMBERS: FamilyMember[] = [
 ];
 
 /**
- * Calculates (x,y) layout coordinates for all members in the tree
+ * Calculates (x,y) layout coordinates for all members in the tree and exact connector paths
  */
 export function calculateTreePositions(members: FamilyMember[]): {
   positionedMembers: FamilyMember[];
   connections: TreeConnection[];
 } {
   const NODE_WIDTH = 160;
-  const NODE_HEIGHT = 180;
-  const LEVEL_SPACING = 160;
+  const NODE_HEIGHT = 160;
+  const LEVEL_SPACING = 140;
   const SIBLING_SPACING = 50;
 
   // Group members by generation or computed depth
   const depthMap = new Map<string, number>();
 
-  // Determine depths starting with nodes that have no parents
   function getDepth(m: FamilyMember, visited = new Set<string>()): number {
-    if (visited.has(m.id)) return depthMap.get(m.id) || 0;
+    if (visited.has(m.id)) return depthMap.get(m.id) || 1;
     visited.add(m.id);
 
     if (m.generation) return m.generation;
@@ -151,8 +150,8 @@ export function calculateTreePositions(members: FamilyMember[]): {
 
   sortedLevels.forEach((level) => {
     const levelMembers = levels.get(level)!;
-    const totalWidth = levelMembers.length * (NODE_WIDTH + SIBLING_SPACING);
-    const startX = -totalWidth / 2 + NODE_WIDTH / 2;
+    const totalWidth = levelMembers.length * (NODE_WIDTH + SIBLING_SPACING) - SIBLING_SPACING;
+    const startX = -totalWidth / 2;
 
     levelMembers.forEach((m, idx) => {
       const x = startX + idx * (NODE_WIDTH + SIBLING_SPACING);
@@ -161,25 +160,28 @@ export function calculateTreePositions(members: FamilyMember[]): {
     });
   });
 
-  // Compute connections (orthogonal step paths)
+  // Compute connections (exact center points of node cards)
   positionedMembers.forEach((m) => {
+    const childCenterX = (m.x || 0) + NODE_WIDTH / 2;
+    const childTopY = m.y || 0;
+
     // Parent -> Child connections
     if (m.fatherId || m.motherId) {
       const father = positionedMembers.find((p) => p.id === m.fatherId);
       const mother = positionedMembers.find((p) => p.id === m.motherId);
       const primaryParent = father || mother;
 
-      if (primaryParent && primaryParent.x !== undefined && primaryParent.y !== undefined && m.x !== undefined && m.y !== undefined) {
-        let parentX = primaryParent.x;
+      if (primaryParent && primaryParent.x !== undefined && primaryParent.y !== undefined) {
+        let parentCenterX = primaryParent.x + NODE_WIDTH / 2;
         if (father && mother && father.x !== undefined && mother.x !== undefined) {
-          parentX = (father.x + mother.x) / 2;
+          parentCenterX = (father.x + NODE_WIDTH / 2 + mother.x + NODE_WIDTH / 2) / 2;
         }
 
-        const startY = primaryParent.y + 120;
-        const endY = m.y - 10;
+        const startY = primaryParent.y + NODE_HEIGHT;
+        const endY = childTopY;
         const midY = startY + (endY - startY) / 2;
 
-        const path = `M ${parentX} ${startY} L ${parentX} ${midY} L ${m.x} ${midY} L ${m.x} ${endY}`;
+        const path = `M ${parentCenterX} ${startY} L ${parentCenterX} ${midY} L ${childCenterX} ${midY} L ${childCenterX} ${endY}`;
         connections.push({
           id: `conn_${primaryParent.id}_${m.id}`,
           fromId: primaryParent.id,
@@ -193,9 +195,12 @@ export function calculateTreePositions(members: FamilyMember[]): {
     // Spouse connection
     if (m.spouseId) {
       const spouse = positionedMembers.find((s) => s.id === m.spouseId);
-      // Avoid duplicate connection rendering (only render from lower ID to higher ID)
       if (spouse && m.id < spouse.id && m.x !== undefined && m.y !== undefined && spouse.x !== undefined && spouse.y !== undefined) {
-        const path = `M ${m.x + 70} ${m.y + 50} L ${spouse.x - 70} ${spouse.y + 50}`;
+        const spouseLeftX = m.x + NODE_WIDTH;
+        const spouseRightX = spouse.x;
+        const spouseY = m.y + NODE_HEIGHT / 2;
+
+        const path = `M ${spouseLeftX} ${spouseY} L ${spouseRightX} ${spouseY}`;
         connections.push({
           id: `spouse_${m.id}_${spouse.id}`,
           fromId: m.id,

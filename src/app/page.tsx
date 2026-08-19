@@ -103,7 +103,7 @@ export default function Home() {
       if (activeMember && relationType) {
         switch (relationType) {
           case 'parents':
-            newGen = (activeMember.generation || 2) - 1;
+            newGen = Math.max(1, (activeMember.generation || 2) - 1);
             break;
           case 'sibling':
             newGen = activeMember.generation || 2;
@@ -129,7 +129,7 @@ export default function Home() {
 
       const newMember: FamilyMember = {
         id: newId,
-        surname: data.surname || 'Li',
+        surname: data.surname || activeMember?.surname || 'Li',
         givenName: data.givenName || 'Unnamed',
         gender: data.gender || 'male',
         birthDate: data.birthDate || '',
@@ -146,12 +146,24 @@ export default function Home() {
         spouseId,
       };
 
-      // If adding partner, update activeMember spouse reference
       let updatedMembers = [...members, newMember];
-      if (relationType === 'partner' && activeMember) {
-        updatedMembers = updatedMembers.map((m) =>
-          m.id === activeMember.id ? { ...m, spouseId: newId } : m
-        );
+
+      // Update bidirectional references
+      if (activeMember) {
+        if (relationType === 'partner') {
+          updatedMembers = updatedMembers.map((m) =>
+            m.id === activeMember.id ? { ...m, spouseId: newId } : m
+          );
+        } else if (relationType === 'parents') {
+          updatedMembers = updatedMembers.map((m) => {
+            if (m.id === activeMember.id) {
+              return newMember.gender === 'female'
+                ? { ...m, motherId: newId }
+                : { ...m, fatherId: newId };
+            }
+            return m;
+          });
+        }
       }
 
       setMembers(updatedMembers);
