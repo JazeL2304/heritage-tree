@@ -93,7 +93,7 @@ export const PasscodeModal: React.FC<PasscodeModalProps> = ({
                 autoComplete="off"
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
-                placeholder="PROTUBERANCE"
+                placeholder=""
                 autoFocus
                 className="w-full h-12 bg-[#FBF8F3] border-[1.5px] border-[#D6C8B4] rounded-[8px] text-center font-mono text-[18px] text-[#3D3731] focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-colors px-10 uppercase placeholder:text-[#3D3731]/30 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden"
               />
