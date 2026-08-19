@@ -7,12 +7,15 @@ import { generateId } from '@/lib/utils';
 import { Navbar } from '@/components/layout/Navbar';
 import { SidebarDrawer } from '@/components/sidebar/SidebarDrawer';
 import { TreeCanvas } from '@/components/canvas/TreeCanvas';
+import { ArchiveView } from '@/components/archive/ArchiveView';
+import { EventsView } from '@/components/events/EventsView';
 import { PasscodeModal } from '@/components/modals/PasscodeModal';
 import { MemberFormModal } from '@/components/modals/MemberFormModal';
 import { ExportScrollModal } from '@/components/modals/ExportScrollModal';
 import { DeleteConfirmModal } from '@/components/modals/DeleteConfirmModal';
 
 export default function Home() {
+  const [activeNavTab, setActiveNavTab] = useState<'lineage' | 'archive' | 'events'>('lineage');
   const [members, setMembers] = useState<FamilyMember[]>(INITIAL_MEMBERS);
   const [activeMember, setActiveMember] = useState<FamilyMember | null>(null);
 
@@ -160,6 +163,8 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-[#fbf9f5] overflow-hidden relative">
       {/* Top Navbar */}
       <Navbar
+        activeTab={activeNavTab}
+        onSelectTab={(tab) => setActiveNavTab(tab)}
         isAuthenticated={isAuthenticated}
         onOpenPasscodeModal={() => setIsPasscodeModalOpen(true)}
         onSignOut={() => {
@@ -168,24 +173,32 @@ export default function Home() {
         }}
       />
 
-      {/* Main Workspace Layout */}
-      <div className={`flex flex-1 pt-16 h-screen w-full relative transition-all duration-300 ${!isAuthenticated ? 'filter blur-sm pointer-events-none opacity-50' : ''}`}>
-        {/* Left Property Drawer */}
-        <SidebarDrawer
-          activeMember={activeMember}
-          onAddRelation={handleAddRelation}
-          onEditMember={handleEditMember}
-          onDeleteMember={handleDeleteMember}
-          onOpenExportModal={() => setIsExportModalOpen(true)}
-        />
+      {/* Main Content Area */}
+      <div className={`flex flex-1 pt-16 min-h-screen w-full relative transition-all duration-300 ${!isAuthenticated ? 'filter blur-sm pointer-events-none opacity-50' : ''}`}>
+        {activeNavTab === 'lineage' && (
+          <>
+            {/* Left Property Drawer */}
+            <SidebarDrawer
+              activeMember={activeMember}
+              onAddRelation={handleAddRelation}
+              onEditMember={handleEditMember}
+              onDeleteMember={handleDeleteMember}
+              onOpenExportModal={() => setIsExportModalOpen(true)}
+            />
 
-        {/* Interactive Infinite Canvas */}
-        <TreeCanvas
-          members={positionedMembers}
-          connections={connections}
-          activeMember={activeMember}
-          onSelectMember={(m) => setActiveMember(m)}
-        />
+            {/* Interactive Infinite Canvas */}
+            <TreeCanvas
+              members={positionedMembers}
+              connections={connections}
+              activeMember={activeMember}
+              onSelectMember={(m) => setActiveMember(m)}
+            />
+          </>
+        )}
+
+        {activeNavTab === 'archive' && <ArchiveView />}
+
+        {activeNavTab === 'events' && <EventsView />}
       </div>
 
       {/* Ancestral Verification Gate Modal (First Screen Landing) */}
