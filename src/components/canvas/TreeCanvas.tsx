@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import gsap from 'gsap';
 import { FamilyMember, TreeConnection, CanvasTransform } from '@/types/family';
 import { TreeNodeCard } from './TreeNodeCard';
 import { TreeConnector } from './TreeConnector';
 import { CanvasToolbar } from './CanvasToolbar';
+
+const NODE_W = 170;
+const NODE_H = 160;
 
 interface TreeCanvasProps {
   members: FamilyMember[];
@@ -20,15 +23,44 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
   activeMember,
   onSelectMember,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Compute tree bounding-box center
+  const getCenter = useCallback(() => {
+    if (!members.length) return { cx: 0, cy: 0 };
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const m of members) {
+      const mx = m.x ?? 0;
+      const my = m.y ?? 0;
+      if (mx < minX) minX = mx;
+      if (mx + NODE_W > maxX) maxX = mx + NODE_W;
+      if (my < minY) minY = my;
+      if (my + NODE_H > maxY) maxY = my + NODE_H;
+    }
+    return { cx: (minX + maxX) / 2, cy: (minY + maxY) / 2 };
+  }, [members]);
+
   const [transform, setTransform] = useState<CanvasTransform>({
-    x: 400,
-    y: 150,
+    x: 0,
+    y: 0,
     zoom: 1,
   });
+  const [hasInitialized, setHasInitialized] = useState(false);
+
+  // Center tree on mount / when members change
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || !members.length) return;
+    const { cx, cy } = getCenter();
+    const viewW = el.clientWidth;
+    const viewH = el.clientHeight;
+    // Position so tree center lands in the middle of the viewport
+    setTransform({ x: viewW / 2 - cx, y: viewH / 2 - cy, zoom: 1 });
+    setHasInitialized(true);
+  }, [members.length > 0 ? 'ready' : 'empty', getCenter]);
 
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // Drag pan handlers
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -86,11 +118,14 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
   };
 
   const handleFitScreen = () => {
-    animateTransform(400, 150, 1);
+    const el = containerRef.current;
+    if (!el) return;
+    const { cx, cy } = getCenter();
+    animateTransform(el.clientWidth / 2 - cx, el.clientHeight / 2 - cy, 1);
   };
 
   const handleReset = () => {
-    animateTransform(400, 150, 1);
+    handleFitScreen();
   };
 
   return (
@@ -119,7 +154,7 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
           transformOrigin: '0 0',
           transition: isDragging ? 'none' : 'transform 0.1s ease-out',
         }}
-        className="absolute left-1/2 top-10 w-0 h-0"
+        className="absolute left-0 top-0 w-0 h-0"
       >
         {/* Render Orthogonal Lines */}
         <TreeConnector connections={connections} />
