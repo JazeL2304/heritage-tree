@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { loadArchives, saveArchive, deleteArchive } from '@/lib/archive-service';
-import { ArchiveHeroZoom } from './ArchiveHeroZoom';
 
 export interface ArchivalItem {
   id: string;
@@ -21,11 +20,6 @@ export const ArchiveView: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<ArchivalItem | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const gallerySectionRef = useRef<HTMLDivElement>(null);
-
-  const handleScrollToGallery = () => {
-    gallerySectionRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   // New archive item form state
   const [newTitle, setNewTitle] = useState('');
@@ -98,19 +92,10 @@ export const ArchiveView: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-[calc(100vh-4rem)] bg-[#fbf9f5] parchment-grid p-6 md:p-8 overflow-y-auto scroll-smooth">
+    <div className="w-full h-[calc(100vh-4rem)] bg-[#fbf9f5] parchment-grid p-6 md:p-8 overflow-y-auto">
       <div className="max-w-6xl mx-auto space-y-6 pb-12">
-        {/* GSAP Scroll Zoom Hero Entrance */}
-        <ArchiveHeroZoom
-          onScrollToGallery={handleScrollToGallery}
-          onOpenAddModal={() => setIsAddModalOpen(true)}
-        />
-
-        {/* Page Header & Gallery Anchor */}
-        <div
-          ref={gallerySectionRef}
-          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#efeeea] border border-[#e8dfd5] p-5 rounded-lg shadow-sm"
-        >
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#efeeea] border border-[#e8dfd5] p-5 rounded-lg shadow-sm">
           <div>
             <div className="flex items-center gap-2 text-[#8e1616] font-bold text-xs uppercase tracking-widest mb-1">
               <span className="material-symbols-outlined text-[18px]">photo_library</span>
