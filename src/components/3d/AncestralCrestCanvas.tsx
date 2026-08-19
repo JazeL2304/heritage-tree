@@ -6,9 +6,8 @@ import * as THREE from 'three';
 /**
  * Chinese Paper-Cut Medallion (剪纸 jiǎnzhǐ)
  *
- * A carved cinnabar-red medallion disc with a Chinese paper-cut zodiac
- * texture on the front face. Gold beveled rim, warm lantern lighting,
- * floating red-gold ember particles. Slow majestic rotation.
+ * Interactive 3D medallion — drag to rotate, auto-rotates when idle.
+ * Red & gold palette only (no jade green).
  */
 export const AncestralCrestCanvas: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -47,88 +46,57 @@ export const AncestralCrestCanvas: React.FC = () => {
     redRim.position.set(2, -3, -2);
     scene.add(redRim);
 
-    /* ── Root group (for whole-scene rotation) ──── */
-    const root = new THREE.Group();
-    scene.add(root);
-
-    /* ── Texture loader ────────────────────────── */
-    const loader = new THREE.TextureLoader();
-    const tex = loader.load('/textures/chinese-papercut.png');
+    /* ── Texture ───────────────────────────────── */
+    const tex = new THREE.TextureLoader().load('/textures/chinese-papercut.png');
     tex.colorSpace = THREE.SRGBColorSpace;
 
     /* ── Medallion Disc ────────────────────────── */
     const RADIUS = 1.7;
     const DEPTH = 0.15;
-    const segments = 80;
+    const seg = 80;
 
-    // Front face — paper-cut texture
-    const frontGeo = new THREE.CircleGeometry(RADIUS, segments);
-    const frontMat = new THREE.MeshStandardMaterial({
-      map: tex,
-      metalness: 0.15,
-      roughness: 0.55,
-      side: THREE.FrontSide,
-    });
-    const front = new THREE.Mesh(frontGeo, frontMat);
+    // Front — paper-cut texture
+    const front = new THREE.Mesh(
+      new THREE.CircleGeometry(RADIUS, seg),
+      new THREE.MeshStandardMaterial({ map: tex, metalness: 0.15, roughness: 0.55 })
+    );
     front.position.z = DEPTH / 2 + 0.001;
 
-    // Back face — solid deep cinnabar with subtle sheen
-    const backGeo = new THREE.CircleGeometry(RADIUS, segments);
-    const backMat = new THREE.MeshStandardMaterial({
-      color: 0x6b1010,
-      metalness: 0.4,
-      roughness: 0.5,
-      side: THREE.FrontSide,
-    });
-    const back = new THREE.Mesh(backGeo, backMat);
-    back.rotation.y = Math.PI; // face backward
+    // Back — deep cinnabar
+    const back = new THREE.Mesh(
+      new THREE.CircleGeometry(RADIUS, seg),
+      new THREE.MeshStandardMaterial({ color: 0x6b1010, metalness: 0.4, roughness: 0.5 })
+    );
+    back.rotation.y = Math.PI;
     back.position.z = -(DEPTH / 2 + 0.001);
 
-    // Edge rim — gold cylinder connecting front & back
-    const rimGeo = new THREE.CylinderGeometry(RADIUS, RADIUS, DEPTH, segments, 1, true);
-    const rimMat = new THREE.MeshStandardMaterial({
-      color: 0xd4af37,
-      metalness: 0.9,
-      roughness: 0.15,
-    });
-    const rim = new THREE.Mesh(rimGeo, rimMat);
-    rim.rotation.x = Math.PI / 2; // orient edge outward
+    // Edge rim — gold
+    const rimMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.15 });
+    const rim = new THREE.Mesh(
+      new THREE.CylinderGeometry(RADIUS, RADIUS, DEPTH, seg, 1, true),
+      rimMat
+    );
+    rim.rotation.x = Math.PI / 2;
 
-    // Outer decorative gold ring
-    const outerRingGeo = new THREE.TorusGeometry(RADIUS + 0.04, 0.045, 20, segments);
-    const outerRing = new THREE.Mesh(outerRingGeo, rimMat.clone());
-    outerRing.position.z = 0;
+    // Outer gold ring
+    const outerRing = new THREE.Mesh(
+      new THREE.TorusGeometry(RADIUS + 0.04, 0.045, 20, seg),
+      rimMat.clone()
+    );
 
-    // Inner bevel ring — slightly inset
-    const innerRingGeo = new THREE.TorusGeometry(RADIUS - 0.06, 0.025, 16, segments);
-    const innerRingMat = new THREE.MeshStandardMaterial({
-      color: 0xc9a73a,
-      metalness: 0.85,
-      roughness: 0.2,
-    });
-    const innerRing = new THREE.Mesh(innerRingGeo, innerRingMat);
+    // Inner bevel ring
+    const innerRing = new THREE.Mesh(
+      new THREE.TorusGeometry(RADIUS - 0.06, 0.025, 16, seg),
+      new THREE.MeshStandardMaterial({ color: 0xc9a73a, metalness: 0.85, roughness: 0.2 })
+    );
     innerRing.position.z = DEPTH / 2 + 0.01;
 
-    // Group the medallion
     const medallion = new THREE.Group();
     medallion.add(front, back, rim, outerRing, innerRing);
-    root.add(medallion);
-
-    /* ── Orbiting Jade Ring ────────────────────── */
-    const jadeGeo = new THREE.TorusGeometry(2.4, 0.04, 20, 100);
-    const jadeMat = new THREE.MeshStandardMaterial({
-      color: 0x3d8b37,
-      metalness: 0.55,
-      roughness: 0.3,
-      transparent: true,
-      opacity: 0.75,
-    });
-    const jadeRing = new THREE.Mesh(jadeGeo, jadeMat);
-    jadeRing.rotation.x = Math.PI / 3;
-    root.add(jadeRing);
+    scene.add(medallion);
 
     /* ── Lantern Ember Particles ───────────────── */
-    const N = 160;
+    const N = 140;
     const pGeo = new THREE.BufferGeometry();
     const pPos = new Float32Array(N * 3);
     const pCol = new Float32Array(N * 3);
@@ -141,7 +109,7 @@ export const AncestralCrestCanvas: React.FC = () => {
       pPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
       pPos[i * 3 + 2] = r * Math.cos(phi);
 
-      // 60% gold, 40% red
+      // Gold & red sparks only
       if (Math.random() > 0.4) {
         pCol[i * 3] = 0.95; pCol[i * 3 + 1] = 0.82; pCol[i * 3 + 2] = 0.35;
       } else {
@@ -152,37 +120,99 @@ export const AncestralCrestCanvas: React.FC = () => {
     pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
     pGeo.setAttribute('color', new THREE.BufferAttribute(pCol, 3));
 
-    const pMat = new THREE.PointsMaterial({
-      size: 0.055,
-      transparent: true,
-      opacity: 0.8,
-      vertexColors: true,
-    });
-    const particles = new THREE.Points(pGeo, pMat);
+    const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({
+      size: 0.055, transparent: true, opacity: 0.8, vertexColors: true,
+    }));
     scene.add(particles);
+
+    /* ── Drag Interaction ──────────────────────── */
+    let isDragging = false;
+    let prevX = 0;
+    let prevY = 0;
+    let dragRotY = 0;   // user-driven Y rotation
+    let dragRotX = 0;   // user-driven X rotation
+    let velocityX = 0;  // inertia
+    let velocityY = 0;
+    let idleTime = 0;   // seconds since last interaction
+
+    const onPointerDown = (e: PointerEvent) => {
+      isDragging = true;
+      prevX = e.clientX;
+      prevY = e.clientY;
+      velocityX = 0;
+      velocityY = 0;
+      idleTime = 0;
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!isDragging) return;
+      const dx = e.clientX - prevX;
+      const dy = e.clientY - prevY;
+      velocityY = dx * 0.008;
+      velocityX = dy * 0.008;
+      dragRotY += velocityY;
+      dragRotX += velocityX;
+      // Clamp X rotation so it doesn't flip upside-down
+      dragRotX = Math.max(-1.2, Math.min(1.2, dragRotX));
+      prevX = e.clientX;
+      prevY = e.clientY;
+      idleTime = 0;
+    };
+
+    const onPointerUp = () => {
+      isDragging = false;
+    };
+
+    const canvas = renderer.domElement;
+    canvas.style.cursor = 'grab';
+    canvas.style.touchAction = 'none'; // prevent scroll on touch drag
+    canvas.addEventListener('pointerdown', onPointerDown);
+    canvas.addEventListener('pointermove', onPointerMove);
+    canvas.addEventListener('pointerup', onPointerUp);
+    canvas.addEventListener('pointerleave', onPointerUp);
 
     /* ── Animation ─────────────────────────────── */
     let frameId: number;
     const clock = new THREE.Clock();
+    let lastTime = 0;
 
     const animate = () => {
       const t = clock.getElapsedTime();
+      const dt = t - lastTime;
+      lastTime = t;
 
-      // Gentle Y rotation — shows front, edge, back, edge, front …
-      medallion.rotation.y = t * 0.4;
+      if (!isDragging) {
+        // Apply inertia decay
+        velocityX *= 0.95;
+        velocityY *= 0.95;
+        dragRotY += velocityY;
+        dragRotX += velocityX;
+        dragRotX = Math.max(-1.2, Math.min(1.2, dragRotX));
 
-      // Subtle tilt wobble
-      medallion.rotation.x = Math.sin(t * 0.3) * 0.12;
+        // Track idle time
+        idleTime += dt;
 
-      // Jade ring orbit
-      jadeRing.rotation.z = t * 0.25;
-      jadeRing.rotation.y = t * 0.15;
+        // After 2 seconds idle and inertia faded, blend into gentle auto-rotation
+        if (idleTime > 2 && Math.abs(velocityY) < 0.001) {
+          const autoSpeed = 0.3;
+          // Smoothly blend: ease dragRotX back toward 0 (level)
+          dragRotX += (0 - dragRotX) * 0.02;
+          dragRotY += autoSpeed * dt;
+        }
+      }
+
+      medallion.rotation.y = dragRotY;
+      medallion.rotation.x = dragRotX;
 
       // Particles slow drift
       particles.rotation.y = t * 0.03;
 
-      // Lantern-flicker on the warm fill light
+      // Lantern flicker
       warmFill.intensity = 2.2 + Math.sin(t * 2.5) * 0.4;
+
+      // Cursor style
+      canvas.style.cursor = isDragging ? 'grabbing' : 'grab';
 
       renderer.render(scene, camera);
       frameId = requestAnimationFrame(animate);
@@ -203,6 +233,10 @@ export const AncestralCrestCanvas: React.FC = () => {
 
     return () => {
       window.removeEventListener('resize', onResize);
+      canvas.removeEventListener('pointerdown', onPointerDown);
+      canvas.removeEventListener('pointermove', onPointerMove);
+      canvas.removeEventListener('pointerup', onPointerUp);
+      canvas.removeEventListener('pointerleave', onPointerUp);
       cancelAnimationFrame(frameId);
       if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement);
       renderer.dispose();
