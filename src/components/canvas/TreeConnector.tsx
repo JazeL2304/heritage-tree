@@ -12,25 +12,36 @@ export const TreeConnector: React.FC<TreeConnectorProps> = ({ connections }) => 
     <svg
       style={{
         position: 'absolute',
-        top: -1000,
+        top: -2000,
         left: -2000,
-        width: 4000,
-        height: 4000,
+        width: 6000,
+        height: 6000,
         pointerEvents: 'none',
         overflow: 'visible',
-        zIndex: 1,
+        zIndex: 5,
       }}
     >
       <defs>
-        {/* Glow Filter for Gold Connection Lines */}
-        <filter id="line-glow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="1.5" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        {/* Drop Shadow for high contrast pop over grid background */}
+        <filter id="connector-shadow" x="-10%" y="-10%" width="120%" height="120%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#1f1d1d" floodOpacity="0.25" />
         </filter>
 
-        {/* Parent-Child Downward Arrow Marker */}
+        {/* Marriage Ring / Joint Circle Marker */}
         <marker
-          id="arrow-down"
+          id="joint-ring"
+          viewBox="0 0 10 10"
+          refX="5"
+          refY="5"
+          markerWidth="8"
+          markerHeight="8"
+        >
+          <circle cx="5" cy="5" r="4" fill="#fed65b" stroke="#8e1616" strokeWidth="2" />
+        </marker>
+
+        {/* Downward Child Arrow Marker */}
+        <marker
+          id="child-arrow"
           viewBox="0 0 10 10"
           refX="5"
           refY="5"
@@ -40,25 +51,13 @@ export const TreeConnector: React.FC<TreeConnectorProps> = ({ connections }) => 
         >
           <path d="M 0 0 L 10 5 L 0 10 z" fill="#8e1616" stroke="#fed65b" strokeWidth="1" />
         </marker>
-
-        {/* Joint Dot Marker */}
-        <marker
-          id="dot-joint"
-          viewBox="0 0 10 10"
-          refX="5"
-          refY="5"
-          markerWidth="8"
-          markerHeight="8"
-        >
-          <circle cx="5" cy="5" r="4" fill="#fed65b" stroke="#8e1616" strokeWidth="2" />
-        </marker>
       </defs>
 
       {connections.map((conn) => {
         const isSpouse = conn.type === 'spouse';
         return (
-          <g key={conn.id}>
-            {/* Outer Glow / Background Stroke for High Visibility */}
+          <g key={conn.id} filter="url(#connector-shadow)">
+            {/* White/Parchment thick background stroke for maximum line contrast */}
             <path
               d={conn.path}
               fill="none"
@@ -66,7 +65,6 @@ export const TreeConnector: React.FC<TreeConnectorProps> = ({ connections }) => 
               strokeWidth={isSpouse ? '5' : '6'}
               strokeLinecap="round"
               strokeLinejoin="round"
-              opacity={0.9}
             />
 
             {/* Main Primary Connector Path Line */}
@@ -75,11 +73,10 @@ export const TreeConnector: React.FC<TreeConnectorProps> = ({ connections }) => 
               fill="none"
               stroke={isSpouse ? '#735c00' : '#8e1616'}
               strokeWidth={isSpouse ? '3' : '3.5'}
-              strokeDasharray={isSpouse ? '6,6' : 'none'}
+              strokeDasharray={isSpouse ? '5,5' : 'none'}
               strokeLinecap="round"
               strokeLinejoin="round"
-              markerEnd={isSpouse ? 'url(#dot-joint)' : 'url(#arrow-down)'}
-              filter="url(#line-glow)"
+              markerEnd={isSpouse ? 'url(#joint-ring)' : 'url(#child-arrow)'}
             />
           </g>
         );

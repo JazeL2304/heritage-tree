@@ -92,18 +92,18 @@ export const INITIAL_MEMBERS: FamilyMember[] = [
 ];
 
 /**
- * Calculates (x,y) layout coordinates for all members in the tree and exact connector paths
+ * Calculates (x,y) layout coordinates for all members in the tree and classic family tree connections
  */
 export function calculateTreePositions(members: FamilyMember[]): {
   positionedMembers: FamilyMember[];
   connections: TreeConnection[];
 } {
   const NODE_WIDTH = 160;
-  const NODE_HEIGHT = 160;
-  const LEVEL_SPACING = 140;
-  const SIBLING_SPACING = 50;
+  const NODE_HEIGHT = 150;
+  const LEVEL_SPACING = 150;
+  const SIBLING_SPACING = 60;
 
-  // Group members by generation or computed depth
+  // Compute generation depth for each member
   const depthMap = new Map<string, number>();
 
   function getDepth(m: FamilyMember, visited = new Set<string>()): number {
@@ -160,47 +160,19 @@ export function calculateTreePositions(members: FamilyMember[]): {
     });
   });
 
-  // Compute connections (exact center points of node cards)
+  // 1. Compute Spouse Marriage Connections (Horizontal line between couples)
   positionedMembers.forEach((m) => {
-    const childCenterX = (m.x || 0) + NODE_WIDTH / 2;
-    const childTopY = m.y || 0;
-
-    // Parent -> Child connections
-    if (m.fatherId || m.motherId) {
-      const father = positionedMembers.find((p) => p.id === m.fatherId);
-      const mother = positionedMembers.find((p) => p.id === m.motherId);
-      const primaryParent = father || mother;
-
-      if (primaryParent && primaryParent.x !== undefined && primaryParent.y !== undefined) {
-        let parentCenterX = primaryParent.x + NODE_WIDTH / 2;
-        if (father && mother && father.x !== undefined && mother.x !== undefined) {
-          parentCenterX = (father.x + NODE_WIDTH / 2 + mother.x + NODE_WIDTH / 2) / 2;
-        }
-
-        const startY = primaryParent.y + NODE_HEIGHT;
-        const endY = childTopY;
-        const midY = startY + (endY - startY) / 2;
-
-        const path = `M ${parentCenterX} ${startY} L ${parentCenterX} ${midY} L ${childCenterX} ${midY} L ${childCenterX} ${endY}`;
-        connections.push({
-          id: `conn_${primaryParent.id}_${m.id}`,
-          fromId: primaryParent.id,
-          toId: m.id,
-          type: 'parent-child',
-          path,
-        });
-      }
-    }
-
-    // Spouse connection
     if (m.spouseId) {
       const spouse = positionedMembers.find((s) => s.id === m.spouseId);
       if (spouse && m.id < spouse.id && m.x !== undefined && m.y !== undefined && spouse.x !== undefined && spouse.y !== undefined) {
-        const spouseLeftX = m.x + NODE_WIDTH;
-        const spouseRightX = spouse.x;
-        const spouseY = m.y + NODE_HEIGHT / 2;
+        const leftMember = m.x < spouse.x ? m : spouse;
+        const rightMember = m.x < spouse.x ? spouse : m;
 
-        const path = `M ${spouseLeftX} ${spouseY} L ${spouseRightX} ${spouseY}`;
+        const startX = (leftMember.x || 0) + NODE_WIDTH;
+        const endX = rightMember.x || 0;
+        const lineY = (leftMember.y || 0) + 60; // Middle height of member card
+
+        const path = `M ${startX} ${lineY} L ${endX} ${lineY}`;
         connections.push({
           id: `spouse_${m.id}_${spouse.id}`,
           fromId: m.id,
@@ -210,6 +182,65 @@ export function calculateTreePositions(members: FamilyMember[]): {
         });
       }
     }
+  });
+
+  // 2. Compute Parent-Child Connections (Classic Family Tree Branch: Marriage Midpoint -> Vertical Drop -> T-Bar -> Children)
+  // Group children by parent couple / single parent
+  const familyGroups = new Map<string, FamilyMember[]>();
+
+  positionedMembers.forEach((m) => {
+    if (m.fatherId || m.motherId) {
+      const parentKey = [m.fatherId, m.motherId].filter(Boolean).sort().join('_');
+      if (!familyGroups.has(parentKey)) {
+        familyGroups.set(parentKey, []);
+      }
+      familyGroups.get(parentKey)!.push(m);
+    }
+  });
+
+  familyGroups.forEach((children, parentKey) => {
+    const parentIds = parentKey.split('_');
+    const parents = positionedMembers.filter((p) => parentIds.includes(p.id));
+
+    if (parents.length === 0) return;
+
+    let stemX = 0;
+    let stemY = 0;
+
+    if (parents.length === 2 && parents[0].x !== undefined && parents[1].x !== undefined) {
+      // Parent couple: stem starts at the EXACT MIDPOINT of the marriage line!
+      const leftParent = parents[0].x < parents[1].x ? parents[0] : parents[1];
+      const rightParent = parents[0].x < parents[1].x ? parents[1] : parents[0];
+
+      const spouseStartX = (leftParent.x || 0) + NODE_WIDTH;
+      const spouseEndX = rightParent.x || 0;
+      stemX = (spouseStartX + spouseEndX) / 2;
+      stemY = (leftParent.y || 0) + 60; // Marriage line height
+    } else {
+      // Single parent: stem starts at bottom center of parent card
+      const p = parents[0];
+      stemX = (p.x || 0) + NODE_WIDTH / 2;
+      stemY = (p.y || 0) + NODE_HEIGHT;
+    }
+
+    const firstChildY = children[0].y || 0;
+    const midY = stemY + (firstChildY - stemY) / 2;
+
+    children.forEach((child) => {
+      const childCenterX = (child.x || 0) + NODE_WIDTH / 2;
+      const childTopY = child.y || 0;
+
+      // Path from parent marriage midpoint -> vertical drop to midY -> horizontal to child -> vertical drop to child top
+      const path = `M ${stemX} ${stemY} L ${stemX} ${midY} L ${childCenterX} ${midY} L ${childCenterX} ${childTopY}`;
+
+      connections.push({
+        id: `parent_child_${parents[0].id}_${child.id}`,
+        fromId: parents[0].id,
+        toId: child.id,
+        type: 'parent-child',
+        path,
+      });
+    });
   });
 
   return { positionedMembers, connections };
