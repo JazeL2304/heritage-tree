@@ -40,41 +40,30 @@ export default function Home() {
 
   // Load family members: Instant local cache render + background Supabase sync
   useEffect(() => {
-    // 1. Instant Render from Local Cache (0ms delay)
-    try {
-      const cached = localStorage.getItem('heritage_tree_family_members');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setMembers(parsed);
-          setActiveMember(parsed[0]);
-        }
-      }
-    } catch (err) {
-      console.warn('Failed to load local cache:', err);
-    }
-
-    // 2. Background Sync with Supabase Cloud (Purge dummy data & sync live members)
-    async function syncCloud() {
-      const cached = localStorage.getItem('heritage_tree_family_members');
-      let liveMembers: FamilyMember[] = [];
-      if (cached) {
-        try {
-          liveMembers = JSON.parse(cached);
-        } catch {}
-      }
-
-      if (liveMembers.length > 0) {
-        await syncMembers(liveMembers);
-      }
-
+    async function init() {
+      // Fetch clean members from Supabase Cloud
       const loaded = await loadFamilyMembers();
       if (loaded && loaded.length > 0) {
         setMembers(loaded);
         setActiveMember((prev) => prev || loaded[0]);
+        return;
+      }
+
+      // Offline fallback from local cache
+      try {
+        const cached = localStorage.getItem('heritage_tree_family_members');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setMembers(parsed);
+            setActiveMember(parsed[0]);
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to load local cache:', err);
       }
     }
-    syncCloud();
+    init();
   }, []);
 
   // Compute positions & connections

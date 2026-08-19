@@ -117,72 +117,57 @@ export function calculateTreePositions(members: FamilyMember[]): {
     addSpouseConnection(level1Members[0], level1Members[1]);
   }
 
-  // 2. Compute Parent-Child Connections (Classic Family Tree Branch: Marriage Midpoint -> Vertical Drop -> T-Bar -> Children)
-  const familyGroups = new Map<string, FamilyMember[]>();
+  // 2. Compute Parent-Child Connections (Marriage Midpoint -> Vertical Drop -> Horizontal Branch -> Child Top)
+  positionedMembers.forEach((child) => {
+    // Check for explicit parents or fallback to level 1 members if child is in a lower level
+    let father = child.fatherId ? positionedMembers.find((p) => p.id === child.fatherId) : null;
+    let mother = child.motherId ? positionedMembers.find((p) => p.id === child.motherId) : null;
 
-  positionedMembers.forEach((m) => {
-    let parentKey = [m.fatherId, m.motherId].filter(Boolean).sort().join('_');
-    // Automatic Fallback: If no explicit fatherId/motherId set on child, connect to level 1 members if child is not in level 1
-    if (!parentKey && level1Members.length > 0) {
-      const isLevel1 = level1Members.some((l) => l.id === m.id);
-      if (!isLevel1) {
-        parentKey = level1Members.map((p) => p.id).sort().join('_');
+    const isLevel1 = level1Members.some((l) => l.id === child.id);
+    if (!father && !mother && !isLevel1 && level1Members.length > 0) {
+      // Automatic fallback for unlinked lower-generation children
+      father = level1Members.find((m) => m.gender === 'male') || level1Members[0];
+      mother = level1Members.find((m) => m.gender === 'female') || (level1Members[1] !== father ? level1Members[1] : null);
+    }
+
+    if (father || mother) {
+      let stemX = 0;
+      let stemY = 0;
+
+      if (father && mother && father.x !== undefined && mother.x !== undefined) {
+        // Both parents present: stem starts at EXACT MIDPOINT of parent marriage line
+        const leftParent = father.x < mother.x ? father : mother;
+        const rightParent = father.x < mother.x ? mother : father;
+
+        const spouseStartX = (leftParent.x || 0) + NODE_WIDTH;
+        const spouseEndX = rightParent.x || 0;
+        stemX = (spouseStartX + spouseEndX) / 2;
+        stemY = (leftParent.y || 0) + 60; // Marriage line height
+
+        // Ensure spouse connection exists between father & mother
+        addSpouseConnection(father, mother);
+      } else {
+        // Single parent present
+        const p = father || mother!;
+        stemX = (p.x || 0) + NODE_WIDTH / 2;
+        stemY = (p.y || 0) + NODE_HEIGHT;
       }
-    }
-    if (parentKey) {
-      if (!familyGroups.has(parentKey)) {
-        familyGroups.set(parentKey, []);
-      }
-      familyGroups.get(parentKey)!.push(m);
-    }
-  });
 
-  familyGroups.forEach((children, parentKey) => {
-    const parentIds = parentKey.split('_');
-    const parents = positionedMembers.filter((p) => parentIds.includes(p.id));
-
-    if (parents.length === 0) return;
-
-    // If there are 2 parents (father + mother), ensure a spouse line connects them!
-    if (parents.length === 2) {
-      addSpouseConnection(parents[0], parents[1]);
-    }
-
-    let stemX = 0;
-    let stemY = 0;
-
-    if (parents.length === 2 && parents[0].x !== undefined && parents[1].x !== undefined) {
-      // Parent couple: stem starts at the EXACT MIDPOINT of the marriage line!
-      const leftParent = parents[0].x < parents[1].x ? parents[0] : parents[1];
-      const rightParent = parents[0].x < parents[1].x ? parents[1] : parents[0];
-
-      const spouseStartX = (leftParent.x || 0) + NODE_WIDTH;
-      const spouseEndX = rightParent.x || 0;
-      stemX = (spouseStartX + spouseEndX) / 2;
-      stemY = (leftParent.y || 0) + 60; // Marriage line height
-    } else {
-      // Single parent: stem starts at bottom center of parent card
-      const p = parents[0];
-      stemX = (p.x || 0) + NODE_WIDTH / 2;
-      stemY = (p.y || 0) + NODE_HEIGHT;
-    }
-
-    children.forEach((child) => {
       const childCenterX = (child.x || 0) + NODE_WIDTH / 2;
       const childTopY = child.y || 0;
       const midY = stemY + (childTopY - stemY) / 2;
 
-      // Path from parent marriage midpoint -> vertical drop to midY -> horizontal to child -> vertical drop to child top
+      // Orthogonal T-Bar Path: Marriage midpoint -> vertical drop to midY -> horizontal to child -> vertical drop to child top
       const path = `M ${stemX} ${stemY} L ${stemX} ${midY} L ${childCenterX} ${midY} L ${childCenterX} ${childTopY}`;
 
       connections.push({
-        id: `parent_child_${parents[0].id}_${child.id}`,
-        fromId: parents[0].id,
+        id: `parent_child_${father?.id || mother?.id}_${child.id}`,
+        fromId: father?.id || mother?.id || '',
         toId: child.id,
         type: 'parent-child',
         path,
       });
-    });
+    }
   });
 
   return { positionedMembers, connections };
