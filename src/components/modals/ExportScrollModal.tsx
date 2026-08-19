@@ -51,7 +51,7 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
           body: JSON.stringify({ format, title: scrollTitle }),
         });
 
-        if (response.ok && format === 'json') {
+        if (response.ok) {
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
