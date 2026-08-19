@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { FamilyMember, Gender, RelationType } from '@/types/family';
+import { EasyDatePicker } from '../ui/EasyDatePicker';
 
 interface MemberFormModalProps {
   isOpen: boolean;
@@ -284,47 +285,36 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-3">
+            <EasyDatePicker
+              label="Tanggal Lahir"
+              value={birthDate}
+              onChange={(val) => setBirthDate(val)}
+            />
+
             <div>
               <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
-                Tanggal Lahir
+                Status Anggota
               </label>
-              <input
-                type="date"
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
-              />
-            </div>
-            <div>
-              <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
-                Status Wafat
-              </label>
-              <label className="flex items-center gap-2 mt-2 cursor-pointer">
+              <label className="flex items-center gap-2 cursor-pointer bg-white p-2 border border-[#e8dfd5] rounded">
                 <input
                   type="checkbox"
                   checked={isDeceased}
                   onChange={(e) => setIsDeceased(e.target.checked)}
                   className="accent-[#8e1616]"
                 />
-                <span>Sudah Meninggal Dunia</span>
+                <span className="font-medium text-xs">Sudah Meninggal Dunia (Almarhum)</span>
               </label>
             </div>
-          </div>
 
-          {isDeceased && (
-            <div>
-              <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
-                Tanggal Wafat
-              </label>
-              <input
-                type="date"
+            {isDeceased && (
+              <EasyDatePicker
+                label="Tanggal Wafat"
                 value={deathDate}
-                onChange={(e) => setDeathDate(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
+                onChange={(val) => setDeathDate(val)}
               />
-            </div>
-          )}
+            )}
+          </div>
 
           <div>
             <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
