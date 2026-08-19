@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #8e1616;
+  --color-primary-container: #6a0006;
+  --color-primary-deep: #731010;
+  --color-gold: #fed65b;
+  --color-gold-accent: #d4af37;
+  --color-parchment: #fbf9f5;
+  --color-parchment-alt: #f8f4ee;
+  --color-border-silk: #e8dfd5;
+  --color-connector-charcoal: #3d3731;
+  --color-ink-black: #1f1d1d;
+  --font-headline: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Inter", sans-serif;
+}
+
 @layer base {
   :root {
     --primary: #8e1616;
