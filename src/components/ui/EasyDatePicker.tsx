@@ -28,7 +28,6 @@ interface CustomDropdownProps {
   value: string;
   options: { value: string; label: string }[];
   onSelect: (val: string) => void;
-  isHighlight?: boolean;
 }
 
 const CustomDropdown: React.FC<CustomDropdownProps> = ({
@@ -36,7 +35,6 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
   value,
   options,
   onSelect,
-  isHighlight,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -52,7 +50,9 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const selectedLabel = options.find((o) => o.value === value)?.label || placeholder;
+  const selectedOption = options.find((o) => o.value === value);
+  const displayLabel = selectedOption ? selectedOption.label : placeholder;
+  const hasValue = Boolean(value);
 
   return (
     <div ref={dropdownRef} className="relative flex-1">
@@ -60,12 +60,18 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full px-2.5 py-1.5 bg-white border rounded text-xs flex items-center justify-between transition-colors cursor-pointer ${
-          isOpen ? 'border-[#8e1616] ring-1 ring-[#8e1616]' : 'border-[#e8dfd5] hover:border-[#8e1616]/50'
-        } ${isHighlight ? 'font-bold text-[#8e1616]' : 'text-[#1f1d1d]'}`}
+        className={`w-full px-2.5 py-1.5 bg-white border rounded text-xs flex items-center justify-between transition-all cursor-pointer ${
+          isOpen
+            ? 'border-[#8e1616] ring-1 ring-[#8e1616]'
+            : hasValue
+            ? 'border-[#8e1616]/60 bg-[#8e1616]/5 font-semibold text-[#8e1616]'
+            : 'border-[#e8dfd5] text-[#59413e] hover:border-[#8e1616]/50'
+        }`}
       >
-        <span className="truncate">{selectedLabel}</span>
-        <span className={`material-symbols-outlined text-[16px] text-[#59413e] transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#8e1616]' : ''}`}>
+        <span className="truncate">{displayLabel}</span>
+        <span className={`material-symbols-outlined text-[16px] transition-transform duration-200 ${
+          isOpen ? 'rotate-180 text-[#8e1616]' : hasValue ? 'text-[#8e1616]' : 'text-[#59413e]'
+        }`}>
           expand_more
         </span>
       </button>
@@ -113,11 +119,24 @@ export const EasyDatePicker: React.FC<EasyDatePickerProps> = ({
   value,
   onChange,
 }) => {
-  // Parse existing ISO string YYYY-MM-DD
-  const parts = (value || '').split('-');
-  const selectedYear = parts[0] || '';
-  const selectedMonth = parts[1] || '';
-  const selectedDay = parts[2] || '';
+  // Local independent state so users can click Day, Month, or Year in any order!
+  const [day, setDay] = useState('');
+  const [month, setMonth] = useState('');
+  const [year, setYear] = useState('');
+
+  // Sync from props value
+  useEffect(() => {
+    if (value) {
+      const parts = value.split('-');
+      setYear(parts[0] || '');
+      setMonth(parts[1] || '');
+      setDay(parts[2] || '');
+    } else {
+      setYear('');
+      setMonth('');
+      setDay('');
+    }
+  }, [value]);
 
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 130 }, (_, i) => {
@@ -130,20 +149,32 @@ export const EasyDatePicker: React.FC<EasyDatePickerProps> = ({
     return { value: d, label: `${i + 1}` };
   });
 
-  const updateDate = (newYear: string, newMonth: string, newDay: string) => {
-    if (!newYear) {
+  const handleSelectDay = (newDay: string) => {
+    setDay(newDay);
+    notifyParent(year, month, newDay);
+  };
+
+  const handleSelectMonth = (newMonth: string) => {
+    setMonth(newMonth);
+    notifyParent(year, newMonth, day);
+  };
+
+  const handleSelectYear = (newYear: string) => {
+    setYear(newYear);
+    notifyParent(newYear, month, day);
+  };
+
+  const notifyParent = (y: string, m: string, d: string) => {
+    if (y && m && d) {
+      onChange(`${y}-${m}-${d}`);
+    } else if (y && m) {
+      onChange(`${y}-${m}`);
+    } else if (y) {
+      onChange(y);
+    } else {
+      // Even if year is empty, don't break local UI state
       onChange('');
-      return;
     }
-    if (!newMonth) {
-      onChange(newYear);
-      return;
-    }
-    if (!newDay) {
-      onChange(`${newYear}-${newMonth}`);
-      return;
-    }
-    onChange(`${newYear}-${newMonth}-${newDay}`);
   };
 
   return (
@@ -155,30 +186,29 @@ export const EasyDatePicker: React.FC<EasyDatePickerProps> = ({
         {/* Custom Dropdown Tanggal */}
         <CustomDropdown
           placeholder="Tgl (--)"
-          value={selectedDay}
+          value={day}
           options={dayOptions}
-          onSelect={(d) => updateDate(selectedYear, selectedMonth, d)}
+          onSelect={handleSelectDay}
         />
 
         {/* Custom Dropdown Bulan */}
         <CustomDropdown
           placeholder="Bulan (--)"
-          value={selectedMonth}
+          value={month}
           options={MONTHS}
-          onSelect={(m) => updateDate(selectedYear, m, selectedDay)}
+          onSelect={handleSelectMonth}
         />
 
         {/* Custom Dropdown Tahun */}
         <CustomDropdown
           placeholder="Tahun (*)"
-          value={selectedYear}
+          value={year}
           options={yearOptions}
-          onSelect={(y) => updateDate(y, selectedMonth, selectedDay)}
-          isHighlight
+          onSelect={handleSelectYear}
         />
       </div>
       <p className="text-[10px] text-[#59413e]/70 mt-1">
-        *Cukup pilih <b>Tahun</b> jika lupa tanggal/bulan pasti.
+        *Bisa pilih Tanggal, Bulan, atau Tahun dalam urutan apa pun.
       </p>
     </div>
   );
