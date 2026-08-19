@@ -27,13 +27,18 @@ CREATE TABLE IF NOT EXISTS public.family_members (
 ALTER TABLE public.family_members ENABLE ROW LEVEL SECURITY;
 
 -- 2. Create public access policies for family members
+DROP POLICY IF EXISTS "Allow public read access to family_members" ON public.family_members;
+DROP POLICY IF EXISTS "Allow public insert/update/delete to family_members" ON public.family_members;
+DROP POLICY IF EXISTS "Allow public all access to family_members" ON public.family_members;
+
 CREATE POLICY "Allow public read access to family_members" 
 ON public.family_members FOR SELECT 
 USING (true);
 
 CREATE POLICY "Allow public insert/update/delete to family_members" 
 ON public.family_members FOR ALL 
-USING (true);
+USING (true)
+WITH CHECK (true);
 
 -- 3. Insert Initial Seed Data (Optional sample family tree)
 INSERT INTO public.family_members (id, surname, given_name, gender, birth_date, is_deceased, generation, is_verified, photo_url, notes)
