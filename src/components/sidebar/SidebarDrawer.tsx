@@ -8,6 +8,7 @@ import { ActionStack } from './ActionStack';
 interface SidebarDrawerProps {
   activeMember: FamilyMember | null;
   onAddRelation: (relation: RelationType) => void;
+  onAddStandalone: () => void;
   onEditMember: () => void;
   onDeleteMember: () => void;
   onOpenExportModal: () => void;
@@ -16,6 +17,7 @@ interface SidebarDrawerProps {
 export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
   activeMember,
   onAddRelation,
+  onAddStandalone,
   onEditMember,
   onDeleteMember,
   onOpenExportModal,
@@ -81,6 +83,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
             <ActionStack
               disabled={!activeMember}
               onAddRelation={onAddRelation}
+              onAddStandalone={onAddStandalone}
               onDeleteMember={onDeleteMember}
             />
           </>

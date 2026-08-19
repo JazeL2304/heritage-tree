@@ -289,6 +289,7 @@ export default function Home() {
             <SidebarDrawer
               activeMember={activeMember}
               onAddRelation={handleAddRelation}
+              onAddStandalone={handleAddFirstMember}
               onEditMember={handleEditMember}
               onDeleteMember={handleDeleteMember}
               onOpenExportModal={() => setIsExportModalOpen(true)}

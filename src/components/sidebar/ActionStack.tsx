@@ -5,22 +5,33 @@ import { RelationType } from '@/types/family';
 
 interface ActionStackProps {
   onAddRelation: (relation: RelationType) => void;
+  onAddStandalone: () => void;
   onDeleteMember: () => void;
   disabled: boolean;
 }
 
 export const ActionStack: React.FC<ActionStackProps> = ({
   onAddRelation,
+  onAddStandalone,
   onDeleteMember,
   disabled,
 }) => {
   return (
     <div className="flex flex-col gap-1.5 mt-1">
+      {/* Standalone Add Member Button */}
+      <button
+        onClick={onAddStandalone}
+        className="w-full py-1.5 bg-[#2E5E3B] text-white font-bold text-[11px] uppercase tracking-wider rounded shadow-sm hover:opacity-90 transition-all duration-200 flex justify-center items-center gap-1.5 cursor-pointer"
+      >
+        <span className="material-symbols-outlined text-[16px]">person_add</span>
+        <span>+ ANGGOTA BARU (TANPA RELASI)</span>
+      </button>
+
       <div className="grid grid-cols-2 gap-1.5">
         <button
           disabled={disabled}
           onClick={() => onAddRelation('parents')}
-          className="py-1.5 px-2 bg-[#C06050] text-white font-bold text-[11px] uppercase tracking-wider rounded shadow-sm hover:opacity-90 transition-all duration-200 flex justify-center items-center gap-1 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+          className="py-1.5 px-2 bg-[#8E1616] text-white font-bold text-[11px] uppercase tracking-wider rounded shadow-sm hover:opacity-90 transition-all duration-200 flex justify-center items-center gap-1 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
         >
           <span className="material-symbols-outlined text-[15px]">groups</span>
           <span>+ Parents</span>
