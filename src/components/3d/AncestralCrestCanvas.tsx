@@ -107,7 +107,7 @@ export const AncestralCrestCanvas: React.FC = () => {
     for (let i = 0; i < N; i++) {
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
-      const r = 2.6 + Math.random() * 2.8;
+      const r = 1.8 + Math.random() * 0.9;
       pPos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
       pPos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
       pPos[i * 3 + 2] = r * Math.cos(phi);
@@ -229,7 +229,7 @@ export const AncestralCrestCanvas: React.FC = () => {
   return (
     <div
       ref={mountRef}
-      className="w-48 h-48 md:w-56 md:h-56 mx-auto flex items-center justify-center relative z-10"
+      className="w-40 h-40 md:w-48 md:h-48 mx-auto flex items-center justify-center relative z-10 overflow-hidden rounded-full"
     />
   );
 };
