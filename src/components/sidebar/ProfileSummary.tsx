@@ -15,43 +15,43 @@ export const ProfileSummary: React.FC<ProfileSummaryProps> = ({
 }) => {
   if (!member) {
     return (
-      <div className="bg-[#fbf9f5] border border-[#e8dfd5] rounded p-4 text-center text-sm text-[#59413e]">
+      <div className="bg-[#fbf9f5] border border-[#e8dfd5] rounded p-3 text-center text-xs text-[#59413e]">
         Select a member on the canvas to view details.
       </div>
     );
   }
 
   return (
-    <div className="bg-[#fbf9f5] border border-[#e8dfd5] rounded relative mt-2 p-3 pt-4 shadow-sm">
-      <div className="absolute -top-3 left-3 bg-[#fbf9f5] px-1 text-[11px] font-bold text-[#8e1616] uppercase tracking-widest flex items-center gap-1">
+    <div className="bg-[#fbf9f5] border border-[#e8dfd5] rounded relative mt-1 p-2.5 pt-3 shadow-sm">
+      <div className="absolute -top-2.5 left-2 bg-[#fbf9f5] px-1 text-[10px] font-bold text-[#8e1616] uppercase tracking-widest flex items-center gap-1">
         <span>Active Subject</span>
         {member.isVerified && (
-          <span className="material-symbols-outlined text-[14px] text-[#fed65b]">
+          <span className="material-symbols-outlined text-[13px] text-[#fed65b]">
             verified
           </span>
         )}
       </div>
 
-      <div className="flex flex-col gap-2 text-xs text-[#1f1d1d]">
-        <div className="flex justify-between border-b border-[#eae8e4] pb-1.5">
+      <div className="flex flex-col gap-1 text-[11px] text-[#1f1d1d]">
+        <div className="flex justify-between border-b border-[#eae8e4] pb-1">
           <span className="text-[#59413e] font-semibold uppercase tracking-wide">
             Surname
           </span>
           <span className="font-bold text-[#8e1616]">{member.surname}</span>
         </div>
-        <div className="flex justify-between border-b border-[#eae8e4] pb-1.5">
+        <div className="flex justify-between border-b border-[#eae8e4] pb-1">
           <span className="text-[#59413e] font-semibold uppercase tracking-wide">
             Given Name
           </span>
           <span className="font-bold">{member.givenName}</span>
         </div>
-        <div className="flex justify-between border-b border-[#eae8e4] pb-1.5">
+        <div className="flex justify-between border-b border-[#eae8e4] pb-1">
           <span className="text-[#59413e] font-semibold uppercase tracking-wide">
             Gender
           </span>
           <span className="capitalize">{member.gender}</span>
         </div>
-        <div className="flex justify-between border-b border-[#eae8e4] pb-1.5">
+        <div className="flex justify-between border-b border-[#eae8e4] pb-1">
           <span className="text-[#59413e] font-semibold uppercase tracking-wide">
             DoB
           </span>
@@ -61,7 +61,7 @@ export const ProfileSummary: React.FC<ProfileSummaryProps> = ({
         </div>
 
         {member.isDeceased && (
-          <div className="flex justify-between border-b border-[#eae8e4] pb-1.5">
+          <div className="flex justify-between border-b border-[#eae8e4] pb-1">
             <span className="text-[#59413e] font-semibold uppercase tracking-wide">
               DoD
             </span>
@@ -72,16 +72,16 @@ export const ProfileSummary: React.FC<ProfileSummaryProps> = ({
         )}
 
         {member.notes && (
-          <div className="mt-1 pt-1 text-[11px] text-[#59413e] italic">
+          <div className="mt-0.5 text-[10px] text-[#59413e] italic truncate">
             "{member.notes}"
           </div>
         )}
 
         <button
           onClick={onEditMember}
-          className="mt-2 w-full py-1.5 border border-[#8e1616] text-[#8e1616] hover:bg-[#8e1616] hover:text-white transition-colors text-xs font-semibold uppercase tracking-wider rounded cursor-pointer flex items-center justify-center gap-1"
+          className="mt-1 w-full py-1 border border-[#8e1616] text-[#8e1616] hover:bg-[#8e1616] hover:text-white transition-colors text-[11px] font-bold uppercase tracking-wider rounded cursor-pointer flex items-center justify-center gap-1"
         >
-          <span className="material-symbols-outlined text-[14px]">edit</span>
+          <span className="material-symbols-outlined text-[13px]">edit</span>
           Edit Record
         </button>
       </div>

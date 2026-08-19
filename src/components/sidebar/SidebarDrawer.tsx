@@ -23,10 +23,10 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
   const [activeTab, setActiveTab] = useState<'profile' | 'records' | 'ancestors' | 'media'>('profile');
 
   return (
-    <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-[320px] bg-[#fbf9f5] border-r border-[#e8dfd5] shadow-sm flex flex-col p-4 space-y-4 z-40 overflow-y-auto">
+    <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-[300px] bg-[#fbf9f5] border-r border-[#e8dfd5] shadow-sm flex flex-col p-3 z-40 overflow-hidden">
       {/* Branch Title & Ledger Header */}
-      <div className="flex items-center gap-3 bg-[#efeeea] p-2.5 rounded border border-[#e8dfd5]">
-        <div className="w-12 h-12 rounded-full border-2 border-[#fed65b] overflow-hidden bg-[#8e1616] flex items-center justify-center text-white shrink-0">
+      <div className="flex items-center gap-2.5 bg-[#efeeea] p-2 rounded border border-[#e8dfd5]">
+        <div className="w-9 h-9 rounded-full border-2 border-[#fed65b] overflow-hidden bg-[#8e1616] flex items-center justify-center text-white shrink-0">
           {activeMember?.photoUrl ? (
             <img
               src={activeMember.photoUrl}
@@ -34,72 +34,44 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
               className="w-full h-full object-cover"
             />
           ) : (
-            <span className="material-symbols-outlined text-[28px]">
+            <span className="material-symbols-outlined text-[20px]">
               account_balance
             </span>
           )}
         </div>
         <div>
-          <h2 className="font-bold text-sm text-[#8e1616] leading-tight font-['Plus_Jakarta_Sans']">
+          <h2 className="font-bold text-xs text-[#8e1616] leading-tight font-['Plus_Jakarta_Sans']">
             Family Ledger
           </h2>
-          <p className="text-xs text-[#59413e] italic">Ming Dynasty Branch</p>
+          <p className="text-[10px] text-[#59413e] italic">Ming Dynasty Branch</p>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex flex-col gap-1 pb-2 border-b border-[#e8dfd5]">
-        <button
-          onClick={() => setActiveTab('profile')}
-          className={`flex items-center gap-2.5 px-3 py-2 font-bold text-xs text-left rounded-l w-full transition-all ${
-            activeTab === 'profile'
-              ? 'text-[#8e1616] border-r-4 border-[#8e1616] bg-[#eae8e4]'
-              : 'text-[#59413e] hover:bg-[#efeeea] border-r-4 border-transparent'
-          }`}
-        >
-          <span className="material-symbols-outlined text-[18px]">person</span>
-          <span>Profile</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('records')}
-          className={`flex items-center gap-2.5 px-3 py-2 text-xs text-left rounded-l w-full transition-all ${
-            activeTab === 'records'
-              ? 'text-[#8e1616] font-bold border-r-4 border-[#8e1616] bg-[#eae8e4]'
-              : 'text-[#59413e] hover:bg-[#efeeea] border-r-4 border-transparent'
-          }`}
-        >
-          <span className="material-symbols-outlined text-[18px]">menu_book</span>
-          <span>Records</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('ancestors')}
-          className={`flex items-center gap-2.5 px-3 py-2 text-xs text-left rounded-l w-full transition-all ${
-            activeTab === 'ancestors'
-              ? 'text-[#8e1616] font-bold border-r-4 border-[#8e1616] bg-[#eae8e4]'
-              : 'text-[#59413e] hover:bg-[#efeeea] border-r-4 border-transparent'
-          }`}
-        >
-          <span className="material-symbols-outlined text-[18px]">account_tree</span>
-          <span>Ancestors</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('media')}
-          className={`flex items-center gap-2.5 px-3 py-2 text-xs text-left rounded-l w-full transition-all ${
-            activeTab === 'media'
-              ? 'text-[#8e1616] font-bold border-r-4 border-[#8e1616] bg-[#eae8e4]'
-              : 'text-[#59413e] hover:bg-[#efeeea] border-r-4 border-transparent'
-          }`}
-        >
-          <span className="material-symbols-outlined text-[18px]">photo_library</span>
-          <span>Media</span>
-        </button>
+      {/* Navigation Tabs (Compact 4-grid pill icons) */}
+      <div className="grid grid-cols-4 gap-1 my-2 bg-[#eae8e4] p-1 rounded border border-[#e8dfd5]">
+        {[
+          { id: 'profile', label: 'Profile', icon: 'person' },
+          { id: 'records', label: 'Records', icon: 'menu_book' },
+          { id: 'ancestors', label: 'Tree', icon: 'account_tree' },
+          { id: 'media', label: 'Media', icon: 'photo_library' },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`py-1 text-[10px] font-bold rounded flex flex-col items-center justify-center transition-all cursor-pointer ${
+              activeTab === tab.id
+                ? 'bg-[#8e1616] text-white shadow-sm'
+                : 'text-[#59413e] hover:bg-[#efeeea]'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[15px]">{tab.icon}</span>
+            <span>{tab.label}</span>
+          </button>
+        ))}
       </div>
 
       {/* Main Tab Content */}
-      <div className="flex-1 flex flex-col gap-3">
+      <div className="flex-1 flex flex-col gap-2 overflow-y-auto">
         {activeTab === 'profile' && (
           <>
             <ProfileSummary
@@ -115,20 +87,20 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
         )}
 
         {activeTab === 'records' && (
-          <div className="p-3 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#59413e] space-y-2">
+          <div className="p-2.5 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#59413e] space-y-2">
             <h4 className="font-bold text-[#8e1616]">Archival Ledger Records</h4>
-            <p>Historical genealogical archives of the Li family line (Zupu Volume IV).</p>
-            <div className="p-2 bg-[#eae8e4] rounded text-[11px] flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[16px] text-[#8e1616]">description</span>
+            <p className="text-[11px]">Historical genealogical archives of the Li family line (Zupu Volume IV).</p>
+            <div className="p-1.5 bg-[#eae8e4] rounded text-[10px] flex items-center gap-1.5 font-mono">
+              <span className="material-symbols-outlined text-[14px] text-[#8e1616]">description</span>
               <span>Document Ref #M-1994-07</span>
             </div>
           </div>
         )}
 
         {activeTab === 'ancestors' && (
-          <div className="p-3 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#59413e] space-y-2">
+          <div className="p-2.5 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#59413e] space-y-1.5">
             <h4 className="font-bold text-[#8e1616]">Generational Lineage</h4>
-            <ul className="space-y-1 pl-2 border-l-2 border-[#8e1616]">
+            <ul className="space-y-1 pl-2 border-l-2 border-[#8e1616] text-[11px]">
               <li>Gen 1: Li Jianhua & Wang Xiu Ying</li>
               <li>Gen 2: Li Wei & Chen Ting</li>
               <li>Gen 3: Li An</li>
@@ -138,31 +110,31 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
 
         {activeTab === 'media' && (
           <div className="p-3 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#59413e] text-center">
-            <span className="material-symbols-outlined text-[32px] text-[#8e1616]">
+            <span className="material-symbols-outlined text-[28px] text-[#8e1616]">
               collections
             </span>
-            <p className="mt-1">No additional media attachments uploaded for this node.</p>
+            <p className="mt-1 text-[11px]">No additional media attachments uploaded for this node.</p>
           </div>
         )}
       </div>
 
       {/* Bottom Export & Options Bar */}
-      <div className="mt-auto pt-3 border-t border-[#e8dfd5] flex flex-col gap-2">
+      <div className="mt-auto pt-2 border-t border-[#e8dfd5] flex flex-col gap-1.5 shrink-0">
         <button
           onClick={onOpenExportModal}
-          className="w-full py-2.5 border border-[#735c00] text-[#735c00] bg-[#eae8e4] font-semibold text-xs uppercase tracking-wider rounded hover:bg-[#e4e2de] transition-colors flex justify-center items-center gap-1.5 cursor-pointer"
+          className="w-full py-1.5 border border-[#735c00] text-[#735c00] bg-[#eae8e4] font-bold text-[11px] uppercase tracking-wider rounded hover:bg-[#e4e2de] transition-colors flex justify-center items-center gap-1 cursor-pointer"
         >
-          <span className="material-symbols-outlined text-[18px]">download</span>
-          Export Scroll
+          <span className="material-symbols-outlined text-[16px]">download</span>
+          <span>Export Scroll</span>
         </button>
 
-        <div className="flex justify-between px-1 text-xs">
+        <div className="flex justify-between px-1 text-[10px]">
           <button className="flex items-center gap-1 text-[#59413e] hover:text-[#8e1616] transition-colors cursor-pointer">
-            <span className="material-symbols-outlined text-[16px]">settings</span>
+            <span className="material-symbols-outlined text-[14px]">settings</span>
             Settings
           </button>
           <button className="flex items-center gap-1 text-[#59413e] hover:text-[#8e1616] transition-colors cursor-pointer">
-            <span className="material-symbols-outlined text-[16px]">help_outline</span>
+            <span className="material-symbols-outlined text-[14px]">help_outline</span>
             Help
           </button>
         </div>
