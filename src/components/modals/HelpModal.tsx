@@ -63,7 +63,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               <span>3. Ekspor Gulungan Silsilah (PDF & Cetak)</span>
             </div>
             <p className="text-[11px] leading-relaxed">
-              Klik tombol <strong>EXPORT SCROLL</strong> di bagian bawah sidebar untuk mengunduh bagan silsilah trah keluarga dalam format dokumen gulungan klasik beresolusi tinggi.
+              Klik tombol <strong>EXPORT SCROLL</strong> di bagian bawah sidebar untuk mengunduh bagan silsilah keluarga dalam format dokumen gulungan klasik beresolusi tinggi.
             </p>
           </div>
 

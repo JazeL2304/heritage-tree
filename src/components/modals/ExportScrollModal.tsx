@@ -16,7 +16,7 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
   onClose,
   members,
 }) => {
-  const [scrollTitle, setScrollTitle] = useState('Dokumen Silsilah Trah Keluarga');
+  const [scrollTitle, setScrollTitle] = useState('Dokumen Bagan Silsilah Keluarga');
   const [isExporting, setIsExporting] = useState(false);
 
   if (!isOpen) return null;
@@ -182,17 +182,17 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
         <body>
           <div class="header">
             <h1>${scrollTitle}</h1>
-            <p>Arsip Resmi Catatan Silsilah & Silsilah Trah Keluarga</p>
+            <p>Arsip Resmi Catatan Bagan Silsilah Keluarga</p>
             <div class="seal">Tercatat di Supabase Cloud Ledger — Silsilah Terverifikasi</div>
           </div>
 
           <!-- VISUAL FAMILY TREE DIAGRAM -->
           <div class="visual-tree-container">
-            <div class="visual-title">Bagan Visual Diagram Pohon Silsilah Trah</div>
+            <div class="visual-title">Bagan Visual Diagram Pohon Silsilah Keluarga</div>
 
             <!-- Gen 2 Level (Roni & Imelda) -->
             <div class="tree-level">
-              <span class="level-badge">Generasi 2 (Kepala Cabang Trah)</span>
+              <span class="level-badge">Generasi 2 (Orang Tua & Pasangan)</span>
               <div class="nodes-row">
                 ${
                   genMap[2] && genMap[2].length > 0
@@ -202,7 +202,7 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
                         <div class="node-card">
                           <img src="${m.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'}" class="node-avatar" />
                           <div class="node-name">${m.givenName} ${m.surname}</div>
-                          <div class="node-tag">${m.gender === 'female' ? 'Wanita (Pasangan)' : 'Pria (Kepala)'}</div>
+                          <div class="node-tag">${m.gender === 'female' ? 'Wanita (Ibu)' : 'Pria (Ayah)'}</div>
                         </div>
                       `
                         )
@@ -221,7 +221,7 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
 
             <!-- Gen 3 Level (Jastin & Jason) -->
             <div class="tree-level">
-              <span class="level-badge">Generasi 3 (Penerus Trah Keluarga)</span>
+              <span class="level-badge">Generasi 3 (Anak-anak & Penerus)</span>
               <div class="nodes-row">
                 ${
                   genMap[3] && genMap[3].length > 0
@@ -231,7 +231,7 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
                         <div class="node-card">
                           <img src="${m.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'}" class="node-avatar" />
                           <div class="node-name">${m.givenName} ${m.surname}</div>
-                          <div class="node-tag">Penerus Trah</div>
+                          <div class="node-tag">Anak / Penerus</div>
                         </div>
                       `
                         )
@@ -244,7 +244,7 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
 
           <!-- DETAILED MEMBER DIRECTORY -->
           <div class="gen-section">
-            <div class="gen-title">Generasi 1 (Tetua Trah)</div>
+            <div class="gen-title">Generasi 1 (Kakek & Nenek)</div>
             ${
               genMap[1] && genMap[1].length > 0
                 ? `<div class="member-grid">
@@ -260,12 +260,12 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
                       )
                       .join('')}
                   </div>`
-                : `<div class="empty-text">Belum ada data Tetua Gen 1 terdaftar.</div>`
+                : `<div class="empty-text">Belum ada data Kakek/Nenek Gen 1 terdaftar.</div>`
             }
           </div>
 
           <div class="gen-section">
-            <div class="gen-title">Generasi 2 (Kepala Cabang)</div>
+            <div class="gen-title">Generasi 2 (Orang Tua)</div>
             ${
               genMap[2] && genMap[2].length > 0
                 ? `<div class="member-grid">
@@ -286,7 +286,7 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
           </div>
 
           <div class="gen-section">
-            <div class="gen-title">Generasi 3 (Penerus Trah)</div>
+            <div class="gen-title">Generasi 3 (Anak-anak)</div>
             ${
               genMap[3] && genMap[3].length > 0
                 ? `<div class="member-grid">

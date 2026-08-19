@@ -197,17 +197,17 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
             <p className="text-[10px] text-[#59413e]">Klik nama anggota untuk memfokuskan kursor di canvas.</p>
 
             <div className="space-y-3 pt-1">
-              {/* Gen 1 (Tetua Trah) */}
+              {/* Gen 1 (Kakek & Nenek) */}
               <div className="space-y-1">
                 <div className="font-bold text-[11px] text-[#8e1616] uppercase border-b border-[#e8dfd5] pb-0.5 flex justify-between items-center">
-                  <span>Generasi 1 (Tetua Trah)</span>
+                  <span>Generasi 1 (Kakek / Nenek)</span>
                   {(!generationsMap[1] || generationsMap[1].length === 0) && (
                     <span className="text-[9px] text-[#8e1616] font-semibold italic">Belum diisi</span>
                   )}
                 </div>
                 {!generationsMap[1] || generationsMap[1].length === 0 ? (
                   <div className="p-2 bg-[#eae8e4]/60 border border-dashed border-[#e8dfd5] rounded text-[10px] text-[#59413e] italic">
-                    Belum ada data Tetua Gen 1. Tambah orang tua pada Roni/Imelda di canvas.
+                    Belum ada data Kakek/Nenek Gen 1. Tambah orang tua pada Roni/Imelda di canvas.
                   </div>
                 ) : (
                   <div className="space-y-1 pl-1">
@@ -233,11 +233,11 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                 )}
               </div>
 
-              {/* Gen 2 (Kepala Cabang - Roni & Imelda) */}
+              {/* Gen 2 (Orang Tua - Roni & Imelda) */}
               {generationsMap[2] && generationsMap[2].length > 0 && (
                 <div className="space-y-1">
                   <div className="font-bold text-[11px] text-[#8e1616] uppercase border-b border-[#e8dfd5] pb-0.5">
-                    Generasi 2 (Kepala Cabang)
+                    Generasi 2 (Orang Tua)
                   </div>
                   <div className="space-y-1 pl-1">
                     {generationsMap[2].map((m) => {
@@ -262,11 +262,11 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                 </div>
               )}
 
-              {/* Gen 3 (Penerus Trah - Jastin & Jason) */}
+              {/* Gen 3 (Anak-anak - Jastin & Jason) */}
               {generationsMap[3] && generationsMap[3].length > 0 && (
                 <div className="space-y-1">
                   <div className="font-bold text-[11px] text-[#8e1616] uppercase border-b border-[#e8dfd5] pb-0.5">
-                    Generasi 3 (Penerus Trah)
+                    Generasi 3 (Anak-anak)
                   </div>
                   <div className="space-y-1 pl-1">
                     {generationsMap[3].map((m) => {
