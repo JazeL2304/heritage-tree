@@ -91,33 +91,33 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
   };
 
   return (
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div class="bg-[#fbf9f5] border-2 border-[#8e1616] rounded-lg shadow-2xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-[#fbf9f5] border-2 border-[#8e1616] rounded-lg shadow-2xl max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          class="absolute top-4 right-4 text-[#59413e] hover:text-[#8e1616] transition-colors"
+          className="absolute top-4 right-4 text-[#59413e] hover:text-[#8e1616] transition-colors"
         >
-          <span class="material-symbols-outlined text-[20px]">close</span>
+          <span className="material-symbols-outlined text-[20px]">close</span>
         </button>
 
-        <div class="flex items-center gap-3 mb-4 border-b border-[#e8dfd5] pb-3">
-          <div class="w-10 h-10 rounded-full bg-[#8e1616] text-[#fed65b] flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-[24px]">edit_note</span>
+        <div className="flex items-center gap-3 mb-4 border-b border-[#e8dfd5] pb-3">
+          <div className="w-10 h-10 rounded-full bg-[#8e1616] text-[#fed65b] flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[24px]">edit_note</span>
           </div>
           <div>
-            <h3 class="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
+            <h3 className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
               {getModalTitle()}
             </h3>
-            <p class="text-xs text-[#59413e]">
+            <p className="text-xs text-[#59413e]">
               Enter biographical data into the family ledger.
             </p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} class="space-y-4 text-xs">
-          <div class="grid grid-cols-2 gap-3">
+        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
+              <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
                 Surname *
               </label>
               <input
@@ -125,11 +125,11 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                 required
                 value={surname}
                 onChange={(e) => setSurname(e.target.value)}
-                class="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
+                className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
               />
             </div>
             <div>
-              <label class="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
+              <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
                 Given Name *
               </label>
               <input
@@ -138,63 +138,63 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                 value={givenName}
                 onChange={(e) => setGivenName(e.target.value)}
                 placeholder="e.g. Wei"
-                class="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
+                className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
               />
             </div>
           </div>
 
           <div>
-            <label class="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
+            <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
               Gender
             </label>
-            <div class="flex gap-4">
-              <label class="flex items-center gap-1.5 cursor-pointer">
+            <div className="flex gap-4">
+              <label className="flex items-center gap-1.5 cursor-pointer">
                 <input
                   type="radio"
                   name="gender"
                   value="male"
                   checked={gender === 'male'}
                   onChange={() => setGender('male')}
-                  class="accent-[#8e1616]"
+                  className="accent-[#8e1616]"
                 />
                 <span>Male</span>
               </label>
-              <label class="flex items-center gap-1.5 cursor-pointer">
+              <label className="flex items-center gap-1.5 cursor-pointer">
                 <input
                   type="radio"
                   name="gender"
                   value="female"
                   checked={gender === 'female'}
                   onChange={() => setGender('female')}
-                  class="accent-[#8e1616]"
+                  className="accent-[#8e1616]"
                 />
                 <span>Female</span>
               </label>
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label class="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
+              <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
                 Date of Birth
               </label>
               <input
                 type="date"
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
-                class="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
+                className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
               />
             </div>
             <div>
-              <label class="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
+              <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
                 Deceased Status
               </label>
-              <label class="flex items-center gap-2 mt-2 cursor-pointer">
+              <label className="flex items-center gap-2 mt-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={isDeceased}
                   onChange={(e) => setIsDeceased(e.target.checked)}
-                  class="accent-[#8e1616]"
+                  className="accent-[#8e1616]"
                 />
                 <span>Is Deceased</span>
               </label>
@@ -203,20 +203,20 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
 
           {isDeceased && (
             <div>
-              <label class="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
+              <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
                 Date of Death
               </label>
               <input
                 type="date"
                 value={deathDate}
                 onChange={(e) => setDeathDate(e.target.value)}
-                class="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
+                className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
               />
             </div>
           )}
 
           <div>
-            <label class="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
+            <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
               Photo URL (Optional)
             </label>
             <input
@@ -224,12 +224,12 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
               value={photoUrl}
               onChange={(e) => setPhotoUrl(e.target.value)}
               placeholder="https://images.unsplash.com/..."
-              class="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
+              className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
             />
           </div>
 
           <div>
-            <label class="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
+            <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
               Notes / Archival References
             </label>
             <textarea
@@ -237,21 +237,21 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Biographical notes..."
-              class="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
+              className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
             />
           </div>
 
-          <div class="flex justify-end gap-2 pt-3 border-t border-[#e8dfd5]">
+          <div className="flex justify-end gap-2 pt-3 border-t border-[#e8dfd5]">
             <button
               type="button"
               onClick={onClose}
-              class="px-4 py-2 border border-[#e8dfd5] text-[#59413e] font-semibold rounded hover:bg-[#eae8e4] transition-colors cursor-pointer"
+              className="px-4 py-2 border border-[#e8dfd5] text-[#59413e] font-semibold rounded hover:bg-[#eae8e4] transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              class="px-5 py-2 bg-[#8e1616] text-white font-bold uppercase tracking-wider rounded hover:opacity-90 transition-opacity cursor-pointer shadow"
+              className="px-5 py-2 bg-[#8e1616] text-white font-bold uppercase tracking-wider rounded hover:opacity-90 transition-opacity cursor-pointer shadow"
             >
               Save Record
             </button>

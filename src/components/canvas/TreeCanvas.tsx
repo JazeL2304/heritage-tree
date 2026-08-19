@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { FamilyMember, TreeConnection, CanvasTransform } from '@/types/family';
 import { TreeNodeCard } from './TreeNodeCard';
 import { TreeConnector } from './TreeConnector';
@@ -90,7 +90,7 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       onWheel={handleWheel}
-      class="ml-[320px] flex-1 h-[calc(100vh-4rem)] relative overflow-hidden parchment-grid select-none cursor-grab active:cursor-grabbing"
+      className="ml-[320px] flex-1 h-[calc(100vh-4rem)] relative overflow-hidden parchment-grid select-none cursor-grab active:cursor-grabbing"
     >
       {/* Floating Canvas Toolbar */}
       <CanvasToolbar
@@ -108,7 +108,7 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
           transformOrigin: '0 0',
           transition: isDragging ? 'none' : 'transform 0.1s ease-out',
         }}
-        class="absolute left-1/2 top-10 w-0 h-0"
+        className="absolute left-1/2 top-10 w-0 h-0"
       >
         {/* Render Orthogonal Lines */}
         <TreeConnector connections={connections} />

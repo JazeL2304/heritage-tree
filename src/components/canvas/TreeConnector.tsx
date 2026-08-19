@@ -9,7 +9,7 @@ interface TreeConnectorProps {
 
 export const TreeConnector: React.FC<TreeConnectorProps> = ({ connections }) => {
   return (
-    <svg class="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible">
+    <svg className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible">
       <defs>
         <marker
           id="arrow"

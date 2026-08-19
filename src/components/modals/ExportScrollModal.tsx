@@ -72,113 +72,113 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
   };
 
   return (
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div class="bg-[#fbf9f5] border-2 border-[#8e1616] rounded-lg shadow-2xl max-w-xl w-full p-6 relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-[#fbf9f5] border-2 border-[#8e1616] rounded-lg shadow-2xl max-w-xl w-full p-6 relative">
         <button
           onClick={onClose}
-          class="absolute top-4 right-4 text-[#59413e] hover:text-[#8e1616] transition-colors"
+          className="absolute top-4 right-4 text-[#59413e] hover:text-[#8e1616] transition-colors"
         >
-          <span class="material-symbols-outlined text-[20px]">close</span>
+          <span className="material-symbols-outlined text-[20px]">close</span>
         </button>
 
         {/* Modal Header */}
-        <div class="flex items-center gap-3 mb-4 border-b border-[#e8dfd5] pb-3">
-          <div class="w-10 h-10 rounded-full bg-[#8e1616] text-[#fed65b] flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-[24px]">history_edu</span>
+        <div className="flex items-center gap-3 mb-4 border-b border-[#e8dfd5] pb-3">
+          <div className="w-10 h-10 rounded-full bg-[#8e1616] text-[#fed65b] flex items-center justify-center shrink-0">
+            <span className="material-symbols-outlined text-[24px]">history_edu</span>
           </div>
           <div>
-            <h3 class="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
+            <h3 className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
               Export Family Scroll Modal
             </h3>
-            <p class="text-xs text-[#59413e]">
+            <p className="text-xs text-[#59413e]">
               Generate high-resolution physical or digital scroll document.
             </p>
           </div>
         </div>
 
         {/* Scroll Preview Box */}
-        <div class="bg-[#F8F4EE] border border-[#e8dfd5] rounded p-4 mb-4 relative overflow-hidden text-center shadow-inner">
-          <div class="text-[11px] uppercase tracking-widest text-[#8e1616] font-bold mb-1">
+        <div className="bg-[#F8F4EE] border border-[#e8dfd5] rounded p-4 mb-4 relative overflow-hidden text-center shadow-inner">
+          <div className="text-[11px] uppercase tracking-widest text-[#8e1616] font-bold mb-1">
             📜 Scroll Preview
           </div>
-          <div class="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
+          <div className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
             {scrollTitle || 'Family Lineage Scroll'}
           </div>
-          <div class="text-xs text-[#59413e] mt-1">
-            Total Documented Members: <span class="font-bold text-[#8e1616]">{members.length}</span>
+          <div className="text-xs text-[#59413e] mt-1">
+            Total Documented Members: <span className="font-bold text-[#8e1616]">{members.length}</span>
           </div>
 
-          <div class="mt-3 py-2 px-4 bg-white/70 rounded border border-[#e8dfd5] inline-flex items-center gap-2 text-xs font-semibold text-[#735c00]">
-            <span class="material-symbols-outlined text-[18px]">verified</span>
+          <div className="mt-3 py-2 px-4 bg-white/70 rounded border border-[#e8dfd5] inline-flex items-center gap-2 text-xs font-semibold text-[#735c00]">
+            <span className="material-symbols-outlined text-[18px]">verified</span>
             Stamped with Imperial Seal of Verification
           </div>
         </div>
 
         {/* Form Controls */}
-        <div class="space-y-4 text-xs">
+        <div className="space-y-4 text-xs">
           <div>
-            <label class="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
+            <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
               Scroll Document Title
             </label>
             <input
               type="text"
               value={scrollTitle}
               onChange={(e) => setScrollTitle(e.target.value)}
-              class="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
+              className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
             />
           </div>
 
           <div>
-            <label class="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
+            <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
               Export Format
             </label>
-            <div class="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => setFormat('pdf')}
-                class={`py-2 px-3 rounded border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
+                className={`py-2 px-3 rounded border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
                   format === 'pdf'
                     ? 'bg-[#8e1616] text-white border-[#8e1616]'
                     : 'bg-white text-[#59413e] border-[#e8dfd5] hover:bg-[#eae8e4]'
                 }`}
               >
-                <span class="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+                <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
                 PDF Scroll
               </button>
 
               <button
                 type="button"
                 onClick={() => setFormat('png')}
-                class={`py-2 px-3 rounded border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
+                className={`py-2 px-3 rounded border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
                   format === 'png'
                     ? 'bg-[#8e1616] text-white border-[#8e1616]'
                     : 'bg-white text-[#59413e] border-[#e8dfd5] hover:bg-[#eae8e4]'
                 }`}
               >
-                <span class="material-symbols-outlined text-[16px]">image</span>
+                <span className="material-symbols-outlined text-[16px]">image</span>
                 High-Res PNG
               </button>
 
               <button
                 type="button"
                 onClick={() => setFormat('json')}
-                class={`py-2 px-3 rounded border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
+                className={`py-2 px-3 rounded border text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors ${
                   format === 'json'
                     ? 'bg-[#8e1616] text-white border-[#8e1616]'
                     : 'bg-white text-[#59413e] border-[#e8dfd5] hover:bg-[#eae8e4]'
                 }`}
               >
-                <span class="material-symbols-outlined text-[16px]">code</span>
+                <span className="material-symbols-outlined text-[16px]">code</span>
                 JSON Data
               </button>
             </div>
           </div>
 
-          <div class="flex justify-end gap-2 pt-3 border-t border-[#e8dfd5]">
+          <div className="flex justify-end gap-2 pt-3 border-t border-[#e8dfd5]">
             <button
               type="button"
               onClick={onClose}
-              class="px-4 py-2 border border-[#e8dfd5] text-[#59413e] font-semibold rounded hover:bg-[#eae8e4] transition-colors cursor-pointer"
+              className="px-4 py-2 border border-[#e8dfd5] text-[#59413e] font-semibold rounded hover:bg-[#eae8e4] transition-colors cursor-pointer"
             >
               Cancel
             </button>
@@ -186,9 +186,9 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
               type="button"
               onClick={handleExport}
               disabled={isExporting}
-              class="px-5 py-2 bg-[#8e1616] text-white font-bold uppercase tracking-wider rounded hover:opacity-90 transition-opacity cursor-pointer shadow flex items-center gap-1.5"
+              className="px-5 py-2 bg-[#8e1616] text-white font-bold uppercase tracking-wider rounded hover:opacity-90 transition-opacity cursor-pointer shadow flex items-center gap-1.5"
             >
-              <span class="material-symbols-outlined text-[16px]">download</span>
+              <span className="material-symbols-outlined text-[16px]">download</span>
               {isExporting ? 'Exporting...' : 'Download Scroll'}
             </button>
           </div>

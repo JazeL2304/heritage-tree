@@ -155,7 +155,7 @@ export default function Home() {
   };
 
   return (
-    <div class="flex flex-col min-h-screen bg-[#fbf9f5] overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-[#fbf9f5] overflow-hidden">
       {/* Top Navbar */}
       <Navbar
         isAuthenticated={isAuthenticated}
@@ -164,7 +164,7 @@ export default function Home() {
       />
 
       {/* Main Workspace Layout */}
-      <div class="flex flex-1 pt-16 h-screen w-full relative">
+      <div className="flex flex-1 pt-16 h-screen w-full relative">
         {/* Left Property Drawer */}
         <SidebarDrawer
           activeMember={activeMember}
