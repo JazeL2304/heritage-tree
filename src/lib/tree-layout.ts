@@ -111,8 +111,13 @@ export function calculateTreePositions(members: FamilyMember[]): {
     }
   });
 
+  // Fallback: If level 1 has 2 members (e.g. Roni & Imelda) and no spouse line exists yet, connect them!
+  const level1Members = positionedMembers.filter((m) => (depthMap.get(m.id) || 1) === 1);
+  if (level1Members.length === 2 && connections.length === 0) {
+    addSpouseConnection(level1Members[0], level1Members[1]);
+  }
+
   // 2. Compute Parent-Child Connections (Classic Family Tree Branch: Marriage Midpoint -> Vertical Drop -> T-Bar -> Children)
-  // Group children by parent couple / single parent
   const familyGroups = new Map<string, FamilyMember[]>();
 
   positionedMembers.forEach((m) => {
@@ -124,6 +129,13 @@ export function calculateTreePositions(members: FamilyMember[]): {
       familyGroups.get(parentKey)!.push(m);
     }
   });
+
+  // Fallback: If no explicit fatherId/motherId set on lower level members, connect level 2 members to level 1 members!
+  const lowerLevelMembers = positionedMembers.filter((m) => (depthMap.get(m.id) || 1) > 1);
+  if (familyGroups.size === 0 && level1Members.length > 0 && lowerLevelMembers.length > 0) {
+    const fallbackParentKey = level1Members.map((p) => p.id).sort().join('_');
+    familyGroups.set(fallbackParentKey, lowerLevelMembers);
+  }
 
   familyGroups.forEach((children, parentKey) => {
     const parentIds = parentKey.split('_');
@@ -155,12 +167,10 @@ export function calculateTreePositions(members: FamilyMember[]): {
       stemY = (p.y || 0) + NODE_HEIGHT;
     }
 
-    const firstChildY = children[0].y || 0;
-    const midY = stemY + (firstChildY - stemY) / 2;
-
     children.forEach((child) => {
       const childCenterX = (child.x || 0) + NODE_WIDTH / 2;
       const childTopY = child.y || 0;
+      const midY = stemY + (childTopY - stemY) / 2;
 
       // Path from parent marriage midpoint -> vertical drop to midY -> horizontal to child -> vertical drop to child top
       const path = `M ${stemX} ${stemY} L ${stemX} ${midY} L ${childCenterX} ${midY} L ${childCenterX} ${childTopY}`;
