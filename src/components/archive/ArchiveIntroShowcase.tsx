@@ -163,21 +163,12 @@ export const ArchiveIntroShowcase: React.FC<ArchiveIntroShowcaseProps> = ({
       className="fixed inset-0 z-[100] bg-[#0c0807] flex items-center justify-center overflow-hidden select-none"
     >
       {/* Top Bar Controls */}
-      <div className="absolute top-6 left-6 right-6 z-30 flex justify-between items-center text-white">
-        <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20">
-          <span className="material-symbols-outlined text-[16px] text-[#fed65b]">
-            photo_library
-          </span>
-          <span className="text-xs font-bold uppercase tracking-widest text-[#fed65b]">
-            Showcase Arsip Bersejarah
-          </span>
-        </div>
-
+      <div className="absolute top-6 right-6 z-30 flex justify-end items-center text-white">
         <button
           onClick={handleFinish}
-          className="px-4 py-2 bg-[#8e1616] hover:bg-[#6b0f0f] text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors cursor-pointer shadow flex items-center gap-1.5"
+          className="px-3.5 py-1.5 bg-[#8e1616]/90 hover:bg-[#8e1616] text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors cursor-pointer shadow flex items-center gap-1 backdrop-blur-sm"
         >
-          <span>Lewati Intro</span>
+          <span>Tutup</span>
           <span className="material-symbols-outlined text-[16px]">close</span>
         </button>
       </div>
@@ -205,59 +196,45 @@ export const ArchiveIntroShowcase: React.FC<ArchiveIntroShowcaseProps> = ({
               <img
                 src={item.imageUrl}
                 alt={item.title}
-                className="w-full h-full object-cover filter brightness-[0.7] contrast-[1.05]"
+                className="w-full h-full object-cover filter brightness-[0.75] contrast-[1.05]"
               />
 
               {/* Dark Vignette Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/70 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40 pointer-events-none" />
 
-              {/* Photo Information Caption Overlay */}
+              {/* Minimal Photo Title Overlay */}
               <div
                 ref={(el) => {
                   titleRefs.current[index] = el;
                 }}
-                className="absolute bottom-16 left-8 right-8 md:left-16 md:right-16 z-20 max-w-2xl text-white"
+                className="absolute bottom-16 left-8 md:left-12 z-20 max-w-xl text-white"
               >
-                <div className="inline-block px-3 py-1 bg-[#8e1616] text-[#fed65b] text-[11px] font-bold uppercase tracking-widest rounded mb-3 shadow">
-                  {item.category === 'events'
-                    ? 'Foto Pertemuan & Acara'
-                    : item.category === 'childhood'
-                    ? 'Foto Masa Kecil'
-                    : item.category === 'photos'
-                    ? 'Foto Jadul & Kenangan'
-                    : 'Dokumen Arsip'}
-                </div>
-
                 <h2 className="text-2xl md:text-4xl font-bold font-['Poppins'] text-white tracking-tight drop-shadow-md">
                   {item.title}
                 </h2>
-
-                <p className="text-xs md:text-sm text-[#e8dfd5] mt-2 line-clamp-3 leading-relaxed max-w-xl">
-                  {item.description || 'Tidak ada keterangan tambahan.'}
-                </p>
-
-                <div className="mt-3 text-xs text-[#fed65b] font-semibold flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-[16px]">calendar_today</span>
-                  <span>Tanggal Dokumen: {item.date || 'Tahun N/A'}</span>
-                </div>
+                {item.date && (
+                  <p className="text-xs text-[#fed65b] font-semibold mt-1 opacity-90">
+                    {item.date}
+                  </p>
+                )}
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Bottom Scroll Prompt & Slide Counter */}
-      <div className="absolute bottom-6 left-6 right-6 z-30 flex justify-between items-center text-white/80 pointer-events-none">
-        <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-xs font-bold">
-          <span>Acara {currentIndex + 1}</span>
-          <span className="text-white/40">/</span>
-          <span>{items.length} Foto</span>
+      {/* Bottom Minimal Navigation Prompt & Counter */}
+      <div className="absolute bottom-6 left-8 right-8 z-30 flex justify-between items-center text-white/80 pointer-events-none text-xs font-semibold">
+        <div className="bg-black/50 backdrop-blur-md px-3 py-1 rounded-md border border-white/15 text-white/90">
+          <span>{currentIndex + 1}</span>
+          <span className="text-white/40 mx-1">/</span>
+          <span>{items.length}</span>
         </div>
 
-        <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/20 text-xs font-semibold text-[#fed65b]">
-          <span>Gulir Layar Ke Bawah Untuk Zoom-Out Ke Foto Berikutnya</span>
-          <span className="material-symbols-outlined text-[18px] animate-bounce">
-            keyboard_double_arrow_down
+        <div className="flex items-center gap-1.5 bg-black/50 backdrop-blur-md px-3 py-1 rounded-md border border-white/15 text-[#fed65b]">
+          <span>Gulir untuk lanjut</span>
+          <span className="material-symbols-outlined text-[16px] animate-bounce">
+            arrow_downward
           </span>
         </div>
       </div>
