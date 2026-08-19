@@ -1,6 +1,6 @@
-import type { Config } from 'tailwindcss';
+import type { Config } from 'tailwind-merge';
 
-const config: Config = {
+const config = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -35,8 +35,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        headline: ['Plus Jakarta Sans', 'sans-serif'],
-        body: ['Inter', 'sans-serif'],
+        headline: ['Poppins', 'sans-serif'],
+        body: ['Poppins', 'sans-serif'],
+        sans: ['Poppins', 'sans-serif'],
       },
     },
   },

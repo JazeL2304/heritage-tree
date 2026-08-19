@@ -11,8 +11,9 @@
   --color-border-silk: #e8dfd5;
   --color-connector-charcoal: #3d3731;
   --color-ink-black: #1f1d1d;
-  --font-headline: "Plus Jakarta Sans", sans-serif;
-  --font-body: "Inter", sans-serif;
+  --font-headline: "Poppins", sans-serif;
+  --font-body: "Poppins", sans-serif;
+  --font-sans: "Poppins", sans-serif;
 }
 
 @layer base {
@@ -25,6 +26,10 @@
     --border-silk: #e8dfd5;
     --connector-charcoal: #3d3731;
     --ink-black: #1f1d1d;
+  }
+
+  body {
+    font-family: "Poppins", sans-serif !important;
   }
 }
 

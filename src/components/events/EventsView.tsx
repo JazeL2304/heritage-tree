@@ -212,7 +212,7 @@ export const EventsView: React.FC = () => {
               <span className="material-symbols-outlined text-[18px]">calendar_month</span>
               <span>Calendar Dashboard</span>
             </div>
-            <h1 className="text-xl md:text-2xl font-bold text-[#8e1616] font-['Plus_Jakarta_Sans']">
+            <h1 className="text-xl md:text-2xl font-bold text-[#8e1616] font-['Poppins']">
               Kalender & Agenda Keluarga
             </h1>
             <p className="text-xs text-[#59413e]">
@@ -276,7 +276,7 @@ export const EventsView: React.FC = () => {
                   >
                     <span className="material-symbols-outlined text-[18px]">chevron_left</span>
                   </button>
-                  <span className="font-bold text-xs text-[#8e1616] font-['Plus_Jakarta_Sans'] uppercase tracking-wider">
+                  <span className="font-bold text-xs text-[#8e1616] font-['Poppins'] uppercase tracking-wider">
                     {monthNames[currentMonth]} {currentYear}
                   </span>
                   <button
@@ -323,7 +323,7 @@ export const EventsView: React.FC = () => {
 
               {/* Status Filter Checklist Panel (Icons instead of emojis) */}
               <div className="bg-[#fbf9f5] border border-[#e8dfd5] rounded-xl p-4 shadow-sm space-y-3">
-                <h3 className="font-bold text-xs text-[#8e1616] uppercase tracking-wider font-['Plus_Jakarta_Sans'] border-b border-[#e8dfd5] pb-2 flex items-center gap-1.5">
+                <h3 className="font-bold text-xs text-[#8e1616] uppercase tracking-wider font-['Poppins'] border-b border-[#e8dfd5] pb-2 flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-[16px]">filter_list</span>
                   <span>Kategori Agenda</span>
                 </h3>
@@ -396,7 +396,7 @@ export const EventsView: React.FC = () => {
                   >
                     <span className="material-symbols-outlined text-[20px]">chevron_left</span>
                   </button>
-                  <h2 className="text-lg font-bold text-[#8e1616] font-['Plus_Jakarta_Sans'] uppercase tracking-widest">
+                  <h2 className="text-lg font-bold text-[#8e1616] font-['Poppins'] uppercase tracking-widest">
                     {monthNames[currentMonth]} {currentYear}
                   </h2>
                   <button
@@ -510,7 +510,7 @@ export const EventsView: React.FC = () => {
         {viewMode === 'default' && (
           <div className="space-y-4">
             <div className="bg-[#fbf9f5] border border-[#e8dfd5] p-3 rounded-lg flex justify-between items-center text-xs">
-              <span className="font-bold text-[#8e1616] uppercase tracking-wider font-['Plus_Jakarta_Sans'] flex items-center gap-1.5">
+              <span className="font-bold text-[#8e1616] uppercase tracking-wider font-['Poppins'] flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[18px]">format_list_bulleted</span>
                 <span>Daftar List Agenda Timeline</span>
               </span>
@@ -529,7 +529,7 @@ export const EventsView: React.FC = () => {
                     <div className="text-[11px] font-bold text-[#8e1616] uppercase tracking-wider">
                       {shortMonthNames[new Date(evt.date).getMonth()]}
                     </div>
-                    <div className="text-2xl font-bold text-[#8e1616] font-['Plus_Jakarta_Sans']">
+                    <div className="text-2xl font-bold text-[#8e1616] font-['Poppins']">
                       {new Date(evt.date).getDate()}
                     </div>
                     <div className="text-[10px] text-[#59413e] font-semibold mt-0.5">
@@ -539,7 +539,7 @@ export const EventsView: React.FC = () => {
 
                   <div className="flex-1 space-y-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
+                      <h3 className="font-bold text-base text-[#8e1616] font-['Poppins']">
                         {evt.title}
                       </h3>
                       <span className={`px-2.5 py-0.5 rounded text-[10px] uppercase font-bold flex items-center gap-1 ${badge.bg}`}>
@@ -576,7 +576,7 @@ export const EventsView: React.FC = () => {
         {/* HEATMAP VIEW MODE: DENSITY GRID */}
         {viewMode === 'heatmap' && (
           <div className="bg-[#fbf9f5] border-2 border-[#8e1616] rounded-xl p-6 shadow-lg space-y-4 text-center">
-            <h3 className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans'] uppercase tracking-wider flex items-center justify-center gap-2">
+            <h3 className="font-bold text-base text-[#8e1616] font-['Poppins'] uppercase tracking-wider flex items-center justify-center gap-2">
               <span className="material-symbols-outlined text-[#8e1616]">local_fire_department</span>
               <span>Heatmap Kepadatan Agenda Keluarga {currentYear}</span>
             </h3>
@@ -601,7 +601,7 @@ export const EventsView: React.FC = () => {
                     }`}
                   >
                     <div className="font-bold text-xs uppercase">{mName}</div>
-                    <div className="text-xl font-bold font-['Plus_Jakarta_Sans'] mt-1">{count} Acara</div>
+                    <div className="text-xl font-bold font-['Poppins'] mt-1">{count} Acara</div>
                   </div>
                 );
               })}
@@ -626,7 +626,7 @@ export const EventsView: React.FC = () => {
                 <span className="material-symbols-outlined text-[24px]">event</span>
               </div>
               <div>
-                <h3 className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
+                <h3 className="font-bold text-base text-[#8e1616] font-['Poppins']">
                   Rincian Agenda Keluarga
                 </h3>
                 <p className="text-xs text-[#59413e]">{selectedEventDetail.date}</p>
@@ -634,7 +634,7 @@ export const EventsView: React.FC = () => {
             </div>
 
             <div className="space-y-3 text-xs">
-              <h2 className="text-lg font-bold text-[#8e1616] font-['Plus_Jakarta_Sans']">
+              <h2 className="text-lg font-bold text-[#8e1616] font-['Poppins']">
                 {selectedEventDetail.title}
               </h2>
 
@@ -687,7 +687,7 @@ export const EventsView: React.FC = () => {
                 <span className="material-symbols-outlined text-[24px]">edit_calendar</span>
               </div>
               <div>
-                <h3 className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
+                <h3 className="font-bold text-base text-[#8e1616] font-['Poppins']">
                   Tambah Agenda / Peringatan Baru
                 </h3>
                 <p className="text-xs text-[#59413e]">

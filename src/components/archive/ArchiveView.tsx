@@ -104,7 +104,7 @@ export const ArchiveView: React.FC = () => {
               <span className="material-symbols-outlined text-[18px]">photo_library</span>
               <span>Arsip & Galeri Dokumen Sejarah</span>
             </div>
-            <h1 className="text-2xl font-bold text-[#8e1616] font-['Plus_Jakarta_Sans']">
+            <h1 className="text-2xl font-bold text-[#8e1616] font-['Poppins']">
               Dokumentasi Bersejarah Keluarga
             </h1>
             <p className="text-xs text-[#59413e] mt-1">
@@ -184,7 +184,7 @@ export const ArchiveView: React.FC = () => {
               {/* Card Body */}
               <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
                 <div>
-                  <h3 className="font-bold text-sm text-[#8e1616] font-['Plus_Jakarta_Sans'] line-clamp-1">
+                  <h3 className="font-bold text-sm text-[#8e1616] font-['Poppins'] line-clamp-1">
                     {item.title}
                   </h3>
                   <div className="text-[11px] text-[#735c00] font-semibold mt-0.5 flex items-center gap-1">
@@ -230,7 +230,7 @@ export const ArchiveView: React.FC = () => {
               <span className="material-symbols-outlined text-[20px]">close</span>
             </button>
 
-            <h2 className="text-lg font-bold text-[#8e1616] font-['Plus_Jakarta_Sans'] mb-1">
+            <h2 className="text-lg font-bold text-[#8e1616] font-['Poppins'] mb-1">
               {selectedItem.title}
             </h2>
             <div className="text-xs text-[#735c00] font-semibold mb-4 flex items-center gap-2">
@@ -279,7 +279,7 @@ export const ArchiveView: React.FC = () => {
                 <span className="material-symbols-outlined text-[24px]">add_photo_alternate</span>
               </div>
               <div>
-                <h3 className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
+                <h3 className="font-bold text-base text-[#8e1616] font-['Poppins']">
                   Tambah Dokumen / Foto Arsip
                 </h3>
                 <p className="text-xs text-[#59413e]">

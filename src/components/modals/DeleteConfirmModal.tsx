@@ -33,7 +33,7 @@ export const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
             <span className="material-symbols-outlined text-[28px]">warning</span>
           </div>
           <div>
-            <h3 className="font-bold text-base text-[#ba1a1a] font-['Plus_Jakarta_Sans']">
+            <h3 className="font-bold text-base text-[#ba1a1a] font-['Poppins']">
               Delete Member Record
             </h3>
             <p className="text-xs text-[#59413e]">

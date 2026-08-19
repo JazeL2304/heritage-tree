@@ -81,7 +81,7 @@ export const TreeNodeCard: React.FC<TreeNodeCardProps> = ({
       </div>
 
       {/* Given Name */}
-      <div className="text-sm text-white font-bold text-center leading-tight mb-1 font-['Plus_Jakarta_Sans']">
+      <div className="text-sm text-white font-bold text-center leading-tight mb-1 font-['Poppins']">
         {member.givenName}
       </div>
 

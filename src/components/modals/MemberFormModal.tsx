@@ -121,7 +121,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
             <span className="material-symbols-outlined text-[24px]">edit_note</span>
           </div>
           <div>
-            <h3 className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
+            <h3 className="font-bold text-base text-[#8e1616] font-['Poppins']">
               {getModalTitle()}
             </h3>
             <p className="text-xs text-[#59413e]">

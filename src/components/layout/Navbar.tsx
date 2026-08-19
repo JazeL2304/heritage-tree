@@ -27,7 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <span className="material-symbols-outlined text-[#fed65b] text-[28px]">
           account_tree
         </span>
-        <span className="font-bold text-lg text-[#fed65b] tracking-widest uppercase font-['Plus_Jakarta_Sans']">
+        <span className="font-bold text-lg text-[#fed65b] tracking-widest uppercase font-['Poppins']">
           HeritageTree
         </span>
       </div>

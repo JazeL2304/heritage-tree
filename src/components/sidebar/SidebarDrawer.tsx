@@ -40,7 +40,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
           )}
         </div>
         <div>
-          <h2 className="font-bold text-xs text-[#8e1616] leading-tight font-['Plus_Jakarta_Sans']">
+          <h2 className="font-bold text-xs text-[#8e1616] leading-tight font-['Poppins']">
             Family Ledger
           </h2>
           <p className="text-[10px] text-[#59413e] italic">Ming Dynasty Branch</p>

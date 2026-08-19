@@ -87,7 +87,7 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
             <span className="material-symbols-outlined text-[24px]">history_edu</span>
           </div>
           <div>
-            <h3 className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
+            <h3 className="font-bold text-base text-[#8e1616] font-['Poppins']">
               Export Family Scroll Modal
             </h3>
             <p className="text-xs text-[#59413e]">
@@ -102,7 +102,7 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
             <span className="material-symbols-outlined text-[16px]">description</span>
             <span>Scroll Preview</span>
           </div>
-          <div className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
+          <div className="font-bold text-base text-[#8e1616] font-['Poppins']">
             {scrollTitle || 'Family Lineage Scroll'}
           </div>
           <div className="text-xs text-[#59413e] mt-1">

@@ -61,7 +61,7 @@ export const PasscodeModal: React.FC<PasscodeModalProps> = ({
         {/* Header Section */}
         <div className="flex flex-col items-center text-center mb-6 w-full -mt-6">
           {/* Title & Subtitle Badge */}
-          <h1 className="font-bold text-xl text-[#8e1616] uppercase tracking-[0.08em] mb-1 font-['Plus_Jakarta_Sans']">
+          <h1 className="font-bold text-xl text-[#8e1616] uppercase tracking-[0.08em] mb-1 font-['Poppins']">
             HERITAGESCROLL
           </h1>
           <div className="text-[11px] font-bold text-[#D4AF37] uppercase tracking-wider mb-2 border-b border-[#D4AF37]/30 pb-1 px-4 inline-block">
