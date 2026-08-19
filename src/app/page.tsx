@@ -54,8 +54,20 @@ export default function Home() {
       console.warn('Failed to load local cache:', err);
     }
 
-    // 2. Background Sync with Supabase Cloud
+    // 2. Background Sync with Supabase Cloud (Purge dummy data & sync live members)
     async function syncCloud() {
+      const cached = localStorage.getItem('heritage_tree_family_members');
+      let liveMembers: FamilyMember[] = [];
+      if (cached) {
+        try {
+          liveMembers = JSON.parse(cached);
+        } catch {}
+      }
+
+      if (liveMembers.length > 0) {
+        await syncMembers(liveMembers);
+      }
+
       const loaded = await loadFamilyMembers();
       if (loaded && loaded.length > 0) {
         setMembers(loaded);

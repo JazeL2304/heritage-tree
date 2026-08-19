@@ -77,10 +77,17 @@ export async function loadFamilyMembers(): Promise<FamilyMember[]> {
         .order('created_at', { ascending: true });
 
       if (!error && data) {
-        const loaded = data.map(mapRowToMember);
-        // Sync to local storage as cache
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(loaded));
-        return loaded;
+        // Filter out initial dummy IDs
+        const dummyIds = ['m_patriarch', 'm_matriarch', 'm_spouse', 'm_subject'];
+        const loaded = data
+          .filter((row: any) => !dummyIds.includes(row.id))
+          .map(mapRowToMember);
+
+        if (loaded.length > 0) {
+          // Sync to local storage as cache
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(loaded));
+          return loaded;
+        }
       } else if (error) {
         console.error('Supabase fetch error:', error);
       }
@@ -93,7 +100,9 @@ export async function loadFamilyMembers(): Promise<FamilyMember[]> {
   const localData = localStorage.getItem(STORAGE_KEY);
   if (localData) {
     try {
-      return JSON.parse(localData);
+      const dummyIds = ['m_patriarch', 'm_matriarch', 'm_spouse', 'm_subject'];
+      const parsed: FamilyMember[] = JSON.parse(localData);
+      return parsed.filter((m) => !dummyIds.includes(m.id));
     } catch {
       return [];
     }
@@ -109,10 +118,17 @@ export async function syncMembers(members: FamilyMember[]): Promise<void> {
   // Always update localStorage immediately
   localStorage.setItem(STORAGE_KEY, JSON.stringify(members));
 
-  if (isSupabaseConfigured && members.length > 0) {
+  if (isSupabaseConfigured) {
     try {
-      const rows = members.map(mapMemberToRow);
-      await supabase.from('family_members').upsert(rows, { onConflict: 'id' });
+      // 1. Purge legacy dummy IDs from Supabase table
+      const dummyIds = ['m_patriarch', 'm_matriarch', 'm_spouse', 'm_subject'];
+      await supabase.from('family_members').delete().in('id', dummyIds);
+
+      // 2. Upsert current live members
+      if (members.length > 0) {
+        const rows = members.map(mapMemberToRow);
+        await supabase.from('family_members').upsert(rows, { onConflict: 'id' });
+      }
     } catch (err) {
       console.error('Failed to sync members to Supabase:', err);
     }
