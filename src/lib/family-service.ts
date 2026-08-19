@@ -4,13 +4,31 @@ import { FamilyMember } from '@/types/family';
 const STORAGE_KEY = 'heritage_tree_family_members';
 
 /**
+ * Format partial date string (e.g. '1977' or '1977-08') into valid Postgres DATE string ('YYYY-MM-DD')
+ */
+export function formatDateForPostgres(dateStr?: string): string | null {
+  if (!dateStr || !dateStr.trim()) return null;
+  const parts = dateStr.trim().split('-');
+  if (parts.length === 1 && parts[0].length === 4) {
+    return `${parts[0]}-01-01`;
+  }
+  if (parts.length === 2 && parts[0].length === 4 && parts[1].length === 2) {
+    return `${parts[0]}-${parts[1]}-01`;
+  }
+  if (parts.length === 3 && parts[0].length === 4) {
+    return dateStr;
+  }
+  return null;
+}
+
+/**
  * Convert DB snake_case row to FamilyMember camelCase object
  */
 export function mapRowToMember(row: any): FamilyMember {
   return {
     id: row.id,
-    surname: row.surname || 'Li',
-    givenName: row.given_name || '',
+    surname: row.surname || '',
+    givenName: row.given_name || 'Nama Anggota',
     gender: row.gender || 'male',
     birthDate: row.birth_date || '',
     deathDate: row.death_date || '',
@@ -31,11 +49,11 @@ export function mapRowToMember(row: any): FamilyMember {
 export function mapMemberToRow(member: FamilyMember) {
   return {
     id: member.id,
-    surname: member.surname,
-    given_name: member.givenName,
-    gender: member.gender,
-    birth_date: member.birthDate || null,
-    death_date: member.deathDate || null,
+    surname: member.surname || '',
+    given_name: member.givenName || 'Nama Anggota',
+    gender: member.gender || 'male',
+    birth_date: formatDateForPostgres(member.birthDate),
+    death_date: formatDateForPostgres(member.deathDate),
     is_deceased: member.isDeceased ?? false,
     photo_url: member.photoUrl || null,
     notes: member.notes || null,
@@ -58,11 +76,13 @@ export async function loadFamilyMembers(): Promise<FamilyMember[]> {
         .select('*')
         .order('created_at', { ascending: true });
 
-      if (!error && data && data.length > 0) {
+      if (!error && data) {
         const loaded = data.map(mapRowToMember);
         // Sync to local storage as cache
         localStorage.setItem(STORAGE_KEY, JSON.stringify(loaded));
         return loaded;
+      } else if (error) {
+        console.error('Supabase fetch error:', error);
       }
     } catch (err) {
       console.warn('Supabase fetch failed, falling back to localStorage:', err);

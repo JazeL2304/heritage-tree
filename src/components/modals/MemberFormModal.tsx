@@ -378,11 +378,11 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                 <select
                   value={fatherId}
                   onChange={(e) => setFatherId(e.target.value)}
-                  className="w-full px-2 py-1.5 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#1f1d1d] focus:outline-none focus:border-[#8e1616] cursor-pointer"
+                  className="w-full px-2 py-1.5 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#1f1d1d] focus:outline-none focus:border-[#8e1616] cursor-pointer font-medium"
                 >
                   <option value="">-- Tidak Ada / Belum Set --</option>
                   {allMembers
-                    .filter((m) => m.id !== editingMember?.id && m.gender !== 'female')
+                    .filter((m) => m.id !== editingMember?.id)
                     .map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.givenName} {m.surname}
@@ -399,11 +399,11 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                 <select
                   value={motherId}
                   onChange={(e) => setMotherId(e.target.value)}
-                  className="w-full px-2 py-1.5 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#1f1d1d] focus:outline-none focus:border-[#8e1616] cursor-pointer"
+                  className="w-full px-2 py-1.5 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#1f1d1d] focus:outline-none focus:border-[#8e1616] cursor-pointer font-medium"
                 >
                   <option value="">-- Tidak Ada / Belum Set --</option>
                   {allMembers
-                    .filter((m) => m.id !== editingMember?.id && m.gender !== 'male')
+                    .filter((m) => m.id !== editingMember?.id)
                     .map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.givenName} {m.surname}
@@ -420,7 +420,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                 <select
                   value={spouseId}
                   onChange={(e) => setSpouseId(e.target.value)}
-                  className="w-full px-2 py-1.5 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#1f1d1d] focus:outline-none focus:border-[#8e1616] cursor-pointer"
+                  className="w-full px-2 py-1.5 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#1f1d1d] focus:outline-none focus:border-[#8e1616] cursor-pointer font-medium"
                 >
                   <option value="">-- Tidak Ada / Belum Set --</option>
                   {allMembers
