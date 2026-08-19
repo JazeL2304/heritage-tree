@@ -33,10 +33,28 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
         colors: ['#8e1616', '#fed65b', '#003921'],
       });
 
-      // Group members by generation for the PDF report
+      // Calculate exact dynamic generation depth for each member
+      const getMemberGen = (m: FamilyMember): number => {
+        if (m.fatherId || m.motherId) {
+          let parentGen = 2;
+          const father = members.find((p) => p.id === m.fatherId);
+          const mother = members.find((p) => p.id === m.motherId);
+          if (father) parentGen = getMemberGen(father);
+          else if (mother) parentGen = getMemberGen(mother);
+          return parentGen + 1;
+        }
+        if (m.spouseId) {
+          const spouse = members.find((s) => s.id === m.spouseId);
+          if (spouse && (spouse.fatherId || spouse.motherId)) {
+            return getMemberGen(spouse);
+          }
+        }
+        return m.generation && m.generation > 1 ? m.generation : 2;
+      };
+
       const genMap: { [gen: number]: FamilyMember[] } = { 1: [], 2: [], 3: [] };
       members.forEach((m) => {
-        const gen = m.generation || (m.fatherId || m.motherId ? 3 : 2);
+        const gen = getMemberGen(m);
         if (!genMap[gen]) genMap[gen] = [];
         genMap[gen].push(m);
       });
@@ -53,27 +71,112 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
         <head>
           <title>${scrollTitle}</title>
           <style>
-            @page { size: A4 portrait; margin: 15mm; }
+            @page { size: A4 portrait; margin: 12mm; }
             body {
               font-family: 'Georgia', 'Times New Roman', serif;
               background-color: #fbf9f5;
               color: #1f1d1d;
-              padding: 24px;
+              padding: 20px;
               border: 5px double #8e1616;
               box-sizing: border-box;
             }
-            .header { text-align: center; border-bottom: 2px solid #8e1616; padding-bottom: 14px; margin-bottom: 20px; }
-            .header h1 { color: #8e1616; font-size: 22px; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
-            .header p { color: #59413e; font-size: 12px; margin-top: 6px; font-style: italic; }
-            .seal { display: inline-block; background-color: #8e1616; color: #fed65b; padding: 4px 14px; font-size: 10px; font-weight: bold; border-radius: 4px; text-transform: uppercase; margin-top: 10px; letter-spacing: 1px; }
-            .gen-section { margin-bottom: 18px; }
-            .gen-title { font-size: 13px; font-weight: bold; color: #8e1616; border-bottom: 1px solid #e8dfd5; padding-bottom: 4px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-            .member-grid { display: grid; grid-template-cols: repeat(2, 1fr); gap: 10px; }
-            .member-card { border: 1px solid #e8dfd5; background: #ffffff; padding: 10px 12px; border-radius: 6px; }
-            .member-name { font-weight: bold; color: #8e1616; font-size: 13px; }
-            .member-details { font-size: 11px; color: #59413e; margin-top: 3px; }
-            .empty-text { font-size: 11px; color: #8e1616; font-style: italic; padding: 6px 0; }
-            .footer { margin-top: 30px; border-top: 1px dashed #8e1616; pt: 12px; text-align: center; font-size: 10px; color: #59413e; }
+            .header { text-align: center; border-bottom: 2px solid #8e1616; padding-bottom: 12px; margin-bottom: 16px; }
+            .header h1 { color: #8e1616; font-size: 20px; margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+            .header p { color: #59413e; font-size: 11px; margin-top: 4px; font-style: italic; }
+            .seal { display: inline-block; background-color: #8e1616; color: #fed65b; padding: 3px 12px; font-size: 9px; font-weight: bold; border-radius: 4px; text-transform: uppercase; margin-top: 6px; letter-spacing: 1px; }
+            
+            /* Visual Tree Diagram Styling */
+            .visual-tree-container {
+              background: #ffffff;
+              border: 2px solid #8e1616;
+              border-radius: 8px;
+              padding: 16px;
+              margin-bottom: 20px;
+              text-align: center;
+            }
+            .visual-title {
+              font-size: 12px;
+              font-weight: bold;
+              color: #8e1616;
+              text-transform: uppercase;
+              letter-spacing: 1.5px;
+              margin-bottom: 12px;
+              border-bottom: 1px solid #e8dfd5;
+              padding-bottom: 4px;
+            }
+            .tree-level {
+              margin-bottom: 12px;
+            }
+            .level-badge {
+              font-size: 10px;
+              font-weight: bold;
+              color: #8e1616;
+              text-transform: uppercase;
+              margin-bottom: 8px;
+              display: block;
+            }
+            .nodes-row {
+              display: flex;
+              justify-content: center;
+              gap: 16px;
+              align-items: center;
+            }
+            .node-card {
+              border: 2px solid #8e1616;
+              background: #fbf9f5;
+              border-radius: 6px;
+              padding: 8px 12px;
+              min-width: 110px;
+              text-align: center;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            .node-avatar {
+              width: 44px;
+              height: 44px;
+              border-radius: 50%;
+              border: 2px solid #fed65b;
+              object-fit: cover;
+              margin: 0 auto 4px auto;
+              display: block;
+            }
+            .node-name {
+              font-weight: bold;
+              font-size: 11px;
+              color: #8e1616;
+            }
+            .node-tag {
+              font-size: 9px;
+              color: #59413e;
+              margin-top: 1px;
+            }
+
+            /* Tree Branch Lines */
+            .connector-lines {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              margin: 4px 0;
+            }
+            .line-vert {
+              width: 2px;
+              height: 16px;
+              background-color: #8e1616;
+            }
+            .line-horiz {
+              width: 60%;
+              height: 2px;
+              background-color: #8e1616;
+            }
+
+            /* Member List Directory */
+            .gen-section { margin-bottom: 14px; }
+            .gen-title { font-size: 12px; font-weight: bold; color: #8e1616; border-bottom: 1px solid #e8dfd5; padding-bottom: 3px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+            .member-grid { display: grid; grid-template-cols: repeat(2, 1fr); gap: 8px; }
+            .member-card { border: 1px solid #e8dfd5; background: #ffffff; padding: 8px 10px; border-radius: 6px; }
+            .member-name { font-weight: bold; color: #8e1616; font-size: 11px; }
+            .member-details { font-size: 10px; color: #59413e; margin-top: 2px; }
+            .empty-text { font-size: 10px; color: #8e1616; font-style: italic; padding: 4px 0; }
+            .footer { margin-top: 20px; border-top: 1px dashed #8e1616; pt: 10px; text-align: center; font-size: 9px; color: #59413e; }
           </style>
         </head>
         <body>
@@ -83,6 +186,63 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
             <div class="seal">Tercatat di Supabase Cloud Ledger — Silsilah Terverifikasi</div>
           </div>
 
+          <!-- VISUAL FAMILY TREE DIAGRAM -->
+          <div class="visual-tree-container">
+            <div class="visual-title">Bagan Visual Diagram Pohon Silsilah Trah</div>
+
+            <!-- Gen 2 Level (Roni & Imelda) -->
+            <div class="tree-level">
+              <span class="level-badge">Generasi 2 (Kepala Cabang Trah)</span>
+              <div class="nodes-row">
+                ${
+                  genMap[2] && genMap[2].length > 0
+                    ? genMap[2]
+                        .map(
+                          (m) => `
+                        <div class="node-card">
+                          <img src="${m.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'}" class="node-avatar" />
+                          <div class="node-name">${m.givenName} ${m.surname}</div>
+                          <div class="node-tag">${m.gender === 'female' ? 'Wanita (Pasangan)' : 'Pria (Kepala)'}</div>
+                        </div>
+                      `
+                        )
+                        .join('')
+                    : '<div class="empty-text">Belum ada data Gen 2.</div>'
+                }
+              </div>
+            </div>
+
+            <!-- Branch Connecting Lines -->
+            <div class="connector-lines">
+              <div class="line-vert"></div>
+              <div class="line-horiz"></div>
+              <div class="line-vert"></div>
+            </div>
+
+            <!-- Gen 3 Level (Jastin & Jason) -->
+            <div class="tree-level">
+              <span class="level-badge">Generasi 3 (Penerus Trah Keluarga)</span>
+              <div class="nodes-row">
+                ${
+                  genMap[3] && genMap[3].length > 0
+                    ? genMap[3]
+                        .map(
+                          (m) => `
+                        <div class="node-card">
+                          <img src="${m.photoUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100'}" class="node-avatar" />
+                          <div class="node-name">${m.givenName} ${m.surname}</div>
+                          <div class="node-tag">Penerus Trah</div>
+                        </div>
+                      `
+                        )
+                        .join('')
+                    : '<div class="empty-text">Belum ada data Gen 3.</div>'
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- DETAILED MEMBER DIRECTORY -->
           <div class="gen-section">
             <div class="gen-title">Generasi 1 (Tetua Trah)</div>
             ${
@@ -152,7 +312,9 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
 
           <script>
             window.onload = function() {
-              window.print();
+              setTimeout(function() {
+                window.print();
+              }, 400);
             };
           </script>
         </body>
@@ -194,7 +356,7 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
               Ekspor Dokumen PDF Silsilah
             </h3>
             <p className="text-xs text-[#59413e]">
-              Cetak atau simpan bagan trah keluarga sebagai dokumen PDF resmi.
+              Cetak bagan diagram pohon silsilah resmi berformat PDF.
             </p>
           </div>
         </div>
@@ -203,7 +365,7 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
         <div className="bg-[#F8F4EE] border border-[#e8dfd5] rounded-lg p-4 mb-4 text-center shadow-inner">
           <div className="text-[10px] uppercase tracking-widest text-[#8e1616] font-bold mb-1 flex items-center justify-center gap-1">
             <span className="material-symbols-outlined text-[15px]">description</span>
-            <span>Pratinjau Dokumen</span>
+            <span>Pratinjau Dokumen PDF</span>
           </div>
           <div className="font-bold text-base text-[#8e1616] font-['Poppins']">
             {scrollTitle || 'Dokumen Silsilah Trah Keluarga'}
@@ -213,8 +375,8 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
           </div>
 
           <div className="mt-3 py-1.5 px-3 bg-white rounded border border-[#e8dfd5] inline-flex items-center gap-1.5 text-xs font-semibold text-[#735c00]">
-            <span className="material-symbols-outlined text-[16px] text-[#e5a900]">verified</span>
-            <span>Stempel Silsilah Terverifikasi</span>
+            <span className="material-symbols-outlined text-[16px] text-[#e5a900]">account_tree</span>
+            <span>Termasuk Diagram Visual Pohon Silsilah</span>
           </div>
         </div>
 
@@ -232,7 +394,7 @@ export const ExportScrollModal: React.FC<ExportScrollModalProps> = ({
             />
           </div>
 
-          {/* Clean Action Buttons */}
+          {/* Action Buttons */}
           <div className="flex justify-end gap-2 pt-3 border-t border-[#e8dfd5]">
             <button
               type="button"
