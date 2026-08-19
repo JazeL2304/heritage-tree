@@ -35,6 +35,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
   const [activeTab, setActiveTab] = useState<'profile' | 'records' | 'ancestors' | 'media'>('profile');
   const [archives, setArchives] = useState<ArchivalItem[]>([]);
   const [selectedRecord, setSelectedRecord] = useState<ArchivalItem | null>(null);
+  const [isOpenMobile, setIsOpenMobile] = useState(false);
 
   useEffect(() => {
     async function fetchArchives() {
@@ -72,7 +73,31 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
   });
 
   return (
-    <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-[300px] bg-[#fbf9f5] border-r border-[#e8dfd5] shadow-sm flex flex-col p-3 z-40 overflow-hidden">
+    <>
+      {/* Mobile Sidebar Floating Toggle Trigger */}
+      <button
+        onClick={() => setIsOpenMobile(!isOpenMobile)}
+        className="fixed top-18 left-3 z-45 md:hidden bg-[#8e1616] text-[#fed65b] p-2 rounded-full shadow-lg border border-[#fed65b]/40 flex items-center justify-center cursor-pointer"
+        title="Toggle Menu Silsilah"
+      >
+        <span className="material-symbols-outlined text-[20px]">
+          {isOpenMobile ? 'close' : 'menu'}
+        </span>
+      </button>
+
+      {/* Backdrop overlay on mobile when sidebar is open */}
+      {isOpenMobile && (
+        <div
+          onClick={() => setIsOpenMobile(false)}
+          className="fixed inset-0 bg-black/40 backdrop-blur-xs z-35 md:hidden"
+        />
+      )}
+
+      <aside
+        className={`fixed left-0 top-16 h-[calc(100vh-4rem)] w-[285px] md:w-[300px] bg-[#fbf9f5] border-r border-[#e8dfd5] shadow-md flex flex-col p-3 z-40 overflow-hidden transition-transform duration-300 ${
+          isOpenMobile ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        }`}
+      >
       {/* Branch Title & Ledger Header */}
       <div className="flex items-center gap-2.5 bg-[#efeeea] p-2 rounded border border-[#e8dfd5]">
         <div className="w-9 h-9 rounded-full border-2 border-[#fed65b] overflow-hidden bg-[#8e1616] flex items-center justify-center text-white shrink-0">
@@ -355,5 +380,6 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
         </div>
       </div>
     </aside>
+    </>
   );
 };

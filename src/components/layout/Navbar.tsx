@@ -32,7 +32,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </span>
       </div>
 
-      {/* Navigation Links */}
+      {/* Navigation Links (Desktop) */}
       <div className="hidden md:flex gap-8 h-full items-center">
         <button
           onClick={() => onSelectTab('lineage')}
@@ -65,6 +65,39 @@ export const Navbar: React.FC<NavbarProps> = ({
           }`}
         >
           Events & Calendar
+        </button>
+      </div>
+
+      {/* Navigation Links (Mobile Icons) */}
+      <div className="flex md:hidden items-center gap-1">
+        <button
+          onClick={() => onSelectTab('lineage')}
+          className={`p-1.5 rounded transition-colors ${
+            activeTab === 'lineage' ? 'text-[#fed65b] bg-black/20' : 'text-white/80'
+          }`}
+          title="Lineage Tree"
+        >
+          <span className="material-symbols-outlined text-[20px]">account_tree</span>
+        </button>
+
+        <button
+          onClick={() => onSelectTab('archive')}
+          className={`p-1.5 rounded transition-colors ${
+            activeTab === 'archive' ? 'text-[#fed65b] bg-black/20' : 'text-white/80'
+          }`}
+          title="Archive Gallery"
+        >
+          <span className="material-symbols-outlined text-[20px]">photo_library</span>
+        </button>
+
+        <button
+          onClick={() => onSelectTab('events')}
+          className={`p-1.5 rounded transition-colors ${
+            activeTab === 'events' ? 'text-[#fed65b] bg-black/20' : 'text-white/80'
+          }`}
+          title="Events & Calendar"
+        >
+          <span className="material-symbols-outlined text-[20px]">calendar_month</span>
         </button>
       </div>
 

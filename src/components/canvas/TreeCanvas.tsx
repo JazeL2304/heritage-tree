@@ -167,7 +167,7 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
       onWheel={handleWheel}
-      className="ml-[320px] flex-1 h-[calc(100vh-4rem)] relative overflow-hidden parchment-grid select-none cursor-grab active:cursor-grabbing"
+      className="md:ml-[300px] ml-0 flex-1 h-[calc(100vh-4rem)] relative overflow-hidden parchment-grid select-none cursor-grab active:cursor-grabbing"
     >
       {/* Floating Canvas Toolbar */}
       <CanvasToolbar
