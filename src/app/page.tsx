@@ -16,9 +16,11 @@ export default function Home() {
   const [members, setMembers] = useState<FamilyMember[]>(INITIAL_MEMBERS);
   const [activeMember, setActiveMember] = useState<FamilyMember | null>(null);
 
-  // Authentication & Modals State
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
-  const [isPasscodeModalOpen, setIsPasscodeModalOpen] = useState<boolean>(false);
+  // Authentication State: defaults to false so Ancestral Verification Gate appears first!
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isPasscodeModalOpen, setIsPasscodeModalOpen] = useState<boolean>(true);
+
+  // Other Modals State
   const [isMemberFormOpen, setIsMemberFormOpen] = useState<boolean>(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
@@ -155,16 +157,19 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#fbf9f5] overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-[#fbf9f5] overflow-hidden relative">
       {/* Top Navbar */}
       <Navbar
         isAuthenticated={isAuthenticated}
         onOpenPasscodeModal={() => setIsPasscodeModalOpen(true)}
-        onSignOut={() => setIsAuthenticated(false)}
+        onSignOut={() => {
+          setIsAuthenticated(false);
+          setIsPasscodeModalOpen(true);
+        }}
       />
 
       {/* Main Workspace Layout */}
-      <div className="flex flex-1 pt-16 h-screen w-full relative">
+      <div className={`flex flex-1 pt-16 h-screen w-full relative transition-all duration-300 ${!isAuthenticated ? 'filter blur-sm pointer-events-none opacity-50' : ''}`}>
         {/* Left Property Drawer */}
         <SidebarDrawer
           activeMember={activeMember}
@@ -183,16 +188,22 @@ export default function Home() {
         />
       </div>
 
-      {/* Modals Suite */}
+      {/* Ancestral Verification Gate Modal (First Screen Landing) */}
       <PasscodeModal
-        isOpen={isPasscodeModalOpen}
-        onClose={() => setIsPasscodeModalOpen(false)}
+        isOpen={!isAuthenticated || isPasscodeModalOpen}
+        isStandaloneGate={!isAuthenticated}
+        onClose={() => {
+          if (isAuthenticated) {
+            setIsPasscodeModalOpen(false);
+          }
+        }}
         onSuccess={() => {
           setIsAuthenticated(true);
           setIsPasscodeModalOpen(false);
         }}
       />
 
+      {/* Member Form Modal */}
       <MemberFormModal
         isOpen={isMemberFormOpen}
         onClose={() => setIsMemberFormOpen(false)}
@@ -202,12 +213,14 @@ export default function Home() {
         activeMember={activeMember}
       />
 
+      {/* Export Scroll Modal */}
       <ExportScrollModal
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}
         members={members}
       />
 
+      {/* Delete Confirmation Modal */}
       <DeleteConfirmModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
