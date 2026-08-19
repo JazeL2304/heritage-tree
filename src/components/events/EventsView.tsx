@@ -9,6 +9,8 @@ export interface FamilyEvent {
   type: 'birthday' | 'reunion' | 'commemoration' | 'meeting';
   date: string; // YYYY-MM-DD
   time?: string;
+  timeOfDay?: 'pagi' | 'siang' | 'malam';
+  targetGenerations?: number[]; // [1, 2, 3]
   location: string;
   description: string;
   organizer: string;
@@ -44,6 +46,12 @@ export const EventsView: React.FC = () => {
     'meeting',
   ]);
 
+  // Generation Filters Checkbox
+  const [selectedGenerations, setSelectedGenerations] = useState<number[]>([1, 2, 3]);
+
+  // Time of Day Filters Checkbox
+  const [selectedTimeOfDays, setSelectedTimeOfDays] = useState<string[]>(['pagi', 'siang', 'malam']);
+
   const [selectedEventDetail, setSelectedEventDetail] = useState<FamilyEvent | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
@@ -52,6 +60,8 @@ export const EventsView: React.FC = () => {
   const [newType, setNewType] = useState<'birthday' | 'reunion' | 'commemoration' | 'meeting'>('reunion');
   const [newDate, setNewDate] = useState('');
   const [newTime, setNewTime] = useState('');
+  const [newTimeOfDay, setNewTimeOfDay] = useState<'pagi' | 'siang' | 'malam'>('pagi');
+  const [newTargetGenerations, setNewTargetGenerations] = useState<number[]>([1, 2, 3]);
   const [newLocation, setNewLocation] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newOrganizer, setNewOrganizer] = useState('Panitia Keluarga');
@@ -100,11 +110,32 @@ export const EventsView: React.FC = () => {
     return `${year}-${m}-${d}`;
   };
 
+  // Event matching helper function
+  const matchesEvent = (evt: FamilyEvent) => {
+    const matchesType = selectedTypes.includes(evt.type);
+
+    // Generation filter overlap check
+    const eventGens = evt.targetGenerations && evt.targetGenerations.length > 0 ? evt.targetGenerations : [1, 2, 3];
+    const matchesGen = eventGens.some((g) => selectedGenerations.includes(g));
+
+    // Time of Day filter check
+    let tod = evt.timeOfDay;
+    if (!tod && evt.time) {
+      const hour = parseInt(evt.time.split(':')[0], 10);
+      if (!isNaN(hour)) {
+        if (hour >= 5 && hour < 12) tod = 'pagi';
+        else if (hour >= 12 && hour < 18) tod = 'siang';
+        else tod = 'malam';
+      }
+    }
+    const matchesTod = !tod || selectedTimeOfDays.includes(tod);
+
+    return matchesType && matchesGen && matchesTod;
+  };
+
   const getEventsForDay = (day: number) => {
     const targetDate = formatDateStr(currentYear, currentMonth, day);
-    return events.filter(
-      (evt) => evt.date === targetDate && selectedTypes.includes(evt.type)
-    );
+    return events.filter((evt) => evt.date === targetDate && matchesEvent(evt));
   };
 
   const toggleTypeFilter = (type: string) => {
@@ -115,13 +146,29 @@ export const EventsView: React.FC = () => {
     }
   };
 
+  const toggleGenerationFilter = (gen: number) => {
+    if (selectedGenerations.includes(gen)) {
+      setSelectedGenerations(selectedGenerations.filter((g) => g !== gen));
+    } else {
+      setSelectedGenerations([...selectedGenerations, gen]);
+    }
+  };
+
+  const toggleTimeOfDayFilter = (tod: string) => {
+    if (selectedTimeOfDays.includes(tod)) {
+      setSelectedTimeOfDays(selectedTimeOfDays.filter((t) => t !== tod));
+    } else {
+      setSelectedTimeOfDays([...selectedTimeOfDays, tod]);
+    }
+  };
+
   const filteredEvents = events.filter((evt) => {
-    const matchesType = selectedTypes.includes(evt.type);
+    const matches = matchesEvent(evt);
     if (selectedDay) {
       const selectedDateStr = formatDateStr(currentYear, currentMonth, selectedDay);
-      return matchesType && evt.date === selectedDateStr;
+      return matches && evt.date === selectedDateStr;
     }
-    return matchesType;
+    return matches;
   });
 
   const handleAddEvent = async (e: React.FormEvent) => {
@@ -136,6 +183,8 @@ export const EventsView: React.FC = () => {
       type: newType,
       date: eventDate,
       time: newTime || '10:00 WIB',
+      timeOfDay: newTimeOfDay,
+      targetGenerations: newTargetGenerations,
       location: newLocation || 'Kediaman Keluarga',
       description: newDescription,
       organizer: newOrganizer,
@@ -327,27 +376,75 @@ export const EventsView: React.FC = () => {
 
               {/* Accordion Filter Options */}
               <div className="bg-[#fbf9f5] border border-[#e8dfd5] rounded-xl p-4 shadow-sm space-y-2 text-xs text-[#59413e]">
-                <details className="group border-b border-[#e8dfd5] pb-2">
+                <details className="group border-b border-[#e8dfd5] pb-2" open>
                   <summary className="font-bold cursor-pointer flex justify-between items-center text-[#8e1616]">
                     <span>Generasi (Gen 1 - Gen 3)</span>
                     <span className="material-symbols-outlined text-[16px]">expand_more</span>
                   </summary>
                   <div className="mt-2 pl-2 space-y-1">
-                    <label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-[#8e1616]"/> Generasi 1 (Tetua)</label>
-                    <label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-[#8e1616]"/> Generasi 2 (Kepala Branch)</label>
-                    <label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-[#8e1616]"/> Generasi 3 (Penerus)</label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedGenerations.includes(1)}
+                        onChange={() => toggleGenerationFilter(1)}
+                        className="accent-[#8e1616]"
+                      />
+                      <span>Generasi 1 (Tetua)</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedGenerations.includes(2)}
+                        onChange={() => toggleGenerationFilter(2)}
+                        className="accent-[#8e1616]"
+                      />
+                      <span>Generasi 2 (Kepala Branch)</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedGenerations.includes(3)}
+                        onChange={() => toggleGenerationFilter(3)}
+                        className="accent-[#8e1616]"
+                      />
+                      <span>Generasi 3 (Penerus)</span>
+                    </label>
                   </div>
                 </details>
 
-                <details className="group border-b border-[#e8dfd5] pb-2 pt-1">
+                <details className="group border-b border-[#e8dfd5] pb-2 pt-1" open>
                   <summary className="font-bold cursor-pointer flex justify-between items-center text-[#8e1616]">
                     <span>Waktu Pelaksanaan</span>
                     <span className="material-symbols-outlined text-[16px]">expand_more</span>
                   </summary>
                   <div className="mt-2 pl-2 space-y-1">
-                    <label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-[#8e1616]"/> Pagi (08:00 - 12:00)</label>
-                    <label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-[#8e1616]"/> Siang (12:00 - 17:00)</label>
-                    <label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-[#8e1616]"/> Malam (18:00 - 21:00)</label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedTimeOfDays.includes('pagi')}
+                        onChange={() => toggleTimeOfDayFilter('pagi')}
+                        className="accent-[#8e1616]"
+                      />
+                      <span>Pagi (08:00 - 12:00)</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedTimeOfDays.includes('siang')}
+                        onChange={() => toggleTimeOfDayFilter('siang')}
+                        className="accent-[#8e1616]"
+                      />
+                      <span>Siang (12:00 - 17:00)</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedTimeOfDays.includes('malam')}
+                        onChange={() => toggleTimeOfDayFilter('malam')}
+                        className="accent-[#8e1616]"
+                      />
+                      <span>Malam (18:00 - 21:00)</span>
+                    </label>
                   </div>
                 </details>
               </div>
@@ -613,7 +710,11 @@ export const EventsView: React.FC = () => {
               <div className="space-y-1.5 text-[#59413e] pt-1 font-semibold">
                 <div className="flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-[16px] text-[#8e1616]">schedule</span>
-                  <span>Waktu: <strong>{selectedEventDetail.time}</strong></span>
+                  <span>Waktu: <strong>{selectedEventDetail.time} {selectedEventDetail.timeOfDay ? `(${selectedEventDetail.timeOfDay.toUpperCase()})` : ''}</strong></span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[16px] text-[#8e1616]">family_history</span>
+                  <span>Target Generasi: <strong>Gen {selectedEventDetail.targetGenerations ? selectedEventDetail.targetGenerations.join(', Gen ') : '1, 2, 3'}</strong></span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="material-symbols-outlined text-[16px] text-[#8e1616]">location_on</span>
@@ -734,6 +835,23 @@ export const EventsView: React.FC = () => {
 
                 <div>
                   <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
+                    Waktu Pelaksanaan
+                  </label>
+                  <select
+                    value={newTimeOfDay}
+                    onChange={(e) => setNewTimeOfDay(e.target.value as any)}
+                    className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
+                  >
+                    <option value="pagi">Pagi (08:00 - 12:00)</option>
+                    <option value="siang">Siang (12:00 - 17:00)</option>
+                    <option value="malam">Malam (18:00 - 21:00)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
                     Lokasi Acara
                   </label>
                   <input
@@ -744,19 +862,44 @@ export const EventsView: React.FC = () => {
                     className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
                   />
                 </div>
+
+                <div>
+                  <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
+                    Penyelenggara
+                  </label>
+                  <input
+                    type="text"
+                    value={newOrganizer}
+                    onChange={(e) => setNewOrganizer(e.target.value)}
+                    placeholder="Nama penyelenggara"
+                    className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
+                  />
+                </div>
               </div>
 
               <div>
                 <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
-                  Penyelenggara / Penanggung Jawab
+                  Target Generasi (Centang yang berlaku)
                 </label>
-                <input
-                  type="text"
-                  value={newOrganizer}
-                  onChange={(e) => setNewOrganizer(e.target.value)}
-                  placeholder="Nama penyelenggara"
-                  className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
-                />
+                <div className="flex items-center gap-4 bg-white p-2 border border-[#e8dfd5] rounded">
+                  {[1, 2, 3].map((gen) => (
+                    <label key={gen} className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold">
+                      <input
+                        type="checkbox"
+                        checked={newTargetGenerations.includes(gen)}
+                        onChange={() => {
+                          if (newTargetGenerations.includes(gen)) {
+                            setNewTargetGenerations(newTargetGenerations.filter((g) => g !== gen));
+                          } else {
+                            setNewTargetGenerations([...newTargetGenerations, gen]);
+                          }
+                        }}
+                        className="accent-[#8e1616]"
+                      />
+                      <span>Gen {gen}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
 
               <div>

@@ -18,6 +18,10 @@ export async function loadEvents(): Promise<FamilyEvent[]> {
           type: row.type || 'meeting',
           date: row.date || '',
           time: row.time || '',
+          timeOfDay: row.time_of_day || undefined,
+          targetGenerations: row.target_generations
+            ? row.target_generations.split(',').map((g: string) => parseInt(g, 10)).filter(Boolean)
+            : [1, 2, 3],
           location: row.location || '',
           description: row.description || '',
           organizer: row.organizer || '',
@@ -54,6 +58,8 @@ export async function saveEvent(event: FamilyEvent): Promise<void> {
         type: event.type,
         date: event.date || null,
         time: event.time || null,
+        time_of_day: event.timeOfDay || null,
+        target_generations: event.targetGenerations ? event.targetGenerations.join(',') : '1,2,3',
         location: event.location,
         description: event.description,
         organizer: event.organizer,
