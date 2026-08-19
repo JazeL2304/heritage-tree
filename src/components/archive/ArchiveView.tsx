@@ -6,7 +6,7 @@ import { loadArchives, saveArchive, deleteArchive } from '@/lib/archive-service'
 export interface ArchivalItem {
   id: string;
   title: string;
-  category: 'photos' | 'events' | 'childhood' | 'documents' | 'records' | 'media';
+  category: 'events' | 'childhood' | 'photos' | 'other';
   date: string;
   description: string;
   imageUrl: string;
@@ -23,7 +23,7 @@ export const ArchiveView: React.FC = () => {
 
   // New archive item form state
   const [newTitle, setNewTitle] = useState('');
-  const [newCategory, setNewCategory] = useState<'photos' | 'events' | 'childhood' | 'documents' | 'records' | 'media'>('events');
+  const [newCategory, setNewCategory] = useState<'events' | 'childhood' | 'photos' | 'other'>('events');
   const [newDate, setNewDate] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newImageUrl, setNewImageUrl] = useState('');
@@ -127,8 +127,7 @@ export const ArchiveView: React.FC = () => {
               { id: 'events', label: 'Foto Pertemuan & Acara', icon: 'groups' },
               { id: 'childhood', label: 'Foto Masa Kecil', icon: 'child_care' },
               { id: 'photos', label: 'Foto Jadul & Kenangan', icon: 'photo_camera' },
-              { id: 'documents', label: 'Sertifikat & Naskah', icon: 'description' },
-              { id: 'records', label: 'Akta & Silsilah Sipil', icon: 'badge' },
+              { id: 'other', label: 'Lainnya', icon: 'folder_open' },
             ].map((cat) => (
               <button
                 key={cat.id}
@@ -326,9 +325,7 @@ export const ArchiveView: React.FC = () => {
                     <option value="events">Foto Pertemuan & Acara</option>
                     <option value="childhood">Foto Masa Kecil</option>
                     <option value="photos">Foto Jadul & Kenangan</option>
-                    <option value="documents">Sertifikat & Naskah</option>
-                    <option value="records">Akta & Silsilah Sipil</option>
-                    <option value="media">Rekaman Media/Lainnya</option>
+                    <option value="other">Lainnya</option>
                   </select>
                 </div>
 
