@@ -56,30 +56,35 @@ export const ArchiveIntroShowcase: React.FC<ArchiveIntroShowcaseProps> = ({
         },
       });
 
-      // 1. Current slide zooms out and fades
+      const isForward = targetIndex > prevIndex;
+
+      // 1. Current slide animation (zooms past camera or back into distance)
       if (currentSlide) {
         tl.to(
           currentSlide,
           {
-            scale: 0.65,
+            scale: isForward ? 2.6 : 0.25,
             autoAlpha: 0,
-            duration: 0.8,
+            duration: 0.85,
             ease: 'power2.inOut',
           },
           0
         );
       }
 
-      // 2. Next slide zooms from 1.3 to 1 and fades in
+      // 2. Next slide zooms FROM FAR AWAY (scale 0.2) to FRONT FOREGROUND (scale 1.0)
       if (nextSlide) {
         tl.fromTo(
           nextSlide,
-          { scale: 1.35, autoAlpha: 0 },
+          {
+            scale: isForward ? 0.25 : 2.6,
+            autoAlpha: 0,
+          },
           {
             scale: 1,
             autoAlpha: 1,
-            duration: 0.85,
-            ease: 'power2.out',
+            duration: 0.9,
+            ease: 'power3.out',
           },
           0.1
         );
@@ -89,14 +94,14 @@ export const ArchiveIntroShowcase: React.FC<ArchiveIntroShowcaseProps> = ({
       if (nextTitle) {
         tl.fromTo(
           nextTitle,
-          { y: 30, autoAlpha: 0 },
+          { y: isForward ? 40 : -40, autoAlpha: 0 },
           {
             y: 0,
             autoAlpha: 1,
             duration: 0.6,
             ease: 'power2.out',
           },
-          0.4
+          0.35
         );
       }
     },
