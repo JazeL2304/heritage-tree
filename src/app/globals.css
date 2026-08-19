@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --primary: #8e1616;
+    --primary-container: #6a0006;
+    --secondary-fixed: #fed65b;
+    --background: #fbf9f5;
+    --surface-container-low: #f5f3ef;
+    --border-silk: #e8dfd5;
+    --connector-charcoal: #3d3731;
+    --ink-black: #1f1d1d;
+  }
+}
+
+/* Parchment Grid Pattern */
+.parchment-grid {
+  background-color: #fbf9f5;
+  background-image: 
+    linear-gradient(to right, #f2ece1 1px, transparent 1px),
+    linear-gradient(to bottom, #f2ece1 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fbf9f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e8dfd5;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8e1616;
+}
