@@ -121,21 +121,21 @@ export function calculateTreePositions(members: FamilyMember[]): {
   const familyGroups = new Map<string, FamilyMember[]>();
 
   positionedMembers.forEach((m) => {
-    if (m.fatherId || m.motherId) {
-      const parentKey = [m.fatherId, m.motherId].filter(Boolean).sort().join('_');
-      if (!familyGroups.has(parentKey)) {
-        familyGroups.set(parentKey, []);
+    const depth = depthMap.get(m.id) || 1;
+    if (depth > 1) {
+      let parentKey = [m.fatherId, m.motherId].filter(Boolean).sort().join('_');
+      // Automatic Fallback: If no explicit fatherId/motherId set on child, connect to upper generation members!
+      if (!parentKey && level1Members.length > 0) {
+        parentKey = level1Members.map((p) => p.id).sort().join('_');
       }
-      familyGroups.get(parentKey)!.push(m);
+      if (parentKey) {
+        if (!familyGroups.has(parentKey)) {
+          familyGroups.set(parentKey, []);
+        }
+        familyGroups.get(parentKey)!.push(m);
+      }
     }
   });
-
-  // Fallback: If no explicit fatherId/motherId set on lower level members, connect level 2 members to level 1 members!
-  const lowerLevelMembers = positionedMembers.filter((m) => (depthMap.get(m.id) || 1) > 1);
-  if (familyGroups.size === 0 && level1Members.length > 0 && lowerLevelMembers.length > 0) {
-    const fallbackParentKey = level1Members.map((p) => p.id).sort().join('_');
-    familyGroups.set(fallbackParentKey, lowerLevelMembers);
-  }
 
   familyGroups.forEach((children, parentKey) => {
     const parentIds = parentKey.split('_');

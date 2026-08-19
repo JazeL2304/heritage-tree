@@ -111,9 +111,26 @@ export default function Home() {
   const handleSaveMember = async (data: Partial<FamilyMember>) => {
     if (editingMember) {
       // Edit existing member
-      const updatedMembers = members.map((m) =>
+      let updatedMembers = members.map((m) =>
         m.id === editingMember.id ? { ...m, ...data } : m
       );
+
+      // Bidirectional Spouse sync
+      if (data.spouseId) {
+        updatedMembers = updatedMembers.map((m) =>
+          m.id === data.spouseId ? { ...m, spouseId: editingMember.id } : m
+        );
+      }
+
+      // Bidirectional Parent-Spouse sync
+      if (data.fatherId && data.motherId) {
+        updatedMembers = updatedMembers.map((m) => {
+          if (m.id === data.fatherId) return { ...m, spouseId: data.motherId };
+          if (m.id === data.motherId) return { ...m, spouseId: data.fatherId };
+          return m;
+        });
+      }
+
       setMembers(updatedMembers);
 
       const updatedObj = { ...editingMember, ...data };
