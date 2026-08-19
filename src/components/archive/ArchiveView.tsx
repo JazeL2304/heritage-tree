@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { loadArchives, saveArchive, deleteArchive } from '@/lib/archive-service';
+import { ArchiveIntroShowcase } from './ArchiveIntroShowcase';
 
 export interface ArchivalItem {
   id: string;
@@ -20,6 +21,7 @@ export const ArchiveView: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<ArchivalItem | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showIntro, setShowIntro] = useState(true);
 
   // New archive item form state
   const [newTitle, setNewTitle] = useState('');
@@ -93,6 +95,14 @@ export const ArchiveView: React.FC = () => {
 
   return (
     <div className="w-full h-[calc(100vh-4rem)] bg-[#fbf9f5] parchment-grid p-6 md:p-8 overflow-y-auto">
+      {/* Fullscreen GSAP Scroll Zoom-Out Intro Showcase */}
+      {showIntro && items.length > 0 && (
+        <ArchiveIntroShowcase
+          items={items}
+          onComplete={() => setShowIntro(false)}
+        />
+      )}
+
       <div className="max-w-6xl mx-auto space-y-6 pb-12">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#efeeea] border border-[#e8dfd5] p-5 rounded-lg shadow-sm">
@@ -109,13 +119,23 @@ export const ArchiveView: React.FC = () => {
             </p>
           </div>
 
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="px-4 py-2.5 bg-[#8e1616] text-white font-bold text-xs uppercase tracking-wider rounded hover:bg-[#731010] transition-colors shadow flex items-center gap-2 cursor-pointer shrink-0"
-          >
-            <span className="material-symbols-outlined text-[18px]">add_photo_alternate</span>
-            Tambah Arsip Baru
-          </button>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => setShowIntro(true)}
+              className="px-3 py-2.5 bg-[#eae8e4] hover:bg-[#e4e2de] text-[#1f1d1d] font-bold text-xs uppercase tracking-wider rounded transition-colors border border-[#e8dfd5] flex items-center gap-1.5 cursor-pointer shadow-sm"
+            >
+              <span className="material-symbols-outlined text-[16px] text-[#8e1616]">play_circle</span>
+              <span>Putar Intro</span>
+            </button>
+
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="px-4 py-2.5 bg-[#8e1616] text-white font-bold text-xs uppercase tracking-wider rounded hover:bg-[#731010] transition-colors shadow flex items-center gap-2 cursor-pointer shrink-0"
+            >
+              <span className="material-symbols-outlined text-[18px]">add_photo_alternate</span>
+              <span>Tambah Arsip Baru</span>
+            </button>
+          </div>
         </div>
 
         {/* Filter & Search Toolbar */}
