@@ -178,21 +178,42 @@ export default function Home() {
 
       let updatedMembers = [...members, newMember];
 
-      // Update bidirectional references
-      if (activeMember) {
+      // Update bidirectional references for perfect tree connection
+      if (activeMember && relationType) {
         if (relationType === 'partner') {
+          // Link activeMember <-> newMember as spouses
           updatedMembers = updatedMembers.map((m) =>
             m.id === activeMember.id ? { ...m, spouseId: newId } : m
           );
         } else if (relationType === 'parents') {
+          // Link activeMember (and their siblings) to new parent
+          const isMother = newMember.gender === 'female';
+          const existingFatherId = activeMember.fatherId;
+          const existingMotherId = activeMember.motherId;
+          const spouseParentId = isMother ? existingFatherId : existingMotherId;
+
           updatedMembers = updatedMembers.map((m) => {
-            if (m.id === activeMember.id) {
-              return newMember.gender === 'female'
-                ? { ...m, motherId: newId }
-                : { ...m, fatherId: newId };
+            // Update activeMember and siblings
+            if (m.id === activeMember.id || (activeMember.fatherId && m.fatherId === activeMember.fatherId) || (activeMember.motherId && m.motherId === activeMember.motherId)) {
+              return isMother ? { ...m, motherId: newId } : { ...m, fatherId: newId };
+            }
+            // Link existing parent with new parent as spouses
+            if (spouseParentId && m.id === spouseParentId) {
+              return { ...m, spouseId: newId };
             }
             return m;
           });
+
+          // Also link new parent to existing spouse parent
+          if (spouseParentId) {
+            const finalNewMemberIndex = updatedMembers.findIndex((m) => m.id === newId);
+            if (finalNewMemberIndex !== -1) {
+              updatedMembers[finalNewMemberIndex] = {
+                ...updatedMembers[finalNewMemberIndex],
+                spouseId: spouseParentId,
+              };
+            }
+          }
         }
       }
 

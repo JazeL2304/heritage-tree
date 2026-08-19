@@ -14,32 +14,36 @@ export function calculateTreePositions(members: FamilyMember[]): {
   const LEVEL_SPACING = 150;
   const SIBLING_SPACING = 60;
 
-  // Compute generation depth for each member
+  // Compute generation depth dynamically for each member
   const depthMap = new Map<string, number>();
 
   function getDepth(m: FamilyMember, visited = new Set<string>()): number {
     if (visited.has(m.id)) return depthMap.get(m.id) || 1;
     visited.add(m.id);
 
-    if (m.generation) return m.generation;
-
+    // If member has parents, level MUST be parent level + 1
     if (m.fatherId || m.motherId) {
-      const parentId = m.fatherId || m.motherId;
-      const parent = members.find((p) => p.id === parentId);
-      if (parent) {
-        const parentDepth = getDepth(parent, visited);
-        return parentDepth + 1;
+      let maxParentDepth = 0;
+      if (m.fatherId) {
+        const father = members.find((p) => p.id === m.fatherId);
+        if (father) maxParentDepth = Math.max(maxParentDepth, getDepth(father, new Set(visited)));
       }
+      if (m.motherId) {
+        const mother = members.find((p) => p.id === m.motherId);
+        if (mother) maxParentDepth = Math.max(maxParentDepth, getDepth(mother, new Set(visited)));
+      }
+      if (maxParentDepth > 0) return maxParentDepth + 1;
     }
 
+    // If member has a spouse who has parents, match spouse level
     if (m.spouseId) {
       const spouse = members.find((s) => s.id === m.spouseId);
-      if (spouse && spouse.id !== m.id) {
-        if (depthMap.has(spouse.id)) return depthMap.get(spouse.id)!;
+      if (spouse && (spouse.fatherId || spouse.motherId)) {
+        return getDepth(spouse, new Set(visited));
       }
     }
 
-    return 1;
+    return m.generation || 1;
   }
 
   members.forEach((m) => {

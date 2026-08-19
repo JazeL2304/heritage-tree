@@ -10,6 +10,7 @@ interface TreeConnectorProps {
 export const TreeConnector: React.FC<TreeConnectorProps> = ({ connections }) => {
   return (
     <svg
+      viewBox="-2000 -2000 6000 6000"
       style={{
         position: 'absolute',
         top: -2000,
