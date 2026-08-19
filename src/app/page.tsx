@@ -13,10 +13,17 @@ import { PasscodeModal } from '@/components/modals/PasscodeModal';
 import { MemberFormModal } from '@/components/modals/MemberFormModal';
 import { ExportScrollModal } from '@/components/modals/ExportScrollModal';
 import { DeleteConfirmModal } from '@/components/modals/DeleteConfirmModal';
+import {
+  loadFamilyMembers,
+  saveMember,
+  deleteMember,
+  syncMembers,
+  clearAllFamilyMembers,
+} from '@/lib/family-service';
 
 export default function Home() {
   const [activeNavTab, setActiveNavTab] = useState<'lineage' | 'archive' | 'events'>('lineage');
-  const [members, setMembers] = useState<FamilyMember[]>(INITIAL_MEMBERS);
+  const [members, setMembers] = useState<FamilyMember[]>([]);
   const [activeMember, setActiveMember] = useState<FamilyMember | null>(null);
 
   // Authentication State: defaults to false so Ancestral Verification Gate appears first!
@@ -31,10 +38,16 @@ export default function Home() {
   const [editingMember, setEditingMember] = useState<FamilyMember | null>(null);
   const [relationType, setRelationType] = useState<RelationType | null>(null);
 
-  // Set default active member on initial load
+  // Load family members from Supabase / localStorage on initial mount
   useEffect(() => {
-    const subject = members.find((m) => m.id === 'm_subject') || members[0] || null;
-    setActiveMember(subject);
+    async function initData() {
+      const loaded = await loadFamilyMembers();
+      setMembers(loaded);
+      if (loaded.length > 0) {
+        setActiveMember(loaded[0]);
+      }
+    }
+    initData();
   }, []);
 
   // Compute positions & connections
@@ -48,6 +61,17 @@ export default function Home() {
     }
     setEditingMember(null);
     setRelationType(type);
+    setIsMemberFormOpen(true);
+  };
+
+  // Handler for adding the first member when tree is empty
+  const handleAddFirstMember = () => {
+    if (!isAuthenticated) {
+      setIsPasscodeModalOpen(true);
+      return;
+    }
+    setEditingMember(null);
+    setRelationType(null);
     setIsMemberFormOpen(true);
   };
 
@@ -73,15 +97,18 @@ export default function Home() {
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!activeMember) return;
-    const updated = members.filter((m) => m.id !== activeMember.id);
+    const deletedId = activeMember.id;
+    const updated = members.filter((m) => m.id !== deletedId);
     setMembers(updated);
     setActiveMember(updated[0] || null);
+    await deleteMember(deletedId);
+    await syncMembers(updated);
   };
 
   // Handler for saving member form data
-  const handleSaveMember = (data: Partial<FamilyMember>) => {
+  const handleSaveMember = async (data: Partial<FamilyMember>) => {
     if (editingMember) {
       // Edit existing member
       const updatedMembers = members.map((m) =>
@@ -89,13 +116,16 @@ export default function Home() {
       );
       setMembers(updatedMembers);
 
+      const updatedObj = { ...editingMember, ...data };
       if (activeMember?.id === editingMember.id) {
-        setActiveMember({ ...activeMember, ...data });
+        setActiveMember(updatedObj);
       }
+      await saveMember(updatedObj);
+      await syncMembers(updatedMembers);
     } else {
-      // Add new member relative to activeMember
+      // Add new member relative to activeMember (or initial root member)
       const newId = generateId();
-      let newGen = activeMember?.generation || 2;
+      let newGen = activeMember?.generation || 1;
       let fatherId = data.fatherId;
       let motherId = data.motherId;
       let spouseId = data.spouseId;
@@ -106,16 +136,16 @@ export default function Home() {
             newGen = Math.max(1, (activeMember.generation || 2) - 1);
             break;
           case 'sibling':
-            newGen = activeMember.generation || 2;
+            newGen = activeMember.generation || 1;
             fatherId = activeMember.fatherId;
             motherId = activeMember.motherId;
             break;
           case 'partner':
-            newGen = activeMember.generation || 2;
+            newGen = activeMember.generation || 1;
             spouseId = activeMember.id;
             break;
           case 'child':
-            newGen = (activeMember.generation || 2) + 1;
+            newGen = (activeMember.generation || 1) + 1;
             if (activeMember.gender === 'female') {
               motherId = activeMember.id;
               fatherId = activeMember.spouseId;
@@ -130,7 +160,7 @@ export default function Home() {
       const newMember: FamilyMember = {
         id: newId,
         surname: data.surname || activeMember?.surname || 'Li',
-        givenName: data.givenName || 'Unnamed',
+        givenName: data.givenName || 'Nama Anggota',
         gender: data.gender || 'male',
         birthDate: data.birthDate || '',
         deathDate: data.deathDate || '',
@@ -168,6 +198,7 @@ export default function Home() {
 
       setMembers(updatedMembers);
       setActiveMember(newMember);
+      await syncMembers(updatedMembers);
     }
   };
 
@@ -204,6 +235,7 @@ export default function Home() {
               connections={connections}
               activeMember={activeMember}
               onSelectMember={(m) => setActiveMember(m)}
+              onAddFirstMember={handleAddFirstMember}
             />
           </>
         )}

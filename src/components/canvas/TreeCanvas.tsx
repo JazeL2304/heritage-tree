@@ -15,6 +15,7 @@ interface TreeCanvasProps {
   connections: TreeConnection[];
   activeMember: FamilyMember | null;
   onSelectMember: (member: FamilyMember) => void;
+  onAddFirstMember?: () => void;
 }
 
 export const TreeCanvas: React.FC<TreeCanvasProps> = ({
@@ -22,6 +23,7 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
   connections,
   activeMember,
   onSelectMember,
+  onAddFirstMember,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -146,6 +148,30 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
         onFitScreen={handleFitScreen}
         onReset={handleReset}
       />
+
+      {/* Empty State Banner when 0 members exist */}
+      {members.length === 0 && (
+        <div className="absolute inset-0 flex items-center justify-center p-6 z-20 pointer-events-none">
+          <div className="bg-[#fbf9f5] border-2 border-[#8e1616] rounded-xl shadow-xl p-8 max-w-md text-center pointer-events-auto flex flex-col items-center animate-in fade-in zoom-in duration-300">
+            <div className="w-16 h-16 rounded-full bg-[#8e1616]/10 text-[#8e1616] flex items-center justify-center mb-4 border border-[#8e1616]/30">
+              <span className="material-symbols-outlined text-[36px]">family_history</span>
+            </div>
+            <h3 className="text-lg font-bold text-[#8e1616] uppercase tracking-wide mb-1 font-['Poppins']">
+              Silsilah Keluarga Masih Kosong
+            </h3>
+            <p className="text-xs text-[#59413e] mb-6 leading-relaxed">
+              Semua data dummy telah dihapus. Mulai buat silsilah keluarga asli kamu sekarang. Data tersimpan aman di Supabase Cloud.
+            </p>
+            <button
+              onClick={onAddFirstMember}
+              className="py-3 px-6 bg-[#8e1616] text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md hover:bg-[#6b0f0f] transition-all flex items-center gap-2 cursor-pointer transform hover:-translate-y-0.5"
+            >
+              <span className="material-symbols-outlined text-[18px]">add_circle</span>
+              <span>Tambah Anggota Pertama (Kepala Keluarga)</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Infinite Canvas Transform Viewport */}
       <div
