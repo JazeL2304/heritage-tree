@@ -54,19 +54,38 @@ const INITIAL_EVENTS: FamilyEvent[] = [
     description: 'Kumpul keluarga menyambut anggota keluarga baru keturunan generasi 3.',
     organizer: 'Wang Xiu Ying',
   },
+  {
+    id: 'evt_5',
+    title: 'Rapat Persiapan Haul Akbar',
+    type: 'meeting',
+    date: '2026-08-18',
+    time: '19:30 WIB',
+    location: 'Pendopo Utama',
+    description: 'Rapat koordinasi seksi konsumsi dan dokumentasi ziarah.',
+    organizer: 'Li Jianhua',
+  },
 ];
 
 export const EventsView: React.FC = () => {
   const [events, setEvents] = useState<FamilyEvent[]>(INITIAL_EVENTS);
-  const [filterType, setFilterType] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
+  const [viewMode, setViewMode] = useState<'grid' | 'default' | 'heatmap'>('grid');
 
-  // Calendar State: default to August 2026 (or current date)
+  // Active Month & Year (Default to August 2026)
   const [currentYear, setCurrentYear] = useState<number>(2026);
-  const [currentMonth, setCurrentMonth] = useState<number>(7); // 0-indexed: 7 = August, 3 = April
-  const [selectedDay, setSelectedDay] = useState<number | null>(null);
-  const [selectedEventDetail, setSelectedEventDetail] = useState<FamilyEvent | null>(null);
+  const [currentMonth, setCurrentMonth] = useState<number>(7); // 7 = August
 
+  // Mini Calendar Selection
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+
+  // Type Filters Checkbox
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([
+    'birthday',
+    'reunion',
+    'commemoration',
+    'meeting',
+  ]);
+
+  const [selectedEventDetail, setSelectedEventDetail] = useState<FamilyEvent | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // New Event Form State
@@ -83,10 +102,17 @@ export const EventsView: React.FC = () => {
     'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
   ];
 
-  const daysOfWeek = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  const shortMonthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
-  // Calendar calculations
-  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+  const daysOfWeek = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Ming'];
+
+  // Calendar calculations (Mon-Sun grid)
+  const getFirstDayOfMonthMon = (year: number, month: number) => {
+    const day = new Date(year, month, 1).getDay();
+    return day === 0 ? 6 : day - 1; // convert Sun=0 to Mon=0
+  };
+
+  const firstDayOfMonth = getFirstDayOfMonthMon(currentYear, currentMonth);
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
   const handlePrevMonth = () => {
@@ -109,22 +135,29 @@ export const EventsView: React.FC = () => {
     setSelectedDay(null);
   };
 
-  // Helper to format date string YYYY-MM-DD
   const formatDateStr = (year: number, month: number, day: number) => {
     const m = (month + 1).toString().padStart(2, '0');
     const d = day.toString().padStart(2, '0');
     return `${year}-${m}-${d}`;
   };
 
-  // Get events for a specific day cell
   const getEventsForDay = (day: number) => {
     const targetDate = formatDateStr(currentYear, currentMonth, day);
-    return events.filter((evt) => evt.date === targetDate);
+    return events.filter(
+      (evt) => evt.date === targetDate && selectedTypes.includes(evt.type)
+    );
   };
 
-  // Filtered events for list view or selected date
+  const toggleTypeFilter = (type: string) => {
+    if (selectedTypes.includes(type)) {
+      setSelectedTypes(selectedTypes.filter((t) => t !== type));
+    } else {
+      setSelectedTypes([...selectedTypes, type]);
+    }
+  };
+
   const filteredEvents = events.filter((evt) => {
-    const matchesType = filterType === 'all' || evt.type === filterType;
+    const matchesType = selectedTypes.includes(evt.type);
     if (selectedDay) {
       const selectedDateStr = formatDateStr(currentYear, currentMonth, selectedDay);
       return matchesType && evt.date === selectedDateStr;
@@ -159,287 +192,418 @@ export const EventsView: React.FC = () => {
   const getEventBadge = (type: FamilyEvent['type']) => {
     switch (type) {
       case 'birthday':
-        return { label: 'Ulang Tahun', bg: 'bg-[#fed65b] text-[#745c00]', icon: 'cake' };
+        return { label: 'Ulang Tahun', bg: 'bg-[#fed65b] text-[#745c00]', border: 'border-[#fed65b]', icon: 'cake' };
       case 'reunion':
-        return { label: 'Reuni / Arisan', bg: 'bg-[#8e1616] text-white', icon: 'groups' };
+        return { label: 'Reuni / Arisan', bg: 'bg-[#8e1616] text-white', border: 'border-[#8e1616]', icon: 'groups' };
       case 'commemoration':
-        return { label: 'Haul / Ziarah', bg: 'bg-[#003921] text-white', icon: 'sentiment_satisfied' };
+        return { label: 'Haul / Ziarah', bg: 'bg-[#003921] text-white', border: 'border-[#003921]', icon: 'diversity_1' };
       default:
-        return { label: 'Pertemuan', bg: 'bg-[#eae8e4] text-[#1f1d1d]', icon: 'event' };
+        return { label: 'Pertemuan', bg: 'bg-[#eae8e4] text-[#1f1d1d]', border: 'border-[#e8dfd5]', icon: 'event' };
     }
   };
 
   return (
-    <div className="flex-1 min-h-[calc(100vh-4rem)] bg-[#fbf9f5] parchment-grid p-6 md:p-8 overflow-y-auto">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <div className="flex-1 min-h-[calc(100vh-4rem)] bg-[#fbf9f5] parchment-grid p-4 md:p-6 overflow-y-auto">
+      <div className="max-w-7xl mx-auto space-y-5">
         {/* Page Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#efeeea] border border-[#e8dfd5] p-5 rounded-lg shadow-sm">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#efeeea] border border-[#e8dfd5] p-4 rounded-lg shadow-sm">
           <div>
             <div className="flex items-center gap-2 text-[#8e1616] font-bold text-xs uppercase tracking-widest mb-1">
               <span className="material-symbols-outlined text-[18px]">calendar_month</span>
-              <span>Agenda & Peringatan Silaturahmi</span>
+              <span>Calendar Dashboard</span>
             </div>
-            <h1 className="text-2xl font-bold text-[#8e1616] font-['Plus_Jakarta_Sans']">
-              Kalender Interaktif Keluarga
+            <h1 className="text-xl md:text-2xl font-bold text-[#8e1616] font-['Plus_Jakarta_Sans']">
+              Kalender & Agenda Keluarga
             </h1>
-            <p className="text-xs text-[#59413e] mt-1">
-              Klik pada tanggal di lembar kalender untuk melihat atau menambahkan agenda reuni, ultah, dan haul.
+            <p className="text-xs text-[#59413e]">
+              Jadwal kegiatan silaturahmi, reuni trah, ulang tahun, dan haul ziarah leluhur.
             </p>
           </div>
 
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="px-4 py-2.5 bg-[#8e1616] text-white font-bold text-xs uppercase tracking-wider rounded hover:bg-[#731010] transition-colors shadow flex items-center gap-2 cursor-pointer shrink-0"
-          >
-            <span className="material-symbols-outlined text-[18px]">edit_calendar</span>
-            Tambah Agenda Baru
-          </button>
-        </div>
-
-        {/* Mode Selector & Category Toolbar */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-[#fbf9f5] border border-[#e8dfd5] p-3 rounded-lg">
-          {/* Categories */}
-          <div className="flex flex-wrap gap-2">
-            {[
-              { id: 'all', label: 'Semua Agenda', icon: 'event_note' },
-              { id: 'reunion', label: 'Reuni & Arisan', icon: 'groups' },
-              { id: 'birthday', label: 'Ulang Tahun', icon: 'cake' },
-              { id: 'commemoration', label: 'Haul & Ziarah', icon: 'diversity_1' },
-            ].map((cat) => (
+          {/* Top Control Bar & Mode Pills */}
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+            <div className="flex bg-[#eae8e4] p-1 rounded-lg border border-[#e8dfd5] text-xs font-semibold">
               <button
-                key={cat.id}
-                onClick={() => setFilterType(cat.id)}
-                className={`px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer ${
-                  filterType === cat.id
-                    ? 'bg-[#8e1616] text-white shadow-sm'
-                    : 'bg-[#eae8e4] text-[#59413e] hover:bg-[#e4e2de]'
+                onClick={() => setViewMode('grid')}
+                className={`px-3 py-1.5 rounded transition-colors cursor-pointer flex items-center gap-1 ${
+                  viewMode === 'grid' ? 'bg-[#8e1616] text-white shadow-sm' : 'text-[#59413e] hover:text-[#8e1616]'
                 }`}
               >
-                <span className="material-symbols-outlined text-[16px]">{cat.icon}</span>
-                {cat.label}
+                <span className="material-symbols-outlined text-[15px]">calendar_view_month</span>
+                Grid Bulanan
               </button>
-            ))}
-          </div>
+              <button
+                onClick={() => setViewMode('default')}
+                className={`px-3 py-1.5 rounded transition-colors cursor-pointer flex items-center gap-1 ${
+                  viewMode === 'default' ? 'bg-[#8e1616] text-white shadow-sm' : 'text-[#59413e] hover:text-[#8e1616]'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[15px]">view_timeline</span>
+                List Timeline
+              </button>
+              <button
+                onClick={() => setViewMode('heatmap')}
+                className={`px-3 py-1.5 rounded transition-colors cursor-pointer flex items-center gap-1 ${
+                  viewMode === 'heatmap' ? 'bg-[#8e1616] text-white shadow-sm' : 'text-[#59413e] hover:text-[#8e1616]'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[15px]">grid_on</span>
+                Heatmap
+              </button>
+            </div>
 
-          {/* View Mode Toggle Switch */}
-          <div className="flex bg-[#eae8e4] p-1 rounded border border-[#e8dfd5] text-xs font-semibold shrink-0">
             <button
-              onClick={() => setViewMode('calendar')}
-              className={`px-3 py-1 rounded flex items-center gap-1 transition-colors cursor-pointer ${
-                viewMode === 'calendar' ? 'bg-[#8e1616] text-white shadow-sm' : 'text-[#59413e]'
-              }`}
+              onClick={() => setIsAddModalOpen(true)}
+              className="px-4 py-2 bg-[#8e1616] text-white font-bold text-xs uppercase tracking-wider rounded hover:bg-[#731010] transition-colors shadow flex items-center gap-1.5 cursor-pointer shrink-0"
             >
-              <span className="material-symbols-outlined text-[16px]">calendar_view_month</span>
-              Lembar Kalender
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`px-3 py-1 rounded flex items-center gap-1 transition-colors cursor-pointer ${
-                viewMode === 'list' ? 'bg-[#8e1616] text-white shadow-sm' : 'text-[#59413e]'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[16px]">format_list_bulleted</span>
-              Daftar List
+              <span className="material-symbols-outlined text-[18px]">add</span>
+              Tambah Agenda
             </button>
           </div>
         </div>
 
-        {/* 📅 VISUAL INTERACTIVE CALENDAR GRID VIEW */}
-        {viewMode === 'calendar' && (
-          <div className="bg-[#fbf9f5] border-2 border-[#8e1616] rounded-xl shadow-lg p-5 space-y-4">
-            {/* Calendar Header Month Control */}
-            <div className="flex justify-between items-center bg-[#efeeea] border border-[#e8dfd5] px-4 py-3 rounded-lg">
-              <button
-                onClick={handlePrevMonth}
-                className="p-1.5 rounded-full bg-[#fbf9f5] border border-[#e8dfd5] text-[#8e1616] hover:bg-[#8e1616] hover:text-white transition-colors cursor-pointer"
-                title="Bulan Sebelumnya"
-              >
-                <span className="material-symbols-outlined text-[20px]">chevron_left</span>
-              </button>
+        {/* MAIN CALENDAR DASHBOARD TWO-COLUMN LAYOUT */}
+        {viewMode === 'grid' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* LEFT PANEL: MINI CALENDAR PICKER & CHECKLIST FILTERS (Width: 3/12 cols) */}
+            <div className="lg:col-span-3 space-y-4">
+              {/* Mini Calendar Picker Card */}
+              <div className="bg-[#fbf9f5] border border-[#e8dfd5] rounded-xl p-4 shadow-sm">
+                <div className="flex justify-between items-center mb-3 border-b border-[#e8dfd5] pb-2">
+                  <button
+                    onClick={handlePrevMonth}
+                    className="p-1 rounded text-[#8e1616] hover:bg-[#eae8e4] transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                  </button>
+                  <span className="font-bold text-xs text-[#8e1616] font-['Plus_Jakarta_Sans'] uppercase tracking-wider">
+                    {monthNames[currentMonth]} {currentYear}
+                  </span>
+                  <button
+                    onClick={handleNextMonth}
+                    className="p-1 rounded text-[#8e1616] hover:bg-[#eae8e4] transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                  </button>
+                </div>
 
-              <div className="text-center">
-                <h2 className="text-lg font-bold text-[#8e1616] font-['Plus_Jakarta_Sans'] uppercase tracking-widest">
-                  {monthNames[currentMonth]} {currentYear}
-                </h2>
+                {/* Mini Grid Header */}
+                <div className="grid grid-cols-7 text-center font-bold text-[10px] text-[#59413e] mb-1">
+                  <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
+                </div>
+
+                {/* Mini Grid Days */}
+                <div className="grid grid-cols-7 gap-1 text-center text-xs">
+                  {Array.from({ length: firstDayOfMonth }).map((_, idx) => (
+                    <div key={`m_empty_${idx}`} className="py-1 text-gray-300"></div>
+                  ))}
+                  {Array.from({ length: daysInMonth }).map((_, idx) => {
+                    const dayNum = idx + 1;
+                    const isSelected = selectedDay === dayNum;
+                    const hasEvt = getEventsForDay(dayNum).length > 0;
+
+                    return (
+                      <button
+                        key={`m_day_${dayNum}`}
+                        onClick={() => setSelectedDay(isSelected ? null : dayNum)}
+                        className={`py-1 rounded font-semibold text-[11px] transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#8e1616] text-[#fed65b] font-bold shadow-sm'
+                            : hasEvt
+                            ? 'bg-[#fed65b]/40 text-[#8e1616] font-bold border border-[#8e1616]'
+                            : 'hover:bg-[#eae8e4] text-[#1f1d1d]'
+                        }`}
+                      >
+                        {dayNum}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Status Filter Checklist Panel */}
+              <div className="bg-[#fbf9f5] border border-[#e8dfd5] rounded-xl p-4 shadow-sm space-y-3">
+                <h3 className="font-bold text-xs text-[#8e1616] uppercase tracking-wider font-['Plus_Jakarta_Sans'] border-b border-[#e8dfd5] pb-2">
+                  Kategori Agenda
+                </h3>
+
+                <div className="space-y-2 text-xs">
+                  {[
+                    { id: 'birthday', label: '🎂 Ulang Tahun', count: events.filter(e => e.type === 'birthday').length },
+                    { id: 'reunion', label: '👨‍👩‍👧‍👦 Reuni & Arisan', count: events.filter(e => e.type === 'reunion').length },
+                    { id: 'commemoration', label: '🕯️ Haul & Ziarah', count: events.filter(e => e.type === 'commemoration').length },
+                    { id: 'meeting', label: '📅 Pertemuan Rutin', count: events.filter(e => e.type === 'meeting').length },
+                  ].map((item) => (
+                    <label
+                      key={item.id}
+                      className="flex items-center justify-between p-2 rounded bg-white border border-[#e8dfd5] cursor-pointer hover:bg-[#eae8e4] transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedTypes.includes(item.id)}
+                          onChange={() => toggleTypeFilter(item.id)}
+                          className="accent-[#8e1616]"
+                        />
+                        <span className="font-semibold text-[#1f1d1d]">{item.label}</span>
+                      </span>
+                      <span className="text-[10px] font-bold bg-[#8e1616] text-white px-1.5 py-0.5 rounded-full">
+                        {item.count}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Accordion Filter Options */}
+              <div className="bg-[#fbf9f5] border border-[#e8dfd5] rounded-xl p-4 shadow-sm space-y-2 text-xs text-[#59413e]">
+                <details className="group border-b border-[#e8dfd5] pb-2">
+                  <summary className="font-bold cursor-pointer flex justify-between items-center text-[#8e1616]">
+                    <span>Generasi (Gen 1 - Gen 3)</span>
+                    <span className="material-symbols-outlined text-[16px]">expand_more</span>
+                  </summary>
+                  <div className="mt-2 pl-2 space-y-1">
+                    <label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-[#8e1616]"/> Generasi 1 (Tetua)</label>
+                    <label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-[#8e1616]"/> Generasi 2 (Kepala Branch)</label>
+                    <label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-[#8e1616]"/> Generasi 3 (Penerus)</label>
+                  </div>
+                </details>
+
+                <details className="group border-b border-[#e8dfd5] pb-2 pt-1">
+                  <summary className="font-bold cursor-pointer flex justify-between items-center text-[#8e1616]">
+                    <span>Waktu Pelaksanaan</span>
+                    <span className="material-symbols-outlined text-[16px]">expand_more</span>
+                  </summary>
+                  <div className="mt-2 pl-2 space-y-1">
+                    <label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-[#8e1616]"/> Pagi (08:00 - 12:00)</label>
+                    <label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-[#8e1616]"/> Siang (12:00 - 17:00)</label>
+                    <label className="flex items-center gap-2"><input type="checkbox" defaultChecked className="accent-[#8e1616]"/> Malam (18:00 - 21:00)</label>
+                  </div>
+                </details>
+              </div>
+            </div>
+
+            {/* RIGHT PANEL: FULL MONTH GRID WITH WEEK NUMBERS (Width: 9/12 cols) */}
+            <div className="lg:col-span-9 bg-[#fbf9f5] border-2 border-[#8e1616] rounded-xl p-5 shadow-lg space-y-4">
+              {/* Full Grid Controls Header */}
+              <div className="flex justify-between items-center bg-[#efeeea] border border-[#e8dfd5] px-4 py-3 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handlePrevMonth}
+                    className="p-1.5 rounded-full bg-[#fbf9f5] border border-[#e8dfd5] text-[#8e1616] hover:bg-[#8e1616] hover:text-white transition-colors cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+                  </button>
+                  <h2 className="text-lg font-bold text-[#8e1616] font-['Plus_Jakarta_Sans'] uppercase tracking-widest">
+                    {monthNames[currentMonth]} {currentYear}
+                  </h2>
+                  <button
+                    onClick={handleNextMonth}
+                    className="p-1.5 rounded-full bg-[#fbf9f5] border border-[#e8dfd5] text-[#8e1616] hover:bg-[#8e1616] hover:text-white transition-colors cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+                  </button>
+                </div>
+
                 {selectedDay && (
                   <button
                     onClick={() => setSelectedDay(null)}
-                    className="text-[11px] text-[#735c00] underline font-semibold hover:text-[#8e1616] cursor-pointer"
+                    className="px-3 py-1 bg-[#fed65b] text-[#745c00] rounded font-bold text-xs flex items-center gap-1 shadow-sm hover:opacity-90 cursor-pointer"
                   >
-                    Tampilkan Semua Tanggal Bulan Ini (Klik untuk Reset Filter Tanggal)
+                    <span>Filter: Tanggal {selectedDay}</span>
+                    <span className="material-symbols-outlined text-[14px]">close</span>
                   </button>
                 )}
               </div>
 
-              <button
-                onClick={handleNextMonth}
-                className="p-1.5 rounded-full bg-[#fbf9f5] border border-[#e8dfd5] text-[#8e1616] hover:bg-[#8e1616] hover:text-white transition-colors cursor-pointer"
-                title="Bulan Berikutnya"
-              >
-                <span className="material-symbols-outlined text-[20px]">chevron_right</span>
-              </button>
-            </div>
+              {/* Grid Header with Week Column (W) + Mon-Sun */}
+              <div className="grid grid-cols-8 gap-1.5 text-center font-bold text-xs text-[#8e1616] bg-[#eae8e4] py-2 rounded">
+                <div className="text-[#59413e]/70">W</div>
+                {daysOfWeek.map((dayName, idx) => (
+                  <div key={idx} className={idx === 6 ? 'text-[#ba1a1a]' : ''}>
+                    {dayName}
+                  </div>
+                ))}
+              </div>
 
-            {/* Day Names Grid Header */}
-            <div className="grid grid-cols-7 gap-1 text-center font-bold text-xs text-[#8e1616] bg-[#eae8e4] py-2 rounded">
-              {daysOfWeek.map((dayName, idx) => (
-                <div key={idx} className={idx === 0 ? 'text-[#ba1a1a]' : ''}>
-                  {dayName}
+              {/* Large Month Cells Grid (8 columns: W + 7 Days) */}
+              <div className="grid grid-cols-8 gap-1.5">
+                {/* Week 1 Row */}
+                <div className="h-28 bg-[#eae8e4]/60 border border-[#e8dfd5] rounded flex items-center justify-center font-bold text-xs text-[#59413e]">
+                  W1
                 </div>
-              ))}
+                {Array.from({ length: firstDayOfMonth }).map((_, idx) => (
+                  <div key={`lg_empty_${idx}`} className="h-28 bg-[#fbf9f5]/50 border border-[#e8dfd5]/40 rounded opacity-40"></div>
+                ))}
+
+                {Array.from({ length: daysInMonth }).map((_, idx) => {
+                  const dayNum = idx + 1;
+                  const isSelected = selectedDay === dayNum;
+                  const dayEvents = getEventsForDay(dayNum);
+                  const hasEvents = dayEvents.length > 0;
+
+                  return (
+                    <React.Fragment key={`lg_cell_frag_${dayNum}`}>
+                      {/* Insert Week number badge after every 7 day cells */}
+                      {(firstDayOfMonth + idx) % 7 === 0 && idx > 0 && (
+                        <div className="h-28 bg-[#eae8e4]/60 border border-[#e8dfd5] rounded flex items-center justify-center font-bold text-xs text-[#59413e]">
+                          W{Math.floor((firstDayOfMonth + idx) / 7) + 1}
+                        </div>
+                      )}
+
+                      <div
+                        onClick={() => setSelectedDay(isSelected ? null : dayNum)}
+                        className={`h-28 p-2 border rounded-lg flex flex-col justify-between transition-all duration-150 cursor-pointer overflow-hidden relative ${
+                          isSelected
+                            ? 'bg-[#8e1616] text-white border-2 border-[#fed65b] shadow-md scale-[1.02] z-10'
+                            : hasEvents
+                            ? 'bg-[#efeeea] border-2 border-[#8e1616]/70 hover:bg-[#e4e2de]'
+                            : 'bg-[#fbf9f5] border-[#e8dfd5] hover:bg-[#eae8e4]'
+                        }`}
+                      >
+                        {/* Day Number Header */}
+                        <div className="flex justify-between items-center border-b border-[#e8dfd5]/40 pb-1">
+                          <span className={`font-bold text-xs ${isSelected ? 'text-[#fed65b]' : 'text-[#1f1d1d]'}`}>
+                            {dayNum}
+                          </span>
+                          {hasEvents && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#8e1616] text-[#fed65b]">
+                              {dayEvents.length} Event
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Events Badges inside Day Cell */}
+                        <div className="space-y-1 overflow-y-auto max-h-[70px] text-[10px] my-auto">
+                          {dayEvents.map((evt) => {
+                            const badge = getEventBadge(evt.type);
+                            return (
+                              <div
+                                key={evt.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedEventDetail(evt);
+                                }}
+                                className={`p-1 rounded font-semibold truncate cursor-pointer hover:opacity-90 transition-opacity flex items-center gap-1 ${
+                                  isSelected ? 'bg-[#fed65b] text-[#745c00]' : badge.bg
+                                }`}
+                                title={`${evt.title} - ${evt.time}`}
+                              >
+                                <span className="material-symbols-outlined text-[12px] shrink-0">{badge.icon}</span>
+                                <span className="truncate">{evt.title}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* DEFAULT VIEW MODE: CLEAN TIMELINE CARDS LIST (The original list option) */}
+        {viewMode === 'default' && (
+          <div className="space-y-4">
+            <div className="bg-[#fbf9f5] border border-[#e8dfd5] p-3 rounded-lg flex justify-between items-center text-xs">
+              <span className="font-bold text-[#8e1616] uppercase tracking-wider font-['Plus_Jakarta_Sans']">
+                📋 Daftar List Agenda Timeline
+              </span>
+              <span className="text-[#59413e]">Menampilkan {filteredEvents.length} Acara</span>
             </div>
 
-            {/* Days Grid Cells (7 columns) */}
-            <div className="grid grid-cols-7 gap-1.5">
-              {/* Empty padding slots before first day */}
-              {Array.from({ length: firstDayOfMonth }).map((_, idx) => (
-                <div key={`empty_${idx}`} className="h-24 bg-[#fbf9f5]/50 border border-[#e8dfd5]/40 rounded opacity-40"></div>
-              ))}
+            {filteredEvents.map((evt) => {
+              const badge = getEventBadge(evt.type);
+              return (
+                <div
+                  key={evt.id}
+                  onClick={() => setSelectedEventDetail(evt)}
+                  className="bg-[#fbf9f5] border border-[#e8dfd5] rounded-lg p-5 shadow-sm hover:shadow transition-all flex flex-col md:flex-row gap-5 items-start border-l-4 border-l-[#8e1616] cursor-pointer"
+                >
+                  <div className="bg-[#efeeea] border border-[#e8dfd5] p-3 rounded text-center shrink-0 min-w-[100px]">
+                    <div className="text-[11px] font-bold text-[#8e1616] uppercase tracking-wider">
+                      {shortMonthNames[new Date(evt.date).getMonth()]}
+                    </div>
+                    <div className="text-2xl font-bold text-[#8e1616] font-['Plus_Jakarta_Sans']">
+                      {new Date(evt.date).getDate()}
+                    </div>
+                    <div className="text-[10px] text-[#59413e] font-semibold mt-0.5">
+                      {new Date(evt.date).getFullYear()}
+                    </div>
+                  </div>
 
-              {/* Day Cells 1..daysInMonth */}
-              {Array.from({ length: daysInMonth }).map((_, idx) => {
-                const dayNum = idx + 1;
-                const isSelected = selectedDay === dayNum;
-                const dayEvents = getEventsForDay(dayNum);
-                const hasEvents = dayEvents.length > 0;
+                  <div className="flex-1 space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
+                        {evt.title}
+                      </h3>
+                      <span className={`px-2.5 py-0.5 rounded text-[10px] uppercase font-bold flex items-center gap-1 ${badge.bg}`}>
+                        <span className="material-symbols-outlined text-[13px]">{badge.icon}</span>
+                        {badge.label}
+                      </span>
+                    </div>
 
+                    <p className="text-xs text-[#59413e] leading-relaxed">
+                      {evt.description}
+                    </p>
+
+                    <div className="flex flex-wrap gap-4 text-xs text-[#59413e] pt-2 border-t border-[#e8dfd5]/60 font-semibold">
+                      <div className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[#8e1616] text-[16px]">schedule</span>
+                        <span>{evt.time}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[#8e1616] text-[16px]">location_on</span>
+                        <span>{evt.location}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[#8e1616] text-[16px]">person</span>
+                        <span>Penyelenggara: {evt.organizer}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* HEATMAP VIEW MODE: DENSITY GRID */}
+        {viewMode === 'heatmap' && (
+          <div className="bg-[#fbf9f5] border-2 border-[#8e1616] rounded-xl p-6 shadow-lg space-y-4 text-center">
+            <h3 className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans'] uppercase tracking-wider">
+              🔥 Heatmap Kepadatan Agenda Keluarga {currentYear}
+            </h3>
+            <p className="text-xs text-[#59413e]">Visualisasi intensitas kegiatan dan pertemuan keluarga sepanjang tahun.</p>
+
+            <div className="grid grid-cols-4 md:grid-cols-6 gap-3 pt-4">
+              {monthNames.map((mName, mIdx) => {
+                const count = events.filter(e => new Date(e.date).getMonth() === mIdx).length;
                 return (
                   <div
-                    key={`day_${dayNum}`}
-                    onClick={() => setSelectedDay(isSelected ? null : dayNum)}
-                    className={`h-24 p-1.5 border rounded-lg flex flex-col justify-between transition-all duration-150 cursor-pointer overflow-hidden relative ${
-                      isSelected
-                        ? 'bg-[#8e1616] text-white border-2 border-[#fed65b] shadow-md scale-105 z-10'
-                        : hasEvents
-                        ? 'bg-[#efeeea] border-2 border-[#8e1616]/70 hover:bg-[#e4e2de]'
-                        : 'bg-[#fbf9f5] border-[#e8dfd5] hover:bg-[#eae8e4]'
+                    key={mName}
+                    onClick={() => {
+                      setCurrentMonth(mIdx);
+                      setViewMode('grid');
+                    }}
+                    className={`p-4 rounded-lg border text-center transition-all cursor-pointer ${
+                      count > 2
+                        ? 'bg-[#8e1616] text-white border-[#fed65b]'
+                        : count > 0
+                        ? 'bg-[#fed65b]/40 text-[#8e1616] border-[#8e1616]'
+                        : 'bg-[#efeeea] text-[#59413e] border-[#e8dfd5]'
                     }`}
                   >
-                    {/* Day Number Header */}
-                    <div className="flex justify-between items-center">
-                      <span className={`font-bold text-xs ${isSelected ? 'text-[#fed65b]' : 'text-[#1f1d1d]'}`}>
-                        {dayNum}
-                      </span>
-                      {hasEvents && !isSelected && (
-                        <span className="w-2 h-2 rounded-full bg-[#8e1616] animate-pulse"></span>
-                      )}
-                    </div>
-
-                    {/* Events Badges inside Day Cell */}
-                    <div className="space-y-1 overflow-y-auto max-h-[60px] text-[10px]">
-                      {dayEvents.map((evt) => {
-                        const badge = getEventBadge(evt.type);
-                        return (
-                          <div
-                            key={evt.id}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedEventDetail(evt);
-                            }}
-                            className={`p-1 rounded font-semibold truncate cursor-pointer hover:opacity-90 transition-opacity ${
-                              isSelected ? 'bg-[#fed65b] text-[#745c00]' : badge.bg
-                            }`}
-                            title={`${evt.title} - ${evt.time}`}
-                          >
-                            {evt.title}
-                          </div>
-                        );
-                      })}
-                    </div>
+                    <div className="font-bold text-xs uppercase">{mName}</div>
+                    <div className="text-xl font-bold font-['Plus_Jakarta_Sans'] mt-1">{count} Acara</div>
                   </div>
                 );
               })}
             </div>
           </div>
         )}
-
-        {/* Selected Date Filter Indicator */}
-        {selectedDay && (
-          <div className="bg-[#fed65b]/20 border border-[#fed65b] p-3 rounded-lg flex justify-between items-center text-xs text-[#745c00]">
-            <span>
-              Menampilkan agenda untuk tanggal: <strong>{selectedDay} {monthNames[currentMonth]} {currentYear}</strong>
-            </span>
-            <button
-              onClick={() => setSelectedDay(null)}
-              className="text-[#8e1616] underline font-bold cursor-pointer"
-            >
-              Lihat Semua Tanggal
-            </button>
-          </div>
-        )}
-
-        {/* Events Timeline / Detailed Card List */}
-        <div className="space-y-4">
-          <h2 className="text-sm font-bold text-[#8e1616] uppercase tracking-wider font-['Plus_Jakarta_Sans']">
-            📋 Daftar Rincian Agenda & Event
-          </h2>
-
-          {filteredEvents.map((evt) => {
-            const badge = getEventBadge(evt.type);
-            return (
-              <div
-                key={evt.id}
-                onClick={() => setSelectedEventDetail(evt)}
-                className="bg-[#fbf9f5] border border-[#e8dfd5] rounded-lg p-5 shadow-sm hover:shadow transition-all flex flex-col md:flex-row gap-5 items-start border-l-4 border-l-[#8e1616] cursor-pointer"
-              >
-                {/* Date Badge Box */}
-                <div className="bg-[#efeeea] border border-[#e8dfd5] p-3 rounded text-center shrink-0 min-w-[100px]">
-                  <div className="text-[11px] font-bold text-[#8e1616] uppercase tracking-wider">
-                    {new Date(evt.date).toLocaleDateString('id-ID', { month: 'short' })}
-                  </div>
-                  <div className="text-2xl font-bold text-[#8e1616] font-['Plus_Jakarta_Sans']">
-                    {new Date(evt.date).getDate()}
-                  </div>
-                  <div className="text-[10px] text-[#59413e] font-semibold mt-0.5">
-                    {new Date(evt.date).getFullYear()}
-                  </div>
-                </div>
-
-                {/* Event Information */}
-                <div className="flex-1 space-y-2">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h3 className="font-bold text-base text-[#8e1616] font-['Plus_Jakarta_Sans']">
-                      {evt.title}
-                    </h3>
-                    <span className={`px-2.5 py-0.5 rounded text-[10px] uppercase font-bold flex items-center gap-1 ${badge.bg}`}>
-                      <span className="material-symbols-outlined text-[13px]">{badge.icon}</span>
-                      {badge.label}
-                    </span>
-                  </div>
-
-                  <p className="text-xs text-[#59413e] leading-relaxed">
-                    {evt.description}
-                  </p>
-
-                  <div className="flex flex-wrap gap-4 text-xs text-[#59413e] pt-2 border-t border-[#e8dfd5]/60 font-semibold">
-                    <div className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[#8e1616] text-[16px]">schedule</span>
-                      <span>{evt.time}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[#8e1616] text-[16px]">location_on</span>
-                      <span>{evt.location}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[#8e1616] text-[16px]">person</span>
-                      <span>Penyelenggara: {evt.organizer}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-
-          {filteredEvents.length === 0 && (
-            <div className="bg-[#fbf9f5] border border-[#e8dfd5] rounded-lg p-12 text-center text-[#59413e]">
-              <span className="material-symbols-outlined text-[48px] text-[#8e1616]">
-                event_busy
-              </span>
-              <p className="mt-2 font-bold text-sm text-[#8e1616]">Belum ada agenda pada kriteria ini</p>
-              <p className="text-xs mt-1">Klik "Tambah Agenda Baru" atau pilih tanggal lain di kalender.</p>
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Event Detail Popup Modal */}
@@ -474,7 +638,7 @@ export const EventsView: React.FC = () => {
                 {selectedEventDetail.description}
               </p>
 
-              <div className="space-y-1.5 text-[#59413e] pt-1">
+              <div className="space-y-1.5 text-[#59413e] pt-1 font-semibold">
                 <div>🕒 Waktu: <strong>{selectedEventDetail.time}</strong></div>
                 <div>📍 Lokasi: <strong>{selectedEventDetail.location}</strong></div>
                 <div>👤 Penyelenggara: <strong>{selectedEventDetail.organizer}</strong></div>
@@ -484,7 +648,7 @@ export const EventsView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSelectedEventDetail(null)}
-                  className="px-4 py-2 bg-[#8e1616] text-white font-bold text-xs uppercase rounded"
+                  className="px-4 py-2 bg-[#8e1616] text-white font-bold text-xs uppercase rounded cursor-pointer"
                 >
                   Tutup
                 </button>
