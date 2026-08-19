@@ -9,7 +9,7 @@ export interface FamilyEvent {
   type: 'birthday' | 'reunion' | 'commemoration' | 'meeting';
   date: string; // YYYY-MM-DD
   time?: string;
-  timeOfDay?: 'pagi' | 'siang' | 'malam';
+  timeOfDay?: 'pagi' | 'siang' | 'sore' | 'malam';
   targetGenerations?: number[]; // [1, 2, 3]
   location: string;
   description: string;
@@ -49,18 +49,21 @@ export const EventsView: React.FC = () => {
   // Generation Filters Checkbox
   const [selectedGenerations, setSelectedGenerations] = useState<number[]>([1, 2, 3]);
 
-  // Time of Day Filters Checkbox
-  const [selectedTimeOfDays, setSelectedTimeOfDays] = useState<string[]>(['pagi', 'siang', 'malam']);
+  // Time of Day Filters Checkbox (24-Hour Coverage: Pagi, Siang, Sore, Malam)
+  const [selectedTimeOfDays, setSelectedTimeOfDays] = useState<string[]>(['pagi', 'siang', 'sore', 'malam']);
 
   const [selectedEventDetail, setSelectedEventDetail] = useState<FamilyEvent | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Editing state for existing events
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
 
   // New Event Form State
   const [newTitle, setNewTitle] = useState('');
   const [newType, setNewType] = useState<'birthday' | 'reunion' | 'commemoration' | 'meeting'>('reunion');
   const [newDate, setNewDate] = useState('');
   const [newTime, setNewTime] = useState('');
-  const [newTimeOfDay, setNewTimeOfDay] = useState<'pagi' | 'siang' | 'malam'>('pagi');
+  const [newTimeOfDay, setNewTimeOfDay] = useState<'pagi' | 'siang' | 'sore' | 'malam'>('pagi');
   const [newTargetGenerations, setNewTargetGenerations] = useState<number[]>([1, 2, 3]);
   const [newLocation, setNewLocation] = useState('');
   const [newDescription, setNewDescription] = useState('');
@@ -110,7 +113,7 @@ export const EventsView: React.FC = () => {
     return `${year}-${m}-${d}`;
   };
 
-  // Event matching helper function
+  // Event matching helper function (24-Hour Breakdown: Pagi: 05-11, Siang: 11-15, Sore: 15-18, Malam: 18-05)
   const matchesEvent = (evt: FamilyEvent) => {
     const matchesType = selectedTypes.includes(evt.type);
 
@@ -118,13 +121,14 @@ export const EventsView: React.FC = () => {
     const eventGens = evt.targetGenerations && evt.targetGenerations.length > 0 ? evt.targetGenerations : [1, 2, 3];
     const matchesGen = eventGens.some((g) => selectedGenerations.includes(g));
 
-    // Time of Day filter check
+    // Time of Day filter check (24h)
     let tod = evt.timeOfDay;
     if (!tod && evt.time) {
       const hour = parseInt(evt.time.split(':')[0], 10);
       if (!isNaN(hour)) {
-        if (hour >= 5 && hour < 12) tod = 'pagi';
-        else if (hour >= 12 && hour < 18) tod = 'siang';
+        if (hour >= 5 && hour < 11) tod = 'pagi';
+        else if (hour >= 11 && hour < 15) tod = 'siang';
+        else if (hour >= 15 && hour < 18) tod = 'sore';
         else tod = 'malam';
       }
     }
@@ -171,33 +175,82 @@ export const EventsView: React.FC = () => {
     return matches;
   });
 
+  const handleOpenAddModal = () => {
+    setEditingEventId(null);
+    setNewTitle('');
+    setNewType('reunion');
+    setNewDate('');
+    setNewTime('');
+    setNewTimeOfDay('pagi');
+    setNewTargetGenerations([1, 2, 3]);
+    setNewLocation('');
+    setNewDescription('');
+    setNewOrganizer('Panitia Keluarga');
+    setIsAddModalOpen(true);
+  };
+
+  const handleEditEventClick = (event: FamilyEvent) => {
+    setEditingEventId(event.id);
+    setNewTitle(event.title);
+    setNewType(event.type);
+    setNewDate(event.date);
+    setNewTime(event.time || '');
+    setNewTimeOfDay(event.timeOfDay || 'pagi');
+    setNewTargetGenerations(event.targetGenerations || [1, 2, 3]);
+    setNewLocation(event.location);
+    setNewDescription(event.description);
+    setNewOrganizer(event.organizer);
+    setSelectedEventDetail(null);
+    setIsAddModalOpen(true);
+  };
+
   const handleAddEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
 
     const eventDate = newDate || formatDateStr(currentYear, currentMonth, selectedDay || 15);
 
-    const newEvt: FamilyEvent = {
-      id: 'evt_' + Date.now(),
-      title: newTitle,
-      type: newType,
-      date: eventDate,
-      time: newTime || '10:00 WIB',
-      timeOfDay: newTimeOfDay,
-      targetGenerations: newTargetGenerations,
-      location: newLocation || 'Kediaman Keluarga',
-      description: newDescription,
-      organizer: newOrganizer,
-    };
+    if (editingEventId) {
+      const updatedEvt: FamilyEvent = {
+        id: editingEventId,
+        title: newTitle,
+        type: newType,
+        date: eventDate,
+        time: newTime || '10:00 WIB',
+        timeOfDay: newTimeOfDay,
+        targetGenerations: newTargetGenerations,
+        location: newLocation || 'Kediaman Keluarga',
+        description: newDescription,
+        organizer: newOrganizer,
+      };
 
-    setEvents([newEvt, ...events]);
-    setIsAddModalOpen(false);
+      setEvents(events.map((e) => (e.id === editingEventId ? updatedEvt : e)));
+      setIsAddModalOpen(false);
+      setEditingEventId(null);
+      await saveEvent(updatedEvt);
+    } else {
+      const newEvt: FamilyEvent = {
+        id: 'evt_' + Date.now(),
+        title: newTitle,
+        type: newType,
+        date: eventDate,
+        time: newTime || '10:00 WIB',
+        timeOfDay: newTimeOfDay,
+        targetGenerations: newTargetGenerations,
+        location: newLocation || 'Kediaman Keluarga',
+        description: newDescription,
+        organizer: newOrganizer,
+      };
+
+      setEvents([newEvt, ...events]);
+      setIsAddModalOpen(false);
+      await saveEvent(newEvt);
+    }
+
     setNewTitle('');
     setNewDescription('');
     setNewLocation('');
     setNewDate('');
-
-    await saveEvent(newEvt);
   };
 
   const handleDeleteEvent = async (id: string) => {
@@ -270,7 +323,7 @@ export const EventsView: React.FC = () => {
             </div>
 
             <button
-              onClick={() => setIsAddModalOpen(true)}
+              onClick={handleOpenAddModal}
               className="px-4 py-2 bg-[#8e1616] text-white font-bold text-xs uppercase tracking-wider rounded hover:bg-[#731010] transition-colors shadow flex items-center gap-1.5 cursor-pointer shrink-0"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>
@@ -425,7 +478,7 @@ export const EventsView: React.FC = () => {
                         onChange={() => toggleTimeOfDayFilter('pagi')}
                         className="accent-[#8e1616]"
                       />
-                      <span>Pagi (08:00 - 12:00)</span>
+                      <span>Pagi (05:00 - 11:00)</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -434,7 +487,16 @@ export const EventsView: React.FC = () => {
                         onChange={() => toggleTimeOfDayFilter('siang')}
                         className="accent-[#8e1616]"
                       />
-                      <span>Siang (12:00 - 17:00)</span>
+                      <span>Siang (11:00 - 15:00)</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedTimeOfDays.includes('sore')}
+                        onChange={() => toggleTimeOfDayFilter('sore')}
+                        className="accent-[#8e1616]"
+                      />
+                      <span>Sore (15:00 - 18:00)</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -443,7 +505,7 @@ export const EventsView: React.FC = () => {
                         onChange={() => toggleTimeOfDayFilter('malam')}
                         className="accent-[#8e1616]"
                       />
-                      <span>Malam (18:00 - 21:00)</span>
+                      <span>Malam (18:00 - 05:00)</span>
                     </label>
                   </div>
                 </details>
@@ -727,18 +789,28 @@ export const EventsView: React.FC = () => {
               </div>
 
               <div className="flex justify-between items-center pt-3 border-t border-[#e8dfd5]">
-                <button
-                  type="button"
-                  onClick={() => handleDeleteEvent(selectedEventDetail.id)}
-                  className="px-3 py-1.5 bg-[#ba1a1a] text-white font-bold text-xs uppercase rounded flex items-center gap-1 hover:bg-[#93000a] transition-colors cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[15px]">delete</span>
-                  <span>Hapus Agenda</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleEditEventClick(selectedEventDetail)}
+                    className="px-3 py-1.5 bg-[#8e1616] text-white font-bold text-xs uppercase rounded flex items-center gap-1 hover:bg-[#6b0f0f] transition-colors cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[15px]">edit</span>
+                    <span>Edit Agenda</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteEvent(selectedEventDetail.id)}
+                    className="px-3 py-1.5 bg-[#ba1a1a] text-white font-bold text-xs uppercase rounded flex items-center gap-1 hover:bg-[#93000a] transition-colors cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[15px]">delete</span>
+                    <span>Hapus</span>
+                  </button>
+                </div>
                 <button
                   type="button"
                   onClick={() => setSelectedEventDetail(null)}
-                  className="px-4 py-1.5 bg-[#8e1616] text-white font-bold text-xs uppercase rounded cursor-pointer"
+                  className="px-4 py-1.5 bg-[#eae8e4] text-[#59413e] hover:bg-[#e4e2de] font-bold text-xs uppercase rounded cursor-pointer"
                 >
                   Tutup
                 </button>
@@ -765,10 +837,10 @@ export const EventsView: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-bold text-base text-[#8e1616] font-['Poppins']">
-                  Tambah Agenda / Peringatan Baru
+                  {editingEventId ? 'Edit Agenda / Peringatan' : 'Tambah Agenda / Peringatan Baru'}
                 </h3>
                 <p className="text-xs text-[#59413e]">
-                  Jadwalkan reuni, arisan, atau peringatan ulang tahun/haul.
+                  {editingEventId ? 'Ubah rincian acara atau jadwal kegiatan.' : 'Jadwalkan reuni, arisan, atau peringatan ulang tahun/haul.'}
                 </p>
               </div>
             </div>
@@ -842,9 +914,10 @@ export const EventsView: React.FC = () => {
                     onChange={(e) => setNewTimeOfDay(e.target.value as any)}
                     className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
                   >
-                    <option value="pagi">Pagi (08:00 - 12:00)</option>
-                    <option value="siang">Siang (12:00 - 17:00)</option>
-                    <option value="malam">Malam (18:00 - 21:00)</option>
+                    <option value="pagi">Pagi (05:00 - 11:00)</option>
+                    <option value="siang">Siang (11:00 - 15:00)</option>
+                    <option value="sore">Sore (15:00 - 18:00)</option>
+                    <option value="malam">Malam (18:00 - 05:00)</option>
                   </select>
                 </div>
               </div>
@@ -927,7 +1000,7 @@ export const EventsView: React.FC = () => {
                   type="submit"
                   className="px-5 py-2 bg-[#8e1616] text-white font-bold uppercase tracking-wider rounded hover:opacity-90 transition-opacity cursor-pointer shadow"
                 >
-                  Simpan Agenda
+                  {editingEventId ? 'Simpan Perubahan' : 'Simpan Agenda'}
                 </button>
               </div>
             </form>
