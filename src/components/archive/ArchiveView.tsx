@@ -6,7 +6,7 @@ import { loadArchives, saveArchive, deleteArchive } from '@/lib/archive-service'
 export interface ArchivalItem {
   id: string;
   title: string;
-  category: 'photos' | 'documents' | 'records' | 'media';
+  category: 'photos' | 'events' | 'childhood' | 'documents' | 'records' | 'media';
   date: string;
   description: string;
   imageUrl: string;
@@ -23,7 +23,7 @@ export const ArchiveView: React.FC = () => {
 
   // New archive item form state
   const [newTitle, setNewTitle] = useState('');
-  const [newCategory, setNewCategory] = useState<'photos' | 'documents' | 'records' | 'media'>('photos');
+  const [newCategory, setNewCategory] = useState<'photos' | 'events' | 'childhood' | 'documents' | 'records' | 'media'>('events');
   const [newDate, setNewDate] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newImageUrl, setNewImageUrl] = useState('');
@@ -124,6 +124,8 @@ export const ArchiveView: React.FC = () => {
           <div className="flex flex-wrap gap-2 w-full md:w-auto">
             {[
               { id: 'all', label: 'Semua Arsip', icon: 'collections' },
+              { id: 'events', label: 'Foto Pertemuan & Acara', icon: 'groups' },
+              { id: 'childhood', label: 'Foto Masa Kecil', icon: 'child_care' },
               { id: 'photos', label: 'Foto Jadul & Kenangan', icon: 'photo_camera' },
               { id: 'documents', label: 'Sertifikat & Naskah', icon: 'description' },
               { id: 'records', label: 'Akta & Silsilah Sipil', icon: 'badge' },
@@ -321,6 +323,8 @@ export const ArchiveView: React.FC = () => {
                     onChange={(e) => setNewCategory(e.target.value as any)}
                     className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
                   >
+                    <option value="events">Foto Pertemuan & Acara</option>
+                    <option value="childhood">Foto Masa Kecil</option>
                     <option value="photos">Foto Jadul & Kenangan</option>
                     <option value="documents">Sertifikat & Naskah</option>
                     <option value="records">Akta & Silsilah Sipil</option>
