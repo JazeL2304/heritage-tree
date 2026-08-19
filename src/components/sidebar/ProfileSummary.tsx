@@ -22,11 +22,11 @@ export const ProfileSummary: React.FC<ProfileSummaryProps> = ({
   }
 
   return (
-    <div className="bg-[#fbf9f5] border border-[#e8dfd5] rounded relative mt-1 p-2.5 pt-3 shadow-sm">
-      <div className="absolute -top-2.5 left-2 bg-[#fbf9f5] px-1 text-[10px] font-bold text-[#8e1616] uppercase tracking-widest flex items-center gap-1">
+    <div className="bg-[#fbf9f5] border border-[#e8dfd5] rounded relative mt-3 p-2.5 pt-3.5 shadow-sm">
+      <div className="absolute -top-2.5 left-2 bg-[#fbf9f5] px-1.5 py-0.5 text-[10px] font-bold text-[#8e1616] uppercase tracking-widest flex items-center gap-1 leading-none rounded">
         <span>Active Subject</span>
         {member.isVerified && (
-          <span className="material-symbols-outlined text-[13px] text-[#fed65b]">
+          <span className="material-symbols-outlined text-[12px] text-[#e5a900] leading-none">
             verified
           </span>
         )}
