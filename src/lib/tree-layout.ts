@@ -32,7 +32,7 @@ export function calculateTreePositions(members: FamilyMember[]): {
         const mother = members.find((p) => p.id === m.motherId);
         if (mother) maxParentDepth = Math.max(maxParentDepth, getDepth(mother, new Set(visited)));
       }
-      if (maxParentDepth > 0) return maxParentDepth + 1;
+      return (maxParentDepth > 0 ? maxParentDepth : 1) + 1;
     }
 
     // If member has a spouse who has parents, match spouse level
@@ -121,19 +121,19 @@ export function calculateTreePositions(members: FamilyMember[]): {
   const familyGroups = new Map<string, FamilyMember[]>();
 
   positionedMembers.forEach((m) => {
-    const depth = depthMap.get(m.id) || 1;
-    if (depth > 1) {
-      let parentKey = [m.fatherId, m.motherId].filter(Boolean).sort().join('_');
-      // Automatic Fallback: If no explicit fatherId/motherId set on child, connect to upper generation members!
-      if (!parentKey && level1Members.length > 0) {
+    let parentKey = [m.fatherId, m.motherId].filter(Boolean).sort().join('_');
+    // Automatic Fallback: If no explicit fatherId/motherId set on child, connect to level 1 members if child is not in level 1
+    if (!parentKey && level1Members.length > 0) {
+      const isLevel1 = level1Members.some((l) => l.id === m.id);
+      if (!isLevel1) {
         parentKey = level1Members.map((p) => p.id).sort().join('_');
       }
-      if (parentKey) {
-        if (!familyGroups.has(parentKey)) {
-          familyGroups.set(parentKey, []);
-        }
-        familyGroups.get(parentKey)!.push(m);
+    }
+    if (parentKey) {
+      if (!familyGroups.has(parentKey)) {
+        familyGroups.set(parentKey, []);
       }
+      familyGroups.get(parentKey)!.push(m);
     }
   });
 

@@ -370,10 +370,10 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-              {/* Select Ayah */}
+              {/* Select Ayah (Filtered to Male only) */}
               <div>
                 <label className="block text-[11px] font-semibold text-[#59413e] mb-1">
-                  👨 Ayah
+                  👨 Ayah (Laki-Laki)
                 </label>
                 <select
                   value={fatherId}
@@ -382,7 +382,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                 >
                   <option value="">-- Tidak Ada / Belum Set --</option>
                   {allMembers
-                    .filter((m) => m.id !== editingMember?.id)
+                    .filter((m) => m.id !== editingMember?.id && m.gender === 'male')
                     .map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.givenName} {m.surname}
@@ -391,10 +391,10 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                 </select>
               </div>
 
-              {/* Select Ibu */}
+              {/* Select Ibu (Filtered to Female only) */}
               <div>
                 <label className="block text-[11px] font-semibold text-[#59413e] mb-1">
-                  👩 Ibu
+                  👩 Ibu (Perempuan)
                 </label>
                 <select
                   value={motherId}
@@ -403,7 +403,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                 >
                   <option value="">-- Tidak Ada / Belum Set --</option>
                   {allMembers
-                    .filter((m) => m.id !== editingMember?.id)
+                    .filter((m) => m.id !== editingMember?.id && m.gender === 'female')
                     .map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.givenName} {m.surname}
@@ -412,10 +412,14 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                 </select>
               </div>
 
-              {/* Select Pasangan */}
+              {/* Select Pasangan (Filtered: Suami = Male, Istri = Female) */}
               <div>
                 <label className="block text-[11px] font-semibold text-[#59413e] mb-1">
-                  ❤️ Pasangan
+                  {gender === 'female'
+                    ? '❤️ Suami (Laki-Laki)'
+                    : gender === 'male'
+                    ? '❤️ Istri (Perempuan)'
+                    : '❤️ Pasangan'}
                 </label>
                 <select
                   value={spouseId}
@@ -424,7 +428,15 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                 >
                   <option value="">-- Tidak Ada / Belum Set --</option>
                   {allMembers
-                    .filter((m) => m.id !== editingMember?.id)
+                    .filter(
+                      (m) =>
+                        m.id !== editingMember?.id &&
+                        (gender === 'female'
+                          ? m.gender === 'male'
+                          : gender === 'male'
+                          ? m.gender === 'female'
+                          : true)
+                    )
                     .map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.givenName} {m.surname}
