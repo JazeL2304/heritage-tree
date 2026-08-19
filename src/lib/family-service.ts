@@ -8,16 +8,29 @@ const STORAGE_KEY = 'heritage_tree_family_members';
  */
 export function formatDateForPostgres(dateStr?: string): string | null {
   if (!dateStr || !dateStr.trim()) return null;
-  const parts = dateStr.trim().split('-');
-  if (parts.length === 1 && parts[0].length === 4) {
-    return `${parts[0]}-01-01`;
+  const s = dateStr.trim();
+
+  // YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
+  // YYYY-MM
+  if (/^\d{4}-\d{2}$/.test(s)) return `${s}-01`;
+
+  // YYYY
+  if (/^\d{4}$/.test(s)) return `${s}-01-01`;
+
+  // DD/MM/YYYY
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+    const [d, m, y] = s.split('/');
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
   }
-  if (parts.length === 2 && parts[0].length === 4 && parts[1].length === 2) {
-    return `${parts[0]}-${parts[1]}-01`;
+
+  // DD-MM-YYYY
+  if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(s)) {
+    const [d, m, y] = s.split('-');
+    return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
   }
-  if (parts.length === 3 && parts[0].length === 4) {
-    return dateStr;
-  }
+
   return null;
 }
 
