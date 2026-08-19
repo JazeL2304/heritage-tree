@@ -35,25 +35,25 @@ export const ProfileSummary: React.FC<ProfileSummaryProps> = ({
       <div className="flex flex-col gap-1 text-[11px] text-[#1f1d1d]">
         <div className="flex justify-between border-b border-[#eae8e4] pb-1">
           <span className="text-[#59413e] font-semibold uppercase tracking-wide">
-            Surname
+            Nama Depan
           </span>
-          <span className="font-bold text-[#8e1616]">{member.surname}</span>
+          <span className="font-bold text-[#8e1616]">{member.givenName || '-'}</span>
         </div>
         <div className="flex justify-between border-b border-[#eae8e4] pb-1">
           <span className="text-[#59413e] font-semibold uppercase tracking-wide">
-            Given Name
+            Marga / Keluarga
           </span>
-          <span className="font-bold">{member.givenName}</span>
+          <span className="font-semibold">{member.surname || '-'}</span>
         </div>
         <div className="flex justify-between border-b border-[#eae8e4] pb-1">
           <span className="text-[#59413e] font-semibold uppercase tracking-wide">
-            Gender
+            Jenis Kelamin
           </span>
-          <span className="capitalize">{member.gender}</span>
+          <span className="capitalize">{member.gender === 'female' ? 'Perempuan' : 'Laki-laki'}</span>
         </div>
         <div className="flex justify-between border-b border-[#eae8e4] pb-1">
           <span className="text-[#59413e] font-semibold uppercase tracking-wide">
-            DoB
+            Tgl Lahir
           </span>
           <span className="text-[#8e1616] font-semibold">
             {formatDate(member.birthDate)}
@@ -63,7 +63,7 @@ export const ProfileSummary: React.FC<ProfileSummaryProps> = ({
         {member.isDeceased && (
           <div className="flex justify-between border-b border-[#eae8e4] pb-1">
             <span className="text-[#59413e] font-semibold uppercase tracking-wide">
-              DoD
+              Tgl Wafat
             </span>
             <span className="text-gray-600 italic">
               {formatDate(member.deathDate)}
@@ -82,7 +82,7 @@ export const ProfileSummary: React.FC<ProfileSummaryProps> = ({
           className="mt-1 w-full py-1 border border-[#8e1616] text-[#8e1616] hover:bg-[#8e1616] hover:text-white transition-colors text-[11px] font-bold uppercase tracking-wider rounded cursor-pointer flex items-center justify-center gap-1"
         >
           <span className="material-symbols-outlined text-[13px]">edit</span>
-          Edit Record
+          Edit Data Anggota
         </button>
       </div>
     </div>

@@ -75,15 +75,17 @@ export const TreeNodeCard: React.FC<TreeNodeCardProps> = ({
         )}
       </div>
 
-      {/* Surname */}
-      <div className="text-[11px] font-semibold text-[#fed65b] opacity-90 uppercase tracking-widest mt-1">
-        {member.surname}
+      {/* Given Name (Primary) */}
+      <div className="text-sm text-white font-bold text-center leading-tight mt-1 font-['Poppins']">
+        {member.givenName || 'Tanpa Nama'}
       </div>
 
-      {/* Given Name */}
-      <div className="text-sm text-white font-bold text-center leading-tight mb-1 font-['Poppins']">
-        {member.givenName}
-      </div>
+      {/* Surname (Optional Secondary) */}
+      {member.surname && (
+        <div className="text-[10px] font-medium text-[#fed65b] opacity-90 uppercase tracking-wider mb-1">
+          {member.surname}
+        </div>
+      )}
 
       {/* Date */}
       <div className="text-[10px] text-white/80 mb-2 bg-black/20 px-1.5 py-0.5 rounded">

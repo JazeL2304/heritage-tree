@@ -34,7 +34,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
 
   useEffect(() => {
     if (editingMember) {
-      setSurname(editingMember.surname || 'Li');
+      setSurname(editingMember.surname || '');
       setGivenName(editingMember.givenName || '');
       setGender(editingMember.gender || 'male');
       setBirthDate(editingMember.birthDate || '');
@@ -43,7 +43,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
       setPhotoUrl(editingMember.photoUrl || '');
       setNotes(editingMember.notes || '');
     } else {
-      setSurname(activeMember?.surname || 'Li');
+      setSurname(activeMember?.surname || '');
       setGivenName('');
       setGender(relationType === 'partner' ? (activeMember?.gender === 'male' ? 'female' : 'male') : 'male');
       setBirthDate('');
@@ -89,21 +89,21 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
   };
 
   const getModalTitle = () => {
-    if (editingMember) return 'Edit Ancestral Record';
+    if (editingMember) return 'Edit Data Anggota Keluarga';
     if (relationType && activeMember) {
-      const name = `${activeMember.surname} ${activeMember.givenName}`;
+      const name = `${activeMember.givenName} ${activeMember.surname}`.trim();
       switch (relationType) {
         case 'parents':
-          return `Add Parents for ${name}`;
+          return `Tambah Orang Tua untuk ${name}`;
         case 'sibling':
-          return `Add Sibling for ${name}`;
+          return `Tambah Saudara untuk ${name}`;
         case 'partner':
-          return `Add Partner for ${name}`;
+          return `Tambah Pasangan untuk ${name}`;
         case 'child':
-          return `Add Child for ${name}`;
+          return `Tambah Anak untuk ${name}`;
       }
     }
-    return 'Add Member Record';
+    return 'Tambah Anggota Keluarga Baru';
   };
 
   return (
@@ -125,7 +125,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
               {getModalTitle()}
             </h3>
             <p className="text-xs text-[#59413e]">
-              Enter biographical data and photo into the family ledger.
+              Masukkan data biografi dan foto profil ke dalam catatan silsilah.
             </p>
           </div>
         </div>
@@ -134,7 +134,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
           {/* Photo Selection Area */}
           <div>
             <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
-              Member Photo
+              Foto Profil Anggota
             </label>
             <div className="border border-[#e8dfd5] bg-white rounded p-3 flex flex-col gap-2">
               <div className="flex items-center justify-between border-b border-[#e8dfd5] pb-2">
@@ -149,7 +149,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                     }`}
                   >
                     <span className="material-symbols-outlined text-[14px]">upload_file</span>
-                    Upload File
+                    Unggah Berkas
                   </button>
                   <button
                     type="button"
@@ -161,7 +161,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                     }`}
                   >
                     <span className="material-symbols-outlined text-[14px]">link</span>
-                    Photo URL
+                    URL Foto
                   </button>
                 </div>
 
@@ -172,7 +172,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                     className="text-xs text-[#ba1a1a] hover:underline flex items-center gap-0.5"
                   >
                     <span className="material-symbols-outlined text-[14px]">delete</span>
-                    Remove
+                    Hapus Foto
                   </button>
                 )}
               </div>
@@ -205,9 +205,9 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                         className="px-3 py-1.5 bg-[#eae8e4] border border-[#e8dfd5] text-[#1f1d1d] font-semibold rounded text-xs hover:bg-[#e4e2de] transition-colors flex items-center gap-1.5 cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-[16px]">add_a_photo</span>
-                        Choose Photo File...
+                        Pilih Berkas Foto...
                       </button>
-                      <p className="text-[10px] text-[#59413e] mt-1">Supports JPG, PNG, WEBP files.</p>
+                      <p className="text-[10px] text-[#59413e] mt-1">Mendukung format gambar JPG, PNG, WEBP.</p>
                     </div>
                   ) : (
                     <div>
@@ -215,7 +215,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                         type="url"
                         value={photoUrl}
                         onChange={(e) => setPhotoUrl(e.target.value)}
-                        placeholder="https://images.unsplash.com/..."
+                        placeholder="https://..."
                         className="w-full px-2.5 py-1.5 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
                       />
                     </div>
@@ -225,29 +225,30 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
             </div>
           </div>
 
+          {/* Name Fields Reordered: Given Name FIRST, Surname SECOND */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
-                Surname *
-              </label>
-              <input
-                type="text"
-                required
-                value={surname}
-                onChange={(e) => setSurname(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
-              />
-            </div>
-            <div>
-              <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
-                Given Name *
+                Nama Depan / Panggilan *
               </label>
               <input
                 type="text"
                 required
                 value={givenName}
                 onChange={(e) => setGivenName(e.target.value)}
-                placeholder="e.g. Wei"
+                placeholder="misal: Jastin / Budi"
+                className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
+              />
+            </div>
+            <div>
+              <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
+                Nama Keluarga / Marga
+              </label>
+              <input
+                type="text"
+                value={surname}
+                onChange={(e) => setSurname(e.target.value)}
+                placeholder="misal: Tan / Li / Lim"
                 className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
               />
             </div>
@@ -255,7 +256,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
 
           <div>
             <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
-              Gender
+              Jenis Kelamin
             </label>
             <div className="flex gap-4">
               <label className="flex items-center gap-1.5 cursor-pointer">
@@ -267,7 +268,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                   onChange={() => setGender('male')}
                   className="accent-[#8e1616]"
                 />
-                <span>Male</span>
+                <span>Laki-laki</span>
               </label>
               <label className="flex items-center gap-1.5 cursor-pointer">
                 <input
@@ -278,7 +279,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                   onChange={() => setGender('female')}
                   className="accent-[#8e1616]"
                 />
-                <span>Female</span>
+                <span>Perempuan</span>
               </label>
             </div>
           </div>
@@ -286,7 +287,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
-                Date of Birth
+                Tanggal Lahir
               </label>
               <input
                 type="date"
@@ -297,7 +298,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
             </div>
             <div>
               <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
-                Deceased Status
+                Status Wafat
               </label>
               <label className="flex items-center gap-2 mt-2 cursor-pointer">
                 <input
@@ -306,7 +307,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
                   onChange={(e) => setIsDeceased(e.target.checked)}
                   className="accent-[#8e1616]"
                 />
-                <span>Is Deceased</span>
+                <span>Sudah Meninggal Dunia</span>
               </label>
             </div>
           </div>
@@ -314,7 +315,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
           {isDeceased && (
             <div>
               <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
-                Date of Death
+                Tanggal Wafat
               </label>
               <input
                 type="date"
@@ -327,13 +328,13 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
 
           <div>
             <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
-              Notes / Archival References
+              Catatan / Biografi Singkat
             </label>
             <textarea
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Biographical notes..."
+              placeholder="Catatan silsilah, pekerjaan, atau riwayat singkat..."
               className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
             />
           </div>
@@ -344,13 +345,13 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
               onClick={onClose}
               className="px-4 py-2 border border-[#e8dfd5] text-[#59413e] font-semibold rounded hover:bg-[#eae8e4] transition-colors cursor-pointer"
             >
-              Cancel
+              Batal
             </button>
             <button
               type="submit"
               className="px-5 py-2 bg-[#8e1616] text-white font-bold uppercase tracking-wider rounded hover:opacity-90 transition-opacity cursor-pointer shadow"
             >
-              Save Record
+              Simpan Anggota
             </button>
           </div>
         </form>
