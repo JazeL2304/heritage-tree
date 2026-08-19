@@ -62,10 +62,13 @@ export const AncestralCrestCanvas: React.FC = () => {
     );
     front.position.z = DEPTH / 2 + 0.001;
 
-    // Back — deep cinnabar
+    // Back — same paper-cut texture (mirrored)
+    const backTex = tex.clone();
+    backTex.wrapS = THREE.RepeatWrapping;
+    backTex.repeat.x = -1; // mirror horizontally
     const back = new THREE.Mesh(
       new THREE.CircleGeometry(RADIUS, seg),
-      new THREE.MeshStandardMaterial({ color: 0x6b1010, metalness: 0.4, roughness: 0.5 })
+      new THREE.MeshStandardMaterial({ map: backTex, metalness: 0.15, roughness: 0.55 })
     );
     back.rotation.y = Math.PI;
     back.position.z = -(DEPTH / 2 + 0.001);
@@ -128,45 +131,39 @@ export const AncestralCrestCanvas: React.FC = () => {
     /* ── Drag Interaction ──────────────────────── */
     let isDragging = false;
     let prevX = 0;
-    let prevY = 0;
-    let dragRotY = 0;   // user-driven Y rotation
-    let dragRotX = 0;   // user-driven X rotation
-    let velocityX = 0;  // inertia
-    let velocityY = 0;
-    let idleTime = 0;   // seconds since last interaction
+    let userOffsetY = 0;   // drag delta during current gesture
+    let angleAtGrab = 0;   // medallion.rotation.y snapshot when grabbed
+    let timeAtRelease = 0; // clock time when last released (to offset auto-rot)
+    let baseAngle = 0;     // persistent angle carried across grabs
 
     const onPointerDown = (e: PointerEvent) => {
       isDragging = true;
       prevX = e.clientX;
-      prevY = e.clientY;
-      velocityX = 0;
-      velocityY = 0;
-      idleTime = 0;
+      userOffsetY = 0;
+      // Snapshot current visual angle
+      angleAtGrab = medallion.rotation.y;
       (e.target as HTMLElement).setPointerCapture(e.pointerId);
     };
 
     const onPointerMove = (e: PointerEvent) => {
       if (!isDragging) return;
       const dx = e.clientX - prevX;
-      const dy = e.clientY - prevY;
-      velocityY = dx * 0.008;
-      velocityX = dy * 0.008;
-      dragRotY += velocityY;
-      dragRotX += velocityX;
-      // Clamp X rotation so it doesn't flip upside-down
-      dragRotX = Math.max(-1.2, Math.min(1.2, dragRotX));
+      userOffsetY += dx * 0.01;
       prevX = e.clientX;
-      prevY = e.clientY;
-      idleTime = 0;
     };
 
     const onPointerUp = () => {
+      if (isDragging) {
+        // Persist the final angle and reset auto-rotation clock offset
+        baseAngle = angleAtGrab + userOffsetY;
+        timeAtRelease = clock.getElapsedTime();
+      }
       isDragging = false;
     };
 
     const canvas = renderer.domElement;
     canvas.style.cursor = 'grab';
-    canvas.style.touchAction = 'none'; // prevent scroll on touch drag
+    canvas.style.touchAction = 'none';
     canvas.addEventListener('pointerdown', onPointerDown);
     canvas.addEventListener('pointermove', onPointerMove);
     canvas.addEventListener('pointerup', onPointerUp);
@@ -175,35 +172,21 @@ export const AncestralCrestCanvas: React.FC = () => {
     /* ── Animation ─────────────────────────────── */
     let frameId: number;
     const clock = new THREE.Clock();
-    let lastTime = 0;
+    const AUTO_SPEED = 0.35; // rad/s
 
     const animate = () => {
       const t = clock.getElapsedTime();
-      const dt = t - lastTime;
-      lastTime = t;
 
-      if (!isDragging) {
-        // Apply inertia decay
-        velocityX *= 0.95;
-        velocityY *= 0.95;
-        dragRotY += velocityY;
-        dragRotX += velocityX;
-        dragRotX = Math.max(-1.2, Math.min(1.2, dragRotX));
-
-        // Track idle time
-        idleTime += dt;
-
-        // After 2 seconds idle and inertia faded, blend into gentle auto-rotation
-        if (idleTime > 2 && Math.abs(velocityY) < 0.001) {
-          const autoSpeed = 0.3;
-          // Smoothly blend: ease dragRotX back toward 0 (level)
-          dragRotX += (0 - dragRotX) * 0.02;
-          dragRotY += autoSpeed * dt;
-        }
+      if (isDragging) {
+        // Show snapshot angle + user drag offset (auto-rot frozen)
+        medallion.rotation.y = angleAtGrab + userOffsetY;
+      } else {
+        // Auto-rotate from the angle where user released
+        medallion.rotation.y = baseAngle + AUTO_SPEED * (t - timeAtRelease);
       }
 
-      medallion.rotation.y = dragRotY;
-      medallion.rotation.x = dragRotX;
+      // Gentle tilt wobble
+      medallion.rotation.x = Math.sin(t * 0.3) * 0.08;
 
       // Particles slow drift
       particles.rotation.y = t * 0.03;
