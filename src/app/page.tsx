@@ -38,16 +38,31 @@ export default function Home() {
   const [editingMember, setEditingMember] = useState<FamilyMember | null>(null);
   const [relationType, setRelationType] = useState<RelationType | null>(null);
 
-  // Load family members from Supabase / localStorage on initial mount
+  // Load family members: Instant local cache render + background Supabase sync
   useEffect(() => {
-    async function initData() {
+    // 1. Instant Render from Local Cache (0ms delay)
+    try {
+      const cached = localStorage.getItem('heritage_tree_family_members');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMembers(parsed);
+          setActiveMember(parsed[0]);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to load local cache:', err);
+    }
+
+    // 2. Background Sync with Supabase Cloud
+    async function syncCloud() {
       const loaded = await loadFamilyMembers();
-      setMembers(loaded);
-      if (loaded.length > 0) {
-        setActiveMember(loaded[0]);
+      if (loaded && loaded.length > 0) {
+        setMembers(loaded);
+        setActiveMember((prev) => prev || loaded[0]);
       }
     }
-    initData();
+    syncCloud();
   }, []);
 
   // Compute positions & connections
