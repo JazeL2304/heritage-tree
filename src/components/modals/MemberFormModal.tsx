@@ -11,6 +11,7 @@ interface MemberFormModalProps {
   editingMember?: FamilyMember | null;
   relationType?: RelationType | null;
   activeMember?: FamilyMember | null;
+  allMembers?: FamilyMember[];
 }
 
 export const MemberFormModal: React.FC<MemberFormModalProps> = ({
@@ -20,6 +21,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
   editingMember,
   relationType,
   activeMember,
+  allMembers = [],
 }) => {
   const [surname, setSurname] = useState('Li');
   const [givenName, setGivenName] = useState('');
@@ -29,6 +31,9 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
   const [isDeceased, setIsDeceased] = useState(false);
   const [photoUrl, setPhotoUrl] = useState('');
   const [notes, setNotes] = useState('');
+  const [fatherId, setFatherId] = useState('');
+  const [motherId, setMotherId] = useState('');
+  const [spouseId, setSpouseId] = useState('');
   const [uploadTab, setUploadTab] = useState<'file' | 'url'>('file');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -43,6 +48,9 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
       setIsDeceased(editingMember.isDeceased || false);
       setPhotoUrl(editingMember.photoUrl || '');
       setNotes(editingMember.notes || '');
+      setFatherId(editingMember.fatherId || '');
+      setMotherId(editingMember.motherId || '');
+      setSpouseId(editingMember.spouseId || '');
     } else {
       setSurname(activeMember?.surname || '');
       setGivenName('');
@@ -52,6 +60,41 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
       setIsDeceased(false);
       setPhotoUrl('');
       setNotes('');
+
+      // Auto-set initial relations based on relationType & activeMember
+      if (activeMember && relationType) {
+        switch (relationType) {
+          case 'child':
+            if (activeMember.gender === 'female') {
+              setMotherId(activeMember.id);
+              setFatherId(activeMember.spouseId || '');
+            } else {
+              setFatherId(activeMember.id);
+              setMotherId(activeMember.spouseId || '');
+            }
+            setSpouseId('');
+            break;
+          case 'partner':
+            setSpouseId(activeMember.id);
+            setFatherId('');
+            setMotherId('');
+            break;
+          case 'sibling':
+            setFatherId(activeMember.fatherId || '');
+            setMotherId(activeMember.motherId || '');
+            setSpouseId('');
+            break;
+          case 'parents':
+            setFatherId('');
+            setMotherId('');
+            setSpouseId('');
+            break;
+        }
+      } else {
+        setFatherId('');
+        setMotherId('');
+        setSpouseId('');
+      }
     }
   }, [editingMember, relationType, activeMember, isOpen]);
 
@@ -84,6 +127,9 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
       isDeceased,
       photoUrl,
       notes,
+      fatherId: fatherId || undefined,
+      motherId: motherId || undefined,
+      spouseId: spouseId || undefined,
     });
 
     onClose();
@@ -315,6 +361,81 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
               />
             )}
           </div>
+
+          {/* Hubungan Keluarga / Connection Selectors */}
+          {allMembers.length > 0 && (
+            <div className="border border-[#e8dfd5] bg-white rounded p-3 space-y-3">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#8e1616] uppercase tracking-wider border-b border-[#e8dfd5] pb-1.5">
+                <span className="material-symbols-outlined text-[16px]">account_tree</span>
+                <span>Hubungan Keluarga (Koneksi Silsilah)</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                {/* Select Ayah */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#59413e] mb-1">
+                    👨 Ayah
+                  </label>
+                  <select
+                    value={fatherId}
+                    onChange={(e) => setFatherId(e.target.value)}
+                    className="w-full px-2 py-1.5 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#1f1d1d] focus:outline-none focus:border-[#8e1616] cursor-pointer"
+                  >
+                    <option value="">-- Tidak Ada / Belum Set --</option>
+                    {allMembers
+                      .filter((m) => m.id !== editingMember?.id && m.gender !== 'female')
+                      .map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.givenName} {m.surname}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                {/* Select Ibu */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#59413e] mb-1">
+                    👩 Ibu
+                  </label>
+                  <select
+                    value={motherId}
+                    onChange={(e) => setMotherId(e.target.value)}
+                    className="w-full px-2 py-1.5 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#1f1d1d] focus:outline-none focus:border-[#8e1616] cursor-pointer"
+                  >
+                    <option value="">-- Tidak Ada / Belum Set --</option>
+                    {allMembers
+                      .filter((m) => m.id !== editingMember?.id && m.gender !== 'male')
+                      .map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.givenName} {m.surname}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                {/* Select Pasangan */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-[#59413e] mb-1">
+                    ❤️ Pasangan
+                  </label>
+                  <select
+                    value={spouseId}
+                    onChange={(e) => setSpouseId(e.target.value)}
+                    className="w-full px-2 py-1.5 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#1f1d1d] focus:outline-none focus:border-[#8e1616] cursor-pointer"
+                  >
+                    <option value="">-- Tidak Ada / Belum Set --</option>
+                    {allMembers
+                      .filter((m) => m.id !== editingMember?.id)
+                      .map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.givenName} {m.surname}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div>
             <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">

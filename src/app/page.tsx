@@ -289,6 +289,7 @@ export default function Home() {
         editingMember={editingMember}
         relationType={relationType}
         activeMember={activeMember}
+        allMembers={members}
       />
 
       {/* Export Scroll Modal */}
