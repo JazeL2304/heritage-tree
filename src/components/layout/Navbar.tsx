@@ -3,8 +3,8 @@
 import React from 'react';
 
 interface NavbarProps {
-  isAuthenticated: boolean;
-  onOpenPasscodeModal: () => void;
+  isAuthenticated?: boolean;
+  onOpenPasscodeModal?: () => void;
   onSignOut?: () => void;
 }
 
@@ -53,30 +53,15 @@ export const Navbar: React.FC<NavbarProps> = ({
         </a>
       </div>
 
-      {/* Access Gate Button */}
+      {/* Right Action Button (Clean Sign In / Account Button) */}
       <div className="flex items-center gap-3">
-        {isAuthenticated ? (
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 bg-[#6a0006] text-[#fed65b] text-xs font-semibold px-3 py-1.5 rounded-full border border-[#fed65b]/40">
-              <span className="material-symbols-outlined text-[16px]">lock_open</span>
-              Unlocked
-            </span>
-            <button
-              onClick={onSignOut}
-              className="text-xs text-white/80 hover:text-white underline cursor-pointer"
-            >
-              Lock
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={onOpenPasscodeModal}
-            className="text-sm text-white border-2 border-[#fed65b] px-4 py-1.5 rounded font-semibold tracking-wide hover:bg-[#6a0006] transition-colors cursor-pointer uppercase flex items-center gap-2"
-          >
-            <span className="material-symbols-outlined text-[18px]">key</span>
-            Sign In
-          </button>
-        )}
+        <button
+          onClick={isAuthenticated && onSignOut ? onSignOut : onOpenPasscodeModal}
+          className="text-xs text-white border-2 border-[#fed65b] px-4 py-1.5 rounded font-semibold tracking-wide hover:bg-[#6a0006] transition-colors cursor-pointer uppercase flex items-center gap-1.5"
+        >
+          <span className="material-symbols-outlined text-[16px]">account_circle</span>
+          {isAuthenticated ? 'Sign Out' : 'Sign In'}
+        </button>
       </div>
     </nav>
   );
