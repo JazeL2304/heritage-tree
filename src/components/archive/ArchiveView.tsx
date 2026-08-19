@@ -27,6 +27,19 @@ export const ArchiveView: React.FC = () => {
   const [newDate, setNewDate] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newImageUrl, setNewImageUrl] = useState('');
+  const [uploadTab, setUploadTab] = useState<'file' | 'url'>('file');
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewImageUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   useEffect(() => {
     async function initArchives() {
@@ -328,17 +341,81 @@ export const ArchiveView: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
-                  Gambar / Photo URL
-                </label>
-                <input
-                  type="url"
-                  value={newImageUrl}
-                  onChange={(e) => setNewImageUrl(e.target.value)}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
-                />
+              {/* Photo Input (Upload File or URL) */}
+              <div className="space-y-2 border border-[#e8dfd5] bg-white p-3 rounded-lg">
+                <div className="flex justify-between items-center mb-1">
+                  <label className="font-semibold text-[#59413e] uppercase tracking-wider">
+                    Foto / Gambar Dokumen Arsip
+                  </label>
+                  <div className="flex bg-[#eae8e4] p-0.5 rounded border border-[#e8dfd5] text-[11px]">
+                    <button
+                      type="button"
+                      onClick={() => setUploadTab('file')}
+                      className={`px-2.5 py-1 rounded font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
+                        uploadTab === 'file'
+                          ? 'bg-[#8e1616] text-white'
+                          : 'bg-transparent text-[#59413e] hover:bg-[#e4e2de]'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[13px]">upload_file</span>
+                      Unggah Berkas
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setUploadTab('url')}
+                      className={`px-2.5 py-1 rounded font-semibold flex items-center gap-1 transition-colors cursor-pointer ${
+                        uploadTab === 'url'
+                          ? 'bg-[#8e1616] text-white'
+                          : 'bg-transparent text-[#59413e] hover:bg-[#e4e2de]'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[13px]">link</span>
+                      URL Foto
+                    </button>
+                  </div>
+                </div>
+
+                {uploadTab === 'file' ? (
+                  <div>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full py-3 px-4 border-2 border-dashed border-[#8e1616]/40 hover:border-[#8e1616] bg-[#fbf9f5] rounded-lg text-center cursor-pointer transition-colors flex items-center justify-center gap-2 text-[#8e1616] font-semibold text-xs"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">add_a_photo</span>
+                      <span>Pilih Foto Berkas dari Komputer/HP...</span>
+                    </button>
+                  </div>
+                ) : (
+                  <input
+                    type="url"
+                    value={newImageUrl}
+                    onChange={(e) => setNewImageUrl(e.target.value)}
+                    placeholder="https://images.unsplash.com/..."
+                    className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
+                  />
+                )}
+
+                {/* Preview Box */}
+                {newImageUrl && (
+                  <div className="relative mt-2 rounded overflow-hidden border border-[#e8dfd5] h-36 bg-[#eae8e4]">
+                    <img src={newImageUrl} alt="Preview" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setNewImageUrl('')}
+                      className="absolute top-2 right-2 bg-[#ba1a1a] text-white p-1 rounded-full shadow hover:bg-[#93000a] cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">close</span>
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div>
