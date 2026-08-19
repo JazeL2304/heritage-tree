@@ -44,17 +44,32 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
     fetchArchives();
   }, []);
 
-  // Group members by generation for the 'Tree' tab
+  // Group members by dynamic generation depth for the 'Bagan' tab
   const generationsMap: { [gen: number]: FamilyMember[] } = {};
+
+  const getMemberGen = (m: FamilyMember): number => {
+    if (m.fatherId || m.motherId) {
+      let parentGen = 2;
+      const father = allMembers.find((p) => p.id === m.fatherId);
+      const mother = allMembers.find((p) => p.id === m.motherId);
+      if (father) parentGen = getMemberGen(father);
+      else if (mother) parentGen = getMemberGen(mother);
+      return parentGen + 1;
+    }
+    if (m.spouseId) {
+      const spouse = allMembers.find((s) => s.id === m.spouseId);
+      if (spouse && (spouse.fatherId || spouse.motherId)) {
+        return getMemberGen(spouse);
+      }
+    }
+    return m.generation && m.generation > 1 ? m.generation : 2;
+  };
+
   allMembers.forEach((m) => {
-    const gen = m.generation || 1;
+    const gen = getMemberGen(m);
     if (!generationsMap[gen]) generationsMap[gen] = [];
     generationsMap[gen].push(m);
   });
-
-  const sortedGens = Object.keys(generationsMap)
-    .map(Number)
-    .sort((a, b) => a - b);
 
   return (
     <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-[300px] bg-[#fbf9f5] border-r border-[#e8dfd5] shadow-sm flex flex-col p-3 z-40 overflow-hidden">
@@ -183,13 +198,21 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
             <p className="text-[10px] text-[#59413e]">Klik nama anggota untuk memfokuskan kursor di canvas.</p>
 
             <div className="space-y-3 pt-1">
-              {sortedGens.map((gen) => (
-                <div key={gen} className="space-y-1">
-                  <div className="font-bold text-[11px] text-[#8e1616] uppercase border-b border-[#e8dfd5] pb-0.5">
-                    Generasi {gen} {gen === 1 ? '(Tetua Trah)' : gen === 2 ? '(Kepala Cabang)' : '(Penerus Trah)'}
+              {/* Gen 1 (Tetua Trah) */}
+              <div className="space-y-1">
+                <div className="font-bold text-[11px] text-[#8e1616] uppercase border-b border-[#e8dfd5] pb-0.5 flex justify-between items-center">
+                  <span>Generasi 1 (Tetua Trah)</span>
+                  {(!generationsMap[1] || generationsMap[1].length === 0) && (
+                    <span className="text-[9px] text-[#8e1616] font-semibold italic">Belum diisi</span>
+                  )}
+                </div>
+                {!generationsMap[1] || generationsMap[1].length === 0 ? (
+                  <div className="p-2 bg-[#eae8e4]/60 border border-dashed border-[#e8dfd5] rounded text-[10px] text-[#59413e] italic">
+                    Belum ada data Tetua Gen 1. Tambah orang tua pada Roni/Imelda di canvas.
                   </div>
+                ) : (
                   <div className="space-y-1 pl-1">
-                    {generationsMap[gen].map((m) => {
+                    {generationsMap[1].map((m) => {
                       const isSelected = activeMember?.id === m.id;
                       return (
                         <div
@@ -201,9 +224,37 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                               : 'bg-white text-[#1f1d1d] hover:bg-[#eae8e4] border border-[#e8dfd5]'
                           }`}
                         >
-                          <span className="truncate">
-                            {m.givenName} {m.surname}
+                          <span className="truncate">{m.givenName} {m.surname}</span>
+                          <span className="text-[9px] uppercase opacity-80 px-1 bg-black/10 rounded">
+                            {m.gender === 'female' ? 'Wanita' : 'Pria'}
                           </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Gen 2 (Kepala Cabang - Roni & Imelda) */}
+              {generationsMap[2] && generationsMap[2].length > 0 && (
+                <div className="space-y-1">
+                  <div className="font-bold text-[11px] text-[#8e1616] uppercase border-b border-[#e8dfd5] pb-0.5">
+                    Generasi 2 (Kepala Cabang)
+                  </div>
+                  <div className="space-y-1 pl-1">
+                    {generationsMap[2].map((m) => {
+                      const isSelected = activeMember?.id === m.id;
+                      return (
+                        <div
+                          key={m.id}
+                          onClick={() => onSelectMember(m)}
+                          className={`p-1.5 rounded flex items-center justify-between cursor-pointer text-[11px] transition-colors ${
+                            isSelected
+                              ? 'bg-[#8e1616] text-white font-bold'
+                              : 'bg-white text-[#1f1d1d] hover:bg-[#eae8e4] border border-[#e8dfd5]'
+                          }`}
+                        >
+                          <span className="truncate">{m.givenName} {m.surname}</span>
                           <span className="text-[9px] uppercase opacity-80 px-1 bg-black/10 rounded">
                             {m.gender === 'female' ? 'Wanita' : 'Pria'}
                           </span>
@@ -212,7 +263,37 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                     })}
                   </div>
                 </div>
-              ))}
+              )}
+
+              {/* Gen 3 (Penerus Trah - Jastin & Jason) */}
+              {generationsMap[3] && generationsMap[3].length > 0 && (
+                <div className="space-y-1">
+                  <div className="font-bold text-[11px] text-[#8e1616] uppercase border-b border-[#e8dfd5] pb-0.5">
+                    Generasi 3 (Penerus Trah)
+                  </div>
+                  <div className="space-y-1 pl-1">
+                    {generationsMap[3].map((m) => {
+                      const isSelected = activeMember?.id === m.id;
+                      return (
+                        <div
+                          key={m.id}
+                          onClick={() => onSelectMember(m)}
+                          className={`p-1.5 rounded flex items-center justify-between cursor-pointer text-[11px] transition-colors ${
+                            isSelected
+                              ? 'bg-[#8e1616] text-white font-bold'
+                              : 'bg-white text-[#1f1d1d] hover:bg-[#eae8e4] border border-[#e8dfd5]'
+                          }`}
+                        >
+                          <span className="truncate">{m.givenName} {m.surname}</span>
+                          <span className="text-[9px] uppercase opacity-80 px-1 bg-black/10 rounded">
+                            {m.gender === 'female' ? 'Wanita' : 'Pria'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

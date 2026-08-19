@@ -32,7 +32,7 @@ export function calculateTreePositions(members: FamilyMember[]): {
         const mother = members.find((p) => p.id === m.motherId);
         if (mother) maxParentDepth = Math.max(maxParentDepth, getDepth(mother, new Set(visited)));
       }
-      return (maxParentDepth > 0 ? maxParentDepth : 1) + 1;
+      return (maxParentDepth > 0 ? maxParentDepth : 2) + 1;
     }
 
     // If member has a spouse who has parents, match spouse level
@@ -43,7 +43,8 @@ export function calculateTreePositions(members: FamilyMember[]): {
       }
     }
 
-    return m.generation || 1;
+    // Root level members (e.g. Roni & Imelda) with no parents default to Generation 2
+    return m.generation || 2;
   }
 
   members.forEach((m) => {
