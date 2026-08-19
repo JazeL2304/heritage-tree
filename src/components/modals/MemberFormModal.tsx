@@ -373,7 +373,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
               {/* Select Ayah (Filtered to Male only) */}
               <div>
                 <label className="block text-[11px] font-semibold text-[#59413e] mb-1">
-                  👨 Ayah (Laki-Laki)
+                  👨 Ayah
                 </label>
                 <select
                   value={fatherId}
@@ -394,7 +394,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
               {/* Select Ibu (Filtered to Female only) */}
               <div>
                 <label className="block text-[11px] font-semibold text-[#59413e] mb-1">
-                  👩 Ibu (Perempuan)
+                  👩 Ibu
                 </label>
                 <select
                   value={motherId}
@@ -415,11 +415,7 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
               {/* Select Pasangan (Filtered: Suami = Male, Istri = Female) */}
               <div>
                 <label className="block text-[11px] font-semibold text-[#59413e] mb-1">
-                  {gender === 'female'
-                    ? '❤️ Suami (Laki-Laki)'
-                    : gender === 'male'
-                    ? '❤️ Istri (Perempuan)'
-                    : '❤️ Pasangan'}
+                  {gender === 'female' ? '❤️ Suami' : gender === 'male' ? '❤️ Istri' : '❤️ Pasangan'}
                 </label>
                 <select
                   value={spouseId}
