@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { FamilyMember, Gender, RelationType } from '@/types/family';
 
 interface MemberFormModalProps {
@@ -28,6 +28,9 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
   const [isDeceased, setIsDeceased] = useState(false);
   const [photoUrl, setPhotoUrl] = useState('');
   const [notes, setNotes] = useState('');
+  const [uploadTab, setUploadTab] = useState<'file' | 'url'>('file');
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (editingMember) {
@@ -52,6 +55,19 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
   }, [editingMember, relationType, activeMember, isOpen]);
 
   if (!isOpen) return null;
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setPhotoUrl(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,12 +125,106 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
               {getModalTitle()}
             </h3>
             <p className="text-xs text-[#59413e]">
-              Enter biographical data into the family ledger.
+              Enter biographical data and photo into the family ledger.
             </p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+          {/* Photo Selection Area */}
+          <div>
+            <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
+              Member Photo
+            </label>
+            <div className="border border-[#e8dfd5] bg-white rounded p-3 flex flex-col gap-2">
+              <div className="flex items-center justify-between border-b border-[#e8dfd5] pb-2">
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setUploadTab('file')}
+                    className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition-colors ${
+                      uploadTab === 'file'
+                        ? 'bg-[#8e1616] text-white'
+                        : 'bg-[#eae8e4] text-[#59413e] hover:bg-[#e4e2de]'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[14px]">upload_file</span>
+                    Upload File
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUploadTab('url')}
+                    className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1 transition-colors ${
+                      uploadTab === 'url'
+                        ? 'bg-[#8e1616] text-white'
+                        : 'bg-[#eae8e4] text-[#59413e] hover:bg-[#e4e2de]'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[14px]">link</span>
+                    Photo URL
+                  </button>
+                </div>
+
+                {photoUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setPhotoUrl('')}
+                    className="text-xs text-[#ba1a1a] hover:underline flex items-center gap-0.5"
+                  >
+                    <span className="material-symbols-outlined text-[14px]">delete</span>
+                    Remove
+                  </button>
+                )}
+              </div>
+
+              {/* Photo Preview & Controls */}
+              <div className="flex items-center gap-3 pt-1">
+                <div className="w-16 h-16 rounded-full border-2 border-[#8e1616] bg-[#fbf9f5] overflow-hidden shrink-0 flex items-center justify-center text-[#8e1616] shadow-sm">
+                  {photoUrl ? (
+                    <img src={photoUrl} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="material-symbols-outlined text-[32px]">
+                      {gender === 'female' ? 'woman' : 'man'}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex-1">
+                  {uploadTab === 'file' ? (
+                    <div>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-3 py-1.5 bg-[#eae8e4] border border-[#e8dfd5] text-[#1f1d1d] font-semibold rounded text-xs hover:bg-[#e4e2de] transition-colors flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">add_a_photo</span>
+                        Choose Photo File...
+                      </button>
+                      <p className="text-[10px] text-[#59413e] mt-1">Supports JPG, PNG, WEBP files.</p>
+                    </div>
+                  ) : (
+                    <div>
+                      <input
+                        type="url"
+                        value={photoUrl}
+                        onChange={(e) => setPhotoUrl(e.target.value)}
+                        placeholder="https://images.unsplash.com/..."
+                        className="w-full px-2.5 py-1.5 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
@@ -214,19 +324,6 @@ export const MemberFormModal: React.FC<MemberFormModalProps> = ({
               />
             </div>
           )}
-
-          <div>
-            <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
-              Photo URL (Optional)
-            </label>
-            <input
-              type="url"
-              value={photoUrl}
-              onChange={(e) => setPhotoUrl(e.target.value)}
-              placeholder="https://images.unsplash.com/..."
-              className="w-full px-3 py-2 bg-white border border-[#e8dfd5] rounded text-sm text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
-            />
-          </div>
 
           <div>
             <label className="block font-semibold text-[#59413e] uppercase tracking-wider mb-1">
