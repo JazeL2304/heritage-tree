@@ -60,7 +60,7 @@ export const PasscodeModal: React.FC<PasscodeModalProps> = ({
         <AncestralCrestCanvas />
 
         {/* Header Section */}
-        <div className="flex flex-col items-center text-center mb-6 w-full -mt-6">
+        <div className="flex flex-col items-center text-center mb-4 w-full">
           {/* Title & Subtitle Badge */}
           <h1 className="font-bold text-xl text-[#8e1616] uppercase tracking-[0.08em] mb-1 font-['Poppins']">
             HERITAGESCROLL

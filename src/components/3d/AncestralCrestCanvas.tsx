@@ -229,7 +229,7 @@ export const AncestralCrestCanvas: React.FC = () => {
   return (
     <div
       ref={mountRef}
-      className="w-40 h-40 md:w-48 md:h-48 mx-auto flex items-center justify-center relative z-10 overflow-hidden rounded-full"
+      className="w-40 h-40 md:w-48 md:h-48 mx-auto flex items-center justify-center relative z-10 overflow-hidden"
     />
   );
 };
