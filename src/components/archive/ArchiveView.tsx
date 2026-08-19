@@ -145,17 +145,17 @@ export const ArchiveView: React.FC = () => {
           </div>
 
           {/* Search Box */}
-          <div className="relative w-full md:w-64">
+          <div className="relative w-full md:w-64 flex items-center">
+            <span className="material-symbols-outlined text-[#59413e] text-[18px] absolute left-3 pointer-events-none select-none">
+              search
+            </span>
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari arsip..."
-              className="w-full pl-9 pr-3 py-1.5 bg-white border border-[#e8dfd5] rounded text-xs text-[#1f1d1d] focus:outline-none focus:border-[#8e1616]"
+              className="w-full pl-9 pr-3 py-2 bg-white border border-[#e8dfd5] rounded text-xs text-[#1f1d1d] focus:outline-none focus:border-[#8e1616] transition-colors"
             />
-            <span className="material-symbols-outlined text-[#59413e] text-[18px] absolute left-2.5 top-2">
-              search
-            </span>
           </div>
         </div>
 
