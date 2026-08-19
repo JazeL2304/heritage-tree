@@ -110,24 +110,53 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
   };
 
   const handleZoomIn = () => {
-    const newZoom = Math.min(transform.zoom * 1.2, 2.2);
+    const newZoom = Math.min(transform.zoom + 0.15, 2.5);
     animateTransform(transform.x, transform.y, newZoom);
   };
 
   const handleZoomOut = () => {
-    const newZoom = Math.max(transform.zoom * 0.8, 0.4);
+    const newZoom = Math.max(transform.zoom - 0.15, 0.3);
     animateTransform(transform.x, transform.y, newZoom);
+  };
+
+  const handleResetZoom = () => {
+    const el = containerRef.current;
+    if (!el) return;
+    const targetNode = activeMember || members[0];
+    if (targetNode) {
+      const tx = (targetNode.x ?? 0) + NODE_W / 2;
+      const ty = (targetNode.y ?? 0) + NODE_H / 2;
+      animateTransform(el.clientWidth / 2 - tx, el.clientHeight / 2 - ty, 1);
+    } else {
+      const { cx, cy } = getCenter();
+      animateTransform(el.clientWidth / 2 - cx, el.clientHeight / 2 - cy, 1);
+    }
   };
 
   const handleFitScreen = () => {
     const el = containerRef.current;
     if (!el) return;
+
+    // Toggle HTML5 Fullscreen API if supported
+    if (!document.fullscreenElement) {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
     const { cx, cy } = getCenter();
     animateTransform(el.clientWidth / 2 - cx, el.clientHeight / 2 - cy, 1);
   };
 
   const handleReset = () => {
-    handleFitScreen();
+    const el = containerRef.current;
+    if (!el) return;
+    const { cx, cy } = getCenter();
+    animateTransform(el.clientWidth / 2 - cx, el.clientHeight / 2 - cy, 1);
   };
 
   return (

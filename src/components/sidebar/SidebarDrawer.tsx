@@ -1,28 +1,60 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FamilyMember, RelationType } from '@/types/family';
 import { ProfileSummary } from './ProfileSummary';
 import { ActionStack } from './ActionStack';
+import { loadArchives } from '@/lib/archive-service';
+import { ArchivalItem } from '@/components/archive/ArchiveView';
 
 interface SidebarDrawerProps {
   activeMember: FamilyMember | null;
+  allMembers: FamilyMember[];
+  onSelectMember: (member: FamilyMember) => void;
   onAddRelation: (relation: RelationType) => void;
   onAddStandalone: () => void;
   onEditMember: () => void;
   onDeleteMember: () => void;
   onOpenExportModal: () => void;
+  onOpenSettingsModal: () => void;
+  onOpenHelpModal: () => void;
 }
 
 export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
   activeMember,
+  allMembers,
+  onSelectMember,
   onAddRelation,
   onAddStandalone,
   onEditMember,
   onDeleteMember,
   onOpenExportModal,
+  onOpenSettingsModal,
+  onOpenHelpModal,
 }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'records' | 'ancestors' | 'media'>('profile');
+  const [archives, setArchives] = useState<ArchivalItem[]>([]);
+  const [selectedRecord, setSelectedRecord] = useState<ArchivalItem | null>(null);
+
+  useEffect(() => {
+    async function fetchArchives() {
+      const data = await loadArchives();
+      setArchives(data);
+    }
+    fetchArchives();
+  }, []);
+
+  // Group members by generation for the 'Tree' tab
+  const generationsMap: { [gen: number]: FamilyMember[] } = {};
+  allMembers.forEach((m) => {
+    const gen = m.generation || 1;
+    if (!generationsMap[gen]) generationsMap[gen] = [];
+    generationsMap[gen].push(m);
+  });
+
+  const sortedGens = Object.keys(generationsMap)
+    .map(Number)
+    .sort((a, b) => a - b);
 
   return (
     <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-[300px] bg-[#fbf9f5] border-r border-[#e8dfd5] shadow-sm flex flex-col p-3 z-40 overflow-hidden">
@@ -43,18 +75,20 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
         </div>
         <div>
           <h2 className="font-bold text-xs text-[#8e1616] leading-tight font-['Poppins']">
-            Family Ledger
+            Silsilah Trah Keluarga
           </h2>
-          <p className="text-[10px] text-[#59413e] italic">Ming Dynasty Branch</p>
+          <p className="text-[10px] text-[#59413e]">
+            {allMembers.length} Anggota Terdaftar
+          </p>
         </div>
       </div>
 
       {/* Navigation Tabs (Compact 4-grid pill icons) */}
       <div className="grid grid-cols-4 gap-1 my-2 bg-[#eae8e4] p-1 rounded border border-[#e8dfd5]">
         {[
-          { id: 'profile', label: 'Profile', icon: 'person' },
-          { id: 'records', label: 'Records', icon: 'menu_book' },
-          { id: 'ancestors', label: 'Tree', icon: 'account_tree' },
+          { id: 'profile', label: 'Profil', icon: 'person' },
+          { id: 'records', label: 'Arsip', icon: 'menu_book' },
+          { id: 'ancestors', label: 'Bagan', icon: 'account_tree' },
           { id: 'media', label: 'Media', icon: 'photo_library' },
         ].map((tab) => (
           <button
@@ -73,7 +107,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
       </div>
 
       {/* Main Tab Content */}
-      <div className="flex-1 flex flex-col gap-2 overflow-y-auto">
+      <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-1">
         {activeTab === 'profile' && (
           <>
             <ProfileSummary
@@ -89,34 +123,129 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
           </>
         )}
 
+        {/* Dynamic Records Tab from Supabase */}
         {activeTab === 'records' && (
+          <div className="space-y-2">
+            <div className="p-2.5 bg-[#efeeea] border border-[#e8dfd5] rounded text-xs text-[#59413e]">
+              <h4 className="font-bold text-[#8e1616]">Dokumen & Doktrin Silsilah</h4>
+              <p className="text-[10px] mt-0.5">Catatan arsip silsilah resmi yang tersimpan di Supabase Cloud.</p>
+            </div>
+
+            {archives.length === 0 ? (
+              <div className="p-4 bg-white border border-[#e8dfd5] rounded text-center text-xs text-[#59413e]">
+                Belum ada dokumen arsip tersimpan.
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                {archives.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => setSelectedRecord(item)}
+                    className="p-2 bg-white border border-[#e8dfd5] hover:border-[#8e1616] rounded text-xs cursor-pointer transition-all shadow-2xs"
+                  >
+                    <div className="font-bold text-[#8e1616] line-clamp-1">{item.title}</div>
+                    <div className="text-[10px] text-[#59413e] flex justify-between mt-1">
+                      <span>📅 {item.date}</span>
+                      <span className="font-semibold text-[#735c00] uppercase">{item.category}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Record Details Modal / Preview */}
+            {selectedRecord && (
+              <div className="p-2.5 bg-[#eae8e4] border border-[#8e1616] rounded text-xs text-[#1f1d1d] space-y-1 relative">
+                <button
+                  onClick={() => setSelectedRecord(null)}
+                  className="absolute top-1 right-1 text-[#8e1616] font-bold"
+                >
+                  ✕
+                </button>
+                <div className="font-bold text-[#8e1616]">{selectedRecord.title}</div>
+                <p className="text-[11px] text-[#59413e]">{selectedRecord.description}</p>
+                {selectedRecord.imageUrl && (
+                  <img
+                    src={selectedRecord.imageUrl}
+                    alt={selectedRecord.title}
+                    className="w-full h-24 object-cover rounded border border-[#e8dfd5] mt-1"
+                  />
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Dynamic Tree/Ancestors Tab from Live Members */}
+        {activeTab === 'ancestors' && (
           <div className="p-2.5 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#59413e] space-y-2">
-            <h4 className="font-bold text-[#8e1616]">Archival Ledger Records</h4>
-            <p className="text-[11px]">Historical genealogical archives of the Li family line (Zupu Volume IV).</p>
-            <div className="p-1.5 bg-[#eae8e4] rounded text-[10px] flex items-center gap-1.5 font-mono">
-              <span className="material-symbols-outlined text-[14px] text-[#8e1616]">description</span>
-              <span>Document Ref #M-1994-07</span>
+            <h4 className="font-bold text-[#8e1616]">Silsilah Per Generasi</h4>
+            <p className="text-[10px] text-[#59413e]">Klik nama anggota untuk memfokuskan kursor di canvas.</p>
+
+            <div className="space-y-3 pt-1">
+              {sortedGens.map((gen) => (
+                <div key={gen} className="space-y-1">
+                  <div className="font-bold text-[11px] text-[#8e1616] uppercase border-b border-[#e8dfd5] pb-0.5">
+                    Generasi {gen} {gen === 1 ? '(Tetua Trah)' : gen === 2 ? '(Kepala Cabang)' : '(Penerus Trah)'}
+                  </div>
+                  <div className="space-y-1 pl-1">
+                    {generationsMap[gen].map((m) => {
+                      const isSelected = activeMember?.id === m.id;
+                      return (
+                        <div
+                          key={m.id}
+                          onClick={() => onSelectMember(m)}
+                          className={`p-1.5 rounded flex items-center justify-between cursor-pointer text-[11px] transition-colors ${
+                            isSelected
+                              ? 'bg-[#8e1616] text-white font-bold'
+                              : 'bg-white text-[#1f1d1d] hover:bg-[#eae8e4] border border-[#e8dfd5]'
+                          }`}
+                        >
+                          <span className="truncate">
+                            {m.givenName} {m.surname}
+                          </span>
+                          <span className="text-[9px] uppercase opacity-80 px-1 bg-black/10 rounded">
+                            {m.gender === 'female' ? 'Wanita' : 'Pria'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
-        {activeTab === 'ancestors' && (
-          <div className="p-2.5 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#59413e] space-y-1.5">
-            <h4 className="font-bold text-[#8e1616]">Generational Lineage</h4>
-            <ul className="space-y-1 pl-2 border-l-2 border-[#8e1616] text-[11px]">
-              <li>Gen 1: Li Jianhua & Wang Xiu Ying</li>
-              <li>Gen 2: Li Wei & Chen Ting</li>
-              <li>Gen 3: Li An</li>
-            </ul>
-          </div>
-        )}
-
+        {/* Dynamic Media Tab */}
         {activeTab === 'media' && (
-          <div className="p-3 bg-[#fbf9f5] border border-[#e8dfd5] rounded text-xs text-[#59413e] text-center">
-            <span className="material-symbols-outlined text-[28px] text-[#8e1616]">
-              collections
-            </span>
-            <p className="mt-1 text-[11px]">No additional media attachments uploaded for this node.</p>
+          <div className="space-y-2">
+            <div className="p-2.5 bg-[#efeeea] border border-[#e8dfd5] rounded text-xs text-[#59413e]">
+              <h4 className="font-bold text-[#8e1616]">Galeri Media Anggota</h4>
+              <p className="text-[10px] mt-0.5">Foto-foto tersimpan anggota trah keluarga.</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-1.5">
+              {allMembers.map((m) => (
+                <div
+                  key={m.id}
+                  onClick={() => onSelectMember(m)}
+                  className="bg-white border border-[#e8dfd5] rounded p-1.5 cursor-pointer hover:border-[#8e1616] transition-all text-center group"
+                >
+                  <img
+                    src={
+                      m.photoUrl ||
+                      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80'
+                    }
+                    alt={m.givenName}
+                    className="w-full h-16 object-cover rounded group-hover:scale-105 transition-transform"
+                  />
+                  <div className="text-[10px] font-bold text-[#8e1616] truncate mt-1">
+                    {m.givenName}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -132,13 +261,19 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
         </button>
 
         <div className="flex justify-between px-1 text-[10px]">
-          <button className="flex items-center gap-1 text-[#59413e] hover:text-[#8e1616] transition-colors cursor-pointer">
+          <button
+            onClick={onOpenSettingsModal}
+            className="flex items-center gap-1 text-[#59413e] hover:text-[#8e1616] transition-colors cursor-pointer font-semibold"
+          >
             <span className="material-symbols-outlined text-[14px]">settings</span>
-            Settings
+            <span>Settings</span>
           </button>
-          <button className="flex items-center gap-1 text-[#59413e] hover:text-[#8e1616] transition-colors cursor-pointer">
+          <button
+            onClick={onOpenHelpModal}
+            className="flex items-center gap-1 text-[#59413e] hover:text-[#8e1616] transition-colors cursor-pointer font-semibold"
+          >
             <span className="material-symbols-outlined text-[14px]">help_outline</span>
-            Help
+            <span>Help</span>
           </button>
         </div>
       </div>

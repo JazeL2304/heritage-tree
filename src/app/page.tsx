@@ -13,6 +13,8 @@ import { PasscodeModal } from '@/components/modals/PasscodeModal';
 import { MemberFormModal } from '@/components/modals/MemberFormModal';
 import { ExportScrollModal } from '@/components/modals/ExportScrollModal';
 import { DeleteConfirmModal } from '@/components/modals/DeleteConfirmModal';
+import { SettingsModal } from '@/components/modals/SettingsModal';
+import { HelpModal } from '@/components/modals/HelpModal';
 import {
   loadFamilyMembers,
   saveMember,
@@ -34,6 +36,8 @@ export default function Home() {
   const [isMemberFormOpen, setIsMemberFormOpen] = useState<boolean>(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState<boolean>(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
 
   const [editingMember, setEditingMember] = useState<FamilyMember | null>(null);
   const [relationType, setRelationType] = useState<RelationType | null>(null);
@@ -277,11 +281,15 @@ export default function Home() {
             {/* Left Property Drawer */}
             <SidebarDrawer
               activeMember={activeMember}
+              allMembers={members}
+              onSelectMember={(m) => setActiveMember(m)}
               onAddRelation={handleAddRelation}
               onAddStandalone={handleAddFirstMember}
               onEditMember={handleEditMember}
               onDeleteMember={handleDeleteMember}
               onOpenExportModal={() => setIsExportModalOpen(true)}
+              onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
+              onOpenHelpModal={() => setIsHelpModalOpen(true)}
             />
 
             {/* Interactive Infinite Canvas */}
@@ -339,6 +347,19 @@ export default function Home() {
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={confirmDelete}
         member={activeMember}
+      />
+
+      {/* System Settings Modal */}
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        onOpenPasscodeModal={() => setIsPasscodeModalOpen(true)}
+      />
+
+      {/* Interactive User Help Modal */}
+      <HelpModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
       />
     </div>
   );

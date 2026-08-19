@@ -35,9 +35,13 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <span className="material-symbols-outlined text-[20px]">remove</span>
       </button>
 
-      <div className="px-2 text-xs font-bold text-[#8e1616] select-none">
+      <button
+        onClick={onReset}
+        className="px-2 py-1 rounded text-xs font-bold text-[#8e1616] hover:bg-[#efeeea] transition-colors cursor-pointer select-none"
+        title="Reset Zoom to 100%"
+      >
         {Math.round(zoom * 100)}%
-      </div>
+      </button>
 
       <div className="w-px h-6 bg-[#e8dfd5] my-auto mx-1"></div>
 
