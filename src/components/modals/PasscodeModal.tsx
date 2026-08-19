@@ -17,6 +17,7 @@ export const PasscodeModal: React.FC<PasscodeModalProps> = ({
   isStandaloneGate = false,
 }) => {
   const [passcode, setPasscode] = useState('');
+  const [showPasscode, setShowPasscode] = useState(false);
   const [error, setError] = useState('');
 
   if (!isOpen) return null;
@@ -81,18 +82,33 @@ export const PasscodeModal: React.FC<PasscodeModalProps> = ({
               KODE AKSES KELUARGA / FAMILY PASSCODE
             </label>
             <div className="relative w-full">
+              {/* Left Key Icon */}
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#8e1616]/60 z-10">
+                <span className="material-symbols-outlined text-[18px]">vpn_key</span>
+              </div>
+
+              {/* Password Input with Safe Padding */}
               <input
-                type="password"
+                type={showPasscode ? 'text' : 'password'}
                 autoComplete="off"
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
-                placeholder="Contoh: potu"
+                placeholder="PROTUBERANCE"
                 autoFocus
-                className="w-full h-12 bg-[#FBF8F3] border-[1.5px] border-[#D6C8B4] rounded-[8px] text-center font-mono text-[18px] text-[#3D3731] focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-colors placeholder:text-[#3D3731]/40 uppercase"
+                className="w-full h-12 bg-[#FBF8F3] border-[1.5px] border-[#D6C8B4] rounded-[8px] text-center font-mono text-[18px] text-[#3D3731] focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-colors px-10 uppercase placeholder:text-[#3D3731]/30 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden"
               />
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-[#8e1616]/50">
-                <span className="material-symbols-outlined text-sm">vpn_key</span>
-              </div>
+
+              {/* Custom Interactive Toggle Password Visibility Icon */}
+              <button
+                type="button"
+                onClick={() => setShowPasscode(!showPasscode)}
+                title={showPasscode ? 'Sembunyikan sandi' : 'Tampilkan sandi'}
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#8e1616]/60 hover:text-[#8e1616] transition-colors cursor-pointer z-10"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {showPasscode ? 'visibility_off' : 'visibility'}
+                </span>
+              </button>
             </div>
           </div>
 
