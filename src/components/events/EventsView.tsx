@@ -545,9 +545,8 @@ export const EventsView: React.FC = () => {
                 )}
               </div>
 
-              {/* Grid Header with Week Column (W) + Mon-Sun */}
-              <div className="grid grid-cols-8 gap-1.5 text-center font-bold text-xs text-[#8e1616] bg-[#eae8e4] py-2 rounded">
-                <div className="text-[#59413e]/70">W</div>
+              {/* Grid Header with 7 Days (Mon-Sun) */}
+              <div className="grid grid-cols-7 gap-1 md:gap-1.5 text-center font-bold text-xs text-[#8e1616] bg-[#eae8e4] py-2 rounded">
                 {daysOfWeek.map((dayName, idx) => (
                   <div key={idx} className={idx === 6 ? 'text-[#ba1a1a]' : ''}>
                     {dayName}
@@ -555,14 +554,10 @@ export const EventsView: React.FC = () => {
                 ))}
               </div>
 
-              {/* Large Month Cells Grid (8 columns: W + 7 Days) */}
-              <div className="grid grid-cols-8 gap-1.5">
-                {/* Week 1 Row */}
-                <div className="h-28 bg-[#eae8e4]/60 border border-[#e8dfd5] rounded flex items-center justify-center font-bold text-xs text-[#59413e]">
-                  W1
-                </div>
+              {/* Responsive Month Cells Grid (7 columns: Mon-Sun) */}
+              <div className="grid grid-cols-7 gap-1 md:gap-1.5">
                 {Array.from({ length: firstDayOfMonth }).map((_, idx) => (
-                  <div key={`lg_empty_${idx}`} className="h-28 bg-[#fbf9f5]/50 border border-[#e8dfd5]/40 rounded opacity-40"></div>
+                  <div key={`lg_empty_${idx}`} className="min-h-[54px] md:min-h-[96px] bg-[#fbf9f5]/50 border border-[#e8dfd5]/40 rounded opacity-40"></div>
                 ))}
 
                 {Array.from({ length: daysInMonth }).map((_, idx) => {
@@ -572,60 +567,52 @@ export const EventsView: React.FC = () => {
                   const hasEvents = dayEvents.length > 0;
 
                   return (
-                    <React.Fragment key={`lg_cell_frag_${dayNum}`}>
-                      {/* Insert Week number badge after every 7 day cells */}
-                      {(firstDayOfMonth + idx) % 7 === 0 && idx > 0 && (
-                        <div className="h-28 bg-[#eae8e4]/60 border border-[#e8dfd5] rounded flex items-center justify-center font-bold text-xs text-[#59413e]">
-                          W{Math.floor((firstDayOfMonth + idx) / 7) + 1}
-                        </div>
-                      )}
-
-                      <div
-                        onClick={() => setSelectedDay(isSelected ? null : dayNum)}
-                        className={`h-28 p-2 border rounded-lg flex flex-col justify-between transition-all duration-150 cursor-pointer overflow-hidden relative ${
-                          isSelected
-                            ? 'bg-[#8e1616] text-white border-2 border-[#fed65b] shadow-md scale-[1.02] z-10'
-                            : hasEvents
-                            ? 'bg-[#efeeea] border-2 border-[#8e1616]/70 hover:bg-[#e4e2de]'
-                            : 'bg-[#fbf9f5] border-[#e8dfd5] hover:bg-[#eae8e4]'
-                        }`}
-                      >
-                        {/* Day Number Header */}
-                        <div className="flex justify-between items-center border-b border-[#e8dfd5]/40 pb-1">
-                          <span className={`font-bold text-xs ${isSelected ? 'text-[#fed65b]' : 'text-[#1f1d1d]'}`}>
-                            {dayNum}
+                    <div
+                      key={`lg_cell_${dayNum}`}
+                      onClick={() => setSelectedDay(isSelected ? null : dayNum)}
+                      className={`min-h-[54px] md:min-h-[96px] p-1 md:p-2 border rounded-lg flex flex-col justify-between transition-all duration-150 cursor-pointer overflow-hidden relative ${
+                        isSelected
+                          ? 'bg-[#8e1616] text-white border-2 border-[#fed65b] shadow-md scale-[1.02] z-10'
+                          : hasEvents
+                          ? 'bg-[#efeeea] border-2 border-[#8e1616]/70 hover:bg-[#e4e2de]'
+                          : 'bg-[#fbf9f5] border-[#e8dfd5] hover:bg-[#eae8e4]'
+                      }`}
+                    >
+                      {/* Day Number Header */}
+                      <div className="flex justify-between items-center border-b border-[#e8dfd5]/40 pb-0.5 md:pb-1">
+                        <span className={`font-bold text-xs md:text-sm ${isSelected ? 'text-[#fed65b]' : 'text-[#1f1d1d]'}`}>
+                          {dayNum}
+                        </span>
+                        {hasEvents && (
+                          <span className="text-[9px] md:text-[10px] font-bold px-1 md:px-1.5 py-0.2 md:py-0.5 rounded-full bg-[#8e1616] text-[#fed65b]">
+                            {dayEvents.length} <span className="hidden md:inline">Evt</span>
                           </span>
-                          {hasEvents && (
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#8e1616] text-[#fed65b]">
-                              {dayEvents.length} Event
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Events Badges inside Day Cell */}
-                        <div className="space-y-1 overflow-y-auto max-h-[70px] text-[10px] my-auto">
-                          {dayEvents.map((evt) => {
-                            const badge = getEventBadge(evt.type);
-                            return (
-                              <div
-                                key={evt.id}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedEventDetail(evt);
-                                }}
-                                className={`p-1 rounded font-semibold truncate cursor-pointer hover:opacity-90 transition-opacity flex items-center gap-1 ${
-                                  isSelected ? 'bg-[#fed65b] text-[#745c00]' : badge.bg
-                                }`}
-                                title={`${evt.title} - ${evt.time}`}
-                              >
-                                <span className="material-symbols-outlined text-[12px] shrink-0">{badge.icon}</span>
-                                <span className="truncate">{evt.title}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
+                        )}
                       </div>
-                    </React.Fragment>
+
+                      {/* Events Badges inside Day Cell */}
+                      <div className="space-y-1 overflow-y-auto max-h-[42px] md:max-h-[65px] text-[9px] md:text-[10px] my-auto">
+                        {dayEvents.map((evt) => {
+                          const badge = getEventBadge(evt.type);
+                          return (
+                            <div
+                              key={evt.id}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedEventDetail(evt);
+                              }}
+                              className={`p-0.5 md:p-1 rounded font-semibold truncate cursor-pointer hover:opacity-90 transition-opacity flex items-center gap-1 ${
+                                isSelected ? 'bg-[#fed65b] text-[#745c00]' : badge.bg
+                              }`}
+                              title={`${evt.title} - ${evt.time}`}
+                            >
+                              <span className="material-symbols-outlined text-[10px] md:text-[12px] shrink-0">{badge.icon}</span>
+                              <span className="truncate hidden md:inline">{evt.title}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   );
                 })}
               </div>
