@@ -36,6 +36,8 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
   const [archives, setArchives] = useState<ArchivalItem[]>([]);
   const [selectedRecord, setSelectedRecord] = useState<ArchivalItem | null>(null);
   const [isOpenMobile, setIsOpenMobile] = useState(false);
+  const [familyLogoUrl, setFamilyLogoUrl] = useState<string>('');
+  const familyLogoInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function fetchArchives() {
@@ -43,7 +45,25 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
       setArchives(data);
     }
     fetchArchives();
+
+    const storedLogo = localStorage.getItem('heritage_family_logo_url');
+    if (storedLogo) {
+      setFamilyLogoUrl(storedLogo);
+    }
   }, []);
+
+  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const res = reader.result as string;
+        setFamilyLogoUrl(res);
+        localStorage.setItem('heritage_family_logo_url', res);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Group members by dynamic generation depth for the 'Bagan' tab
   const generationsMap: { [gen: number]: FamilyMember[] } = {};
@@ -74,16 +94,16 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
 
   return (
     <>
-      {/* Mobile Sidebar Floating Toggle Trigger */}
-      <button
-        onClick={() => setIsOpenMobile(!isOpenMobile)}
-        className="fixed top-18 left-3 z-45 md:hidden bg-[#8e1616] text-[#fed65b] p-2 rounded-full shadow-lg border border-[#fed65b]/40 flex items-center justify-center cursor-pointer"
-        title="Toggle Menu Silsilah"
-      >
-        <span className="material-symbols-outlined text-[20px]">
-          {isOpenMobile ? 'close' : 'menu'}
-        </span>
-      </button>
+      {/* Mobile Sidebar Floating Trigger (Only shown when drawer is closed) */}
+      {!isOpenMobile && (
+        <button
+          onClick={() => setIsOpenMobile(true)}
+          className="fixed top-18 left-3 z-45 md:hidden bg-[#8e1616] text-[#fed65b] p-2 rounded-full shadow-lg border border-[#fed65b]/40 flex items-center justify-center cursor-pointer"
+          title="Buka Menu Silsilah"
+        >
+          <span className="material-symbols-outlined text-[20px]">menu</span>
+        </button>
+      )}
 
       {/* Backdrop overlay on mobile when sidebar is open */}
       {isOpenMobile && (
@@ -98,30 +118,61 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
           isOpenMobile ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
-      {/* Branch Title & Ledger Header */}
-      <div className="flex items-center gap-2.5 bg-[#efeeea] p-2 rounded border border-[#e8dfd5]">
-        <div className="w-9 h-9 rounded-full border-2 border-[#fed65b] overflow-hidden bg-[#8e1616] flex items-center justify-center text-white shrink-0">
-          {activeMember?.photoUrl ? (
-            <img
-              src={activeMember.photoUrl}
-              alt="Avatar"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="material-symbols-outlined text-[20px]">
-              account_balance
-            </span>
-          )}
+        {/* Hidden File Input for Custom Family Logo */}
+        <input
+          type="file"
+          ref={familyLogoInputRef}
+          onChange={handleLogoFileChange}
+          accept="image/*"
+          className="hidden"
+        />
+
+        {/* Branch Title & Ledger Header */}
+        <div className="flex items-center justify-between gap-2 bg-[#efeeea] p-2 rounded border border-[#e8dfd5]">
+          <div className="flex items-center gap-2.5">
+            {/* Custom Dedicated Family Logo Avatar with Camera Upload Overlay */}
+            <div
+              onClick={() => familyLogoInputRef.current?.click()}
+              className="relative w-10 h-10 rounded-full border-2 border-[#fed65b] overflow-hidden bg-[#8e1616] flex items-center justify-center text-white shrink-0 cursor-pointer group shadow-sm"
+              title="Klik untuk ubah foto/logo khusus Potu Family"
+            >
+              {familyLogoUrl ? (
+                <img
+                  src={familyLogoUrl}
+                  alt="Logo Potu Family"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="material-symbols-outlined text-[22px] text-[#fed65b]">
+                  diversity_3
+                </span>
+              )}
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                <span className="material-symbols-outlined text-[14px] text-white">
+                  photo_camera
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <h2 className="font-bold text-xs text-[#8e1616] leading-tight font-['Poppins']">
+                Silsilah Potu Family
+              </h2>
+              <p className="text-[10px] text-[#59413e]">
+                {allMembers.length} Anggota Terdaftar
+              </p>
+            </div>
+          </div>
+
+          {/* Mobile Clean Inside Close Button */}
+          <button
+            onClick={() => setIsOpenMobile(false)}
+            className="md:hidden p-1 text-[#8e1616] hover:bg-[#eae8e4] rounded transition-colors cursor-pointer"
+            title="Tutup Menu"
+          >
+            <span className="material-symbols-outlined text-[18px]">close</span>
+          </button>
         </div>
-        <div>
-          <h2 className="font-bold text-xs text-[#8e1616] leading-tight font-['Poppins']">
-            Silsilah Potu Family
-          </h2>
-          <p className="text-[10px] text-[#59413e]">
-            {allMembers.length} Anggota Terdaftar
-          </p>
-        </div>
-      </div>
 
       {/* Navigation Tabs (Compact 4-grid pill icons) */}
       <div className="grid grid-cols-4 gap-1 my-2 bg-[#eae8e4] p-1 rounded border border-[#e8dfd5]">
